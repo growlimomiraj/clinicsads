@@ -11,6 +11,7 @@ import {
 } from './data/siteContent';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
+import { ClinicsScaledSection } from './components/ClinicsScaledSection';
 import { ServicesSection } from './components/ServicesSection';
 import { WhyChooseSection } from './components/WhyChooseSection';
 import { AdditionalSolutionsSection } from './components/AdditionalSolutionsSection';
@@ -31,6 +32,8 @@ const VALID_ROUTES: PageRoute[] = [
   'service-meta-ads',
   'service-landing-pages',
   'service-tracking-followup',
+  'service-gpt',
+  'service-seo',
   'solution-clinic-landing-pages',
   'solution-chatgpt-ads-ai-search',
 ];
@@ -96,6 +99,9 @@ export default function App() {
       <main className="flex-1">
         {currentPage === 'home' ? (
           <>
+            {/* Clinics We've Scaled */}
+            <ClinicsScaledSection />
+
             {/* 2. Our Services (Centered heading + 4-card 2-column grid + organic green right shape) */}
             <ServicesSection
               onSelectService={(service) => {

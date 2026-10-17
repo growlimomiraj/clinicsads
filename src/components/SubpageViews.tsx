@@ -18,6 +18,8 @@ import {
   Activity,
   HeartHandshake,
   ShieldCheck,
+  Bot,
+  TrendingUp,
 } from 'lucide-react';
 import {
   ADDITIONAL_SOLUTIONS_CONTENT,
@@ -158,6 +160,10 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
           return <Layout {...props} />;
         case 'activity':
           return <Activity {...props} />;
+        case 'bot':
+          return <Bot {...props} />;
+        case 'trending-up':
+          return <TrendingUp {...props} />;
       }
     };
 

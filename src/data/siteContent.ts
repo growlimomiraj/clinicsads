@@ -8,6 +8,8 @@ export type PageRoute =
   | 'service-meta-ads'
   | 'service-landing-pages'
   | 'service-tracking-followup'
+  | 'service-gpt'
+  | 'service-seo'
   | 'solution-clinic-landing-pages'
   | 'solution-chatgpt-ads-ai-search';
 
@@ -23,7 +25,7 @@ export interface ServiceCardData {
   title: string;
   description: string;
   featured?: boolean;
-  iconName: 'search' | 'users' | 'layout' | 'activity';
+  iconName: 'search' | 'users' | 'layout' | 'activity' | 'bot' | 'trending-up';
   details: {
     tagline: string;
     overview: string;
@@ -301,6 +303,86 @@ export const SERVICES_CONTENT: {
             question: 'How do you help our reception team convert more inquiries?',
             answer:
               'We set up instant SMS/email alerts for new form inquiries and provide simple follow-up templates so prospective patients receive a response within minutes.',
+          },
+        ],
+      },
+    },
+    {
+      id: 'gpt',
+      route: 'service-gpt',
+      title: 'ChatGPT & AI Search',
+      description:
+        'Help patients find and choose your clinic through conversational AI and answer engines.',
+      featured: false,
+      iconName: 'bot',
+      details: {
+        tagline: 'AI-Powered Patient Discovery & Conversational Search Optimization',
+        overview:
+          'Position your clinic as the trusted, recommended choice across emerging conversational search engines like ChatGPT, Perplexity, and Google AI Overviews.',
+        deliverables: [
+          'Conversational search query analysis & treatment intent mapping',
+          'Structured knowledge graph and verified clinical schema markup',
+          'Practitioner credential & clinical specialty AI syndication',
+          'Attribution tracking for AI-assisted patient consultations',
+        ],
+        methodology: [
+          '1. Audit: Analyze current AI engine perception and citations of your clinic',
+          '2. Optimize: Structure doctor profiles, credentials, and treatments for LLM retrieval',
+          '3. Authority: Build authoritative medical references and structured FAQ schema',
+          '4. Monitor: Track citation frequency, AI referral volume, and booked patients',
+        ],
+        idealFor:
+          'Practices and specialty clinics looking to capture early patient demand on conversational AI platforms before competitors.',
+        faq: [
+          {
+            question: 'How do patients use ChatGPT to find clinics?',
+            answer:
+              'Patients increasingly use conversational AI to research symptoms, compare treatments, and ask for recommended local specialists. We ensure your clinic is properly structured and cited as a top recommendation.',
+          },
+          {
+            question: 'Does this work alongside Google Ads?',
+            answer:
+              'Yes, AI search optimization complements Google and Meta ad campaigns, capturing high-intent patients who research treatments using AI answer engines.',
+          },
+        ],
+      },
+    },
+    {
+      id: 'seo',
+      route: 'service-seo',
+      title: 'Clinic SEO & Local Search',
+      description:
+        'Rank higher in Google local search and Google Maps for high-intent patient queries.',
+      featured: false,
+      iconName: 'trending-up',
+      details: {
+        tagline: 'Google Maps 3-Pack & Organic Search Visibility for Healthcare Clinics',
+        overview:
+          'Drive steady, compounding patient inquiries by dominating local Google Maps results, Google Business Profile rankings, and high-intent local medical search queries.',
+        deliverables: [
+          'Google Business Profile (Maps 3-Pack) optimization and local category alignment',
+          'Treatment-specific on-page SEO targeting high-intent local searches',
+          'Local citation synchronization and healthcare directory management',
+          'Patient review generation strategy and local authority link building',
+        ],
+        methodology: [
+          '1. Audit: Analyze local keyword rankings, competitor visibility, and technical SEO hygiene',
+          '2. On-Page: Optimize title tags, medical service pages, and doctor bios with schema',
+          '3. Local Authority: Optimize Google Business Profile, review signals, and citations',
+          '4. Compounding Growth: Track keyword movements, organic phone calls, and appointment requests',
+        ],
+        idealFor:
+          'Clinics seeking sustainable, long-term organic patient volume alongside their paid advertising.',
+        faq: [
+          {
+            question: 'How soon can we see results from Clinic SEO?',
+            answer:
+              'Google Maps and local optimizations typically show initial momentum within 60–90 days, with organic treatment page rankings compounding over 3–6 months.',
+          },
+          {
+            question: 'Why is Google Maps optimization so important for clinics?',
+            answer:
+              'Over 70% of prospective patients searching for healthcare services look directly at Google Maps 3-Pack results to read reviews, check location, and call the clinic.',
           },
         ],
       },

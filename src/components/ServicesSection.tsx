@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Users, Layout, Activity } from 'lucide-react';
+import { Search, Users, Layout, Activity, Bot, TrendingUp } from 'lucide-react';
 import { SERVICES_CONTENT, ServiceCardData, PageRoute } from '../data/siteContent';
 
 interface ServicesSectionProps {
@@ -24,6 +24,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
         return <Layout {...iconProps} />;
       case 'activity':
         return <Activity {...iconProps} />;
+      case 'bot':
+        return <Bot {...iconProps} />;
+      case 'trending-up':
+        return <TrendingUp {...iconProps} />;
     }
   };
 
@@ -47,7 +51,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
         aria-hidden="true"
       />
 
-      <div className="max-w-[980px] mx-auto px-5 sm:px-8 relative z-10">
+      <div className="max-w-[1080px] mx-auto px-5 sm:px-8 relative z-10">
         {/* Centered Section Heading */}
         <div className="text-center mb-12 lg:mb-14">
           <h2 className="text-[28px] sm:text-[34px] font-extrabold text-[#183B2B] tracking-tight">
@@ -55,8 +59,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
           </h2>
         </div>
 
-        {/* 4-Card, 2-Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+        {/* 6-Card, Responsive Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7">
           {SERVICES_CONTENT.cards.map((card) => {
             const isFeatured = Boolean(card.featured);
 

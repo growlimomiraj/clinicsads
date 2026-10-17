@@ -210,7 +210,8 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                 >
                   <option value="Google Ads">Google Ads</option>
                   <option value="Meta Ads">Meta Ads</option>
-                  <option value="ChatGPT Ads & AI Search">ChatGPT Ads &amp; AI Search</option>
+                  <option value="ChatGPT & AI Search">ChatGPT &amp; AI Search</option>
+                  <option value="Clinic SEO & Local Search">Clinic SEO &amp; Local Search</option>
                   <option value="Landing Pages">Landing Pages</option>
                   <option value="Tracking & Follow-Up">Tracking &amp; Follow-Up (GA4 / GTM)</option>
                   <option value="Clinic Landing Pages">Clinic Landing Pages</option>
