@@ -1,0 +1,6 @@
+{
+  "name": "ClinicsAds — Clinic Marketing Agency",
+  "description": "A specialized marketing agency helping medical and dental clinics grow patient inquiries through Google Ads, Meta Ads, high-converting landing pages, and conversion tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
