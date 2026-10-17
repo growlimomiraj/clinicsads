@@ -73,15 +73,11 @@ export const ClinicsScaledSection: React.FC = () => {
       className="relative w-full bg-white py-10 sm:py-12 border-b border-[#183B2B]/6 overflow-hidden"
     >
       <style>{`
-        /* Manually scrollable row base */
+        /* Auto-scroll marquee for all screens (mobile and desktop) */
         .clinics-marquee-viewport {
-          overflow-x: auto;
-          overflow-y: hidden;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-        }
-        .clinics-marquee-viewport::-webkit-scrollbar {
-          display: none;
+          overflow: hidden;
+          width: 100%;
+          user-select: none;
         }
 
         .clinics-marquee-track {
@@ -89,45 +85,25 @@ export const ClinicsScaledSection: React.FC = () => {
           width: max-content;
         }
 
-        .clinics-marquee-group {
+        .clinics-marquee-group,
+        .clinics-marquee-group-duplicate {
           display: flex;
           align-items: center;
           gap: 1.25rem;
           padding-right: 1.25rem;
           flex-shrink: 0;
+          animation: clinicsMarqueeScroll 35s linear infinite;
+          will-change: transform;
         }
 
-        .clinics-marquee-group-duplicate {
-          display: none;
-        }
-
-        /* Desktop: Hoverable & Fine Pointer -> Seamless CSS Infinite Marquee */
-        @media (hover: hover) and (pointer: fine) {
-          .clinics-marquee-viewport {
-            overflow: hidden;
-          }
-
-          .clinics-marquee-group {
-            animation: clinicsMarqueeScroll 40s linear infinite;
-            will-change: transform;
-          }
-
-          .clinics-marquee-group-duplicate {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            padding-right: 1.25rem;
-            flex-shrink: 0;
-            animation: clinicsMarqueeScroll 40s linear infinite;
-            will-change: transform;
-          }
-
-          .clinics-marquee-viewport:hover .clinics-marquee-group,
-          .clinics-marquee-viewport:hover .clinics-marquee-group-duplicate,
-          .clinics-marquee-viewport:focus-within .clinics-marquee-group,
-          .clinics-marquee-viewport:focus-within .clinics-marquee-group-duplicate {
-            animation-play-state: paused;
-          }
+        /* Pause on hover, focus, and mobile touch */
+        .clinics-marquee-viewport:hover .clinics-marquee-group,
+        .clinics-marquee-viewport:hover .clinics-marquee-group-duplicate,
+        .clinics-marquee-viewport:focus-within .clinics-marquee-group,
+        .clinics-marquee-viewport:focus-within .clinics-marquee-group-duplicate,
+        .clinics-marquee-viewport:active .clinics-marquee-group,
+        .clinics-marquee-viewport:active .clinics-marquee-group-duplicate {
+          animation-play-state: paused;
         }
 
         @keyframes clinicsMarqueeScroll {
@@ -194,19 +170,19 @@ export const ClinicsScaledSection: React.FC = () => {
                       href={clinic.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-center justify-center w-[130px] sm:w-[145px] h-[52px] px-2 py-1.5 rounded-lg transition-all duration-200 outline-none hover:bg-[#F3F8E9]/60 focus-visible:ring-2 focus-visible:ring-[#183B2B]/20"
+                      className="group shrink-0 flex items-center justify-center h-[46px] sm:h-[50px] px-2.5 py-1 rounded-lg transition-all duration-200 outline-none hover:bg-[#F3F8E9]/60 focus-visible:ring-2 focus-visible:ring-[#99BC44]"
                       title={`Visit ${clinic.name} website`}
                     >
                       {hasLogo ? (
                         <img
                           src={clinic.logoSrc}
                           alt={`${clinic.name} logo`}
-                          className="max-h-[44px] max-w-full w-auto h-auto object-contain transition-opacity duration-200"
+                          className="max-h-[38px] sm:max-h-[44px] max-w-[125px] sm:max-w-[150px] w-auto h-auto object-contain transition-opacity duration-200"
                           loading="lazy"
                           onError={() => handleImageError(clinic.name)}
                         />
                       ) : (
-                        <span className="text-center text-[13px] sm:text-[14px] font-semibold text-[#183B2B]/75 group-hover:text-[#183B2B] leading-tight tracking-tight line-clamp-2 transition-colors select-none">
+                        <span className="text-center text-[13px] sm:text-[14px] font-semibold text-[#183B2B]/75 group-hover:text-[#183B2B] leading-tight tracking-tight whitespace-nowrap px-1 transition-colors select-none">
                           {clinic.name}
                         </span>
                       )}
@@ -215,7 +191,7 @@ export const ClinicsScaledSection: React.FC = () => {
                 })}
               </div>
 
-              {/* Duplicate Group (seamless loop on desktop, hidden from screen readers & non-interactive) */}
+              {/* Duplicate Group (seamless loop on all screens, hidden from screen readers & non-interactive) */}
               <div
                 className="clinics-marquee-group-duplicate"
                 aria-hidden="true"
@@ -230,18 +206,18 @@ export const ClinicsScaledSection: React.FC = () => {
                   return (
                     <div
                       key={`duplicate-${idx}-${clinic.name}`}
-                      className="flex items-center justify-center shrink-0 w-[130px] sm:w-[145px] h-[52px] px-2 py-1.5 pointer-events-none select-none"
+                      className="shrink-0 flex items-center justify-center h-[46px] sm:h-[50px] px-2.5 py-1 pointer-events-none select-none"
                     >
                       {hasLogo ? (
                         <img
                           src={clinic.logoSrc}
                           alt=""
-                          className="max-h-[44px] max-w-full w-auto h-auto object-contain"
+                          className="max-h-[38px] sm:max-h-[44px] max-w-[125px] sm:max-w-[150px] w-auto h-auto object-contain"
                           loading="lazy"
                           onError={() => handleImageError(clinic.name)}
                         />
                       ) : (
-                        <span className="text-center text-[13px] sm:text-[14px] font-semibold text-[#183B2B]/75 leading-tight tracking-tight line-clamp-2">
+                        <span className="text-center text-[13px] sm:text-[14px] font-semibold text-[#183B2B]/75 leading-tight tracking-tight whitespace-nowrap px-1">
                           {clinic.name}
                         </span>
                       )}
