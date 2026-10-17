@@ -71,7 +71,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenInquiry()}
-                className="px-8 py-3.5 rounded-full bg-[#183B2B] text-white text-[14px] font-semibold hover:bg-[#224f3a] transition-all shadow-[0_8px_20px_rgba(24,59,43,0.18)] cursor-pointer whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#99BC44]"
+                className="px-8 py-3.5 rounded-full bg-[#99BC44] text-white text-[14px] font-bold hover:bg-[#88a93a] transition-all shadow-[0_8px_20px_rgba(153,188,68,0.32)] cursor-pointer whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#99BC44]"
               >
                 {HERO_CONTENT.primaryCta}
               </button>
@@ -130,7 +130,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     onNavigate(HERO_CONTENT.floatingCards.topCard.targetRoute);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="px-3 py-1 rounded-full bg-[#183B2B] text-white text-[10px] font-semibold hover:bg-[#23523C] transition-colors cursor-pointer whitespace-nowrap"
+                  className="px-3 py-1 rounded-full bg-[#99BC44] text-white text-[10px] font-bold hover:bg-[#88a93a] transition-colors cursor-pointer whitespace-nowrap"
                 >
                   {HERO_CONTENT.floatingCards.topCard.actionLabel}
                 </button>
@@ -155,7 +155,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     onNavigate(HERO_CONTENT.floatingCards.rightCard.targetRoute);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="px-3 py-1 rounded-full bg-[#183B2B] text-white text-[10px] font-semibold hover:bg-[#23523C] transition-colors cursor-pointer whitespace-nowrap"
+                  className="px-3 py-1 rounded-full bg-[#99BC44] text-white text-[10px] font-bold hover:bg-[#88a93a] transition-colors cursor-pointer whitespace-nowrap"
                 >
                   {HERO_CONTENT.floatingCards.rightCard.actionLabel}
                 </button>

@@ -228,7 +228,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-2.5 rounded-full bg-[#183B2B] text-white text-[13.5px] font-semibold hover:bg-[#23523C] transition-colors shadow-sm cursor-pointer"
+                  className="px-7 py-2.5 rounded-full bg-[#99BC44] text-white text-[13.5px] font-bold hover:bg-[#88a93a] transition-colors shadow-sm cursor-pointer"
                 >
                   Preview Inquiry Summary
                 </button>
@@ -289,7 +289,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
               <button
                 type="button"
                 onClick={handleResetAndClose}
-                className="px-5 py-2.5 rounded-full bg-[#183B2B] text-white text-[12.5px] font-semibold hover:bg-[#23523C] cursor-pointer"
+                className="px-5 py-2.5 rounded-full bg-[#99BC44] text-white text-[12.5px] font-bold hover:bg-[#88a93a] cursor-pointer"
               >
                 Close
               </button>

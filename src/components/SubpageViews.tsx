@@ -110,7 +110,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenInquiry(primaryCtaService)}
-                className="px-7 py-3 rounded-full bg-[#183B2B] text-white text-[14px] font-semibold hover:bg-[#224f3a] transition-colors shadow-sm cursor-pointer"
+                className="px-7 py-3 rounded-full bg-[#99BC44] text-white text-[14px] font-bold hover:bg-[#88a93a] transition-colors shadow-sm cursor-pointer"
               >
                 {primaryCtaLabel}
               </button>
@@ -287,7 +287,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                   <button
                     type="button"
                     onClick={() => onOpenInquiry(serviceData.title)}
-                    className="w-full py-3 rounded-full bg-[#183B2B] text-white text-[13.5px] font-semibold hover:bg-[#23523C] transition-colors cursor-pointer"
+                    className="w-full py-3 rounded-full bg-[#99BC44] text-white text-[13.5px] font-bold hover:bg-[#88a93a] transition-colors cursor-pointer"
                   >
                     Request a Free Clinic Audit
                   </button>
@@ -479,7 +479,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                   <button
                     type="button"
                     onClick={() => onOpenInquiry(solutionData.title)}
-                    className="w-full py-3 rounded-full bg-[#183B2B] text-white text-[13.5px] font-semibold hover:bg-[#23523C] transition-colors cursor-pointer"
+                    className="w-full py-3 rounded-full bg-[#99BC44] text-white text-[13.5px] font-bold hover:bg-[#88a93a] transition-colors cursor-pointer"
                   >
                     Book a Strategy Consultation
                   </button>
@@ -614,7 +614,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenInquiry(card.title)}
-                      className="px-4 py-2 rounded-full bg-[#183B2B] text-white text-[12px] font-semibold hover:bg-[#23523C] cursor-pointer"
+                      className="px-4 py-2 rounded-full bg-[#99BC44] text-white text-[12px] font-bold hover:bg-[#88a93a] cursor-pointer"
                     >
                       Inquire
                     </button>
@@ -746,7 +746,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenInquiry(sol.title)}
-                      className="px-5 py-2 rounded-full bg-[#183B2B] text-white text-[12.5px] font-semibold hover:bg-[#23523C] cursor-pointer"
+                      className="px-5 py-2 rounded-full bg-[#99BC44] text-white text-[12.5px] font-bold hover:bg-[#88a93a] cursor-pointer"
                     >
                       Book Consultation
                     </button>
@@ -1009,7 +1009,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                       <div className="pt-2">
                         <button
                           type="submit"
-                          className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#183B2B] text-white text-[14px] font-semibold hover:bg-[#23523C] transition-colors shadow-sm cursor-pointer"
+                          className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#99BC44] text-white text-[14px] font-bold hover:bg-[#88a93a] transition-colors shadow-sm cursor-pointer"
                         >
                           Prepare Consultation Request
                         </button>

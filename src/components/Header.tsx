@@ -81,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => onOpenInquiry()}
-            className="px-6 py-2.5 rounded-full bg-[#183B2B] text-white text-[13px] font-semibold tracking-wide hover:bg-[#224f3a] transition-colors shadow-sm whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#99BC44]"
+            className="px-6 py-2.5 rounded-full bg-[#99BC44] text-white text-[13px] font-bold tracking-wide hover:bg-[#88a93a] transition-colors shadow-sm whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#99BC44]"
           >
             Contact Us
           </button>
@@ -140,7 +140,7 @@ export const Header: React.FC<HeaderProps> = ({
                   setMobileMenuOpen(false);
                   onOpenInquiry();
                 }}
-                className="w-full py-3 rounded-full bg-[#183B2B] text-white text-[14px] font-semibold shadow-sm"
+                className="w-full py-3 rounded-full bg-[#99BC44] text-white text-[14px] font-bold hover:bg-[#88a93a] transition-colors shadow-sm"
               >
                 Contact Us
               </button>

@@ -96,7 +96,7 @@ export const PhotoNotesModal: React.FC<PhotoNotesModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 rounded-full bg-[#183B2B] text-white text-[13px] font-semibold hover:bg-[#23523C] cursor-pointer"
+            className="px-6 py-2.5 rounded-full bg-[#99BC44] text-white text-[13px] font-bold hover:bg-[#88a93a] cursor-pointer"
           >
             Done
           </button>

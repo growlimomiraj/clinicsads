@@ -131,7 +131,7 @@ export const DetailPanelModal: React.FC<DetailPanelModalProps> = ({
               onClose();
               onBookService(title);
             }}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#183B2B] text-white text-[13px] font-semibold hover:bg-[#23523C] transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#99BC44] text-white text-[13px] font-bold hover:bg-[#88a93a] transition-colors cursor-pointer"
           >
             <span>Discuss {title}</span>
             <ArrowRight className="w-4 h-4" />
