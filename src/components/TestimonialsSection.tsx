@@ -58,7 +58,7 @@ export const TestimonialsSection: React.FC = () => {
                 ? 'Previous client testimonial'
                 : 'Additional controls activate when multiple approved testimonials are added'
             }
-            className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 sm:-translate-x-6 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white text-[#59665D] shadow-[0_8px_24px_rgba(24,59,43,0.1)] border border-[#F3F8E9] flex items-center justify-center transition-all focus-visible:outline-2 focus-visible:outline-[#99BC44] ${
+            className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 sm:-translate-x-6 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white text-[#59665D] shadow-[0_8px_24px_rgba(24,59,43,0.1)] border border-[#F3F8E9] flex items-center justify-center transition-all focus-visible:outline-2 focus-visible:outline-[#F97316] ${
               hasMultiple
                 ? 'hover:bg-[#F3F8E9] hover:text-[#183B2B] cursor-pointer'
                 : 'opacity-75 cursor-default'
@@ -78,9 +78,9 @@ export const TestimonialsSection: React.FC = () => {
                 ? 'Next client testimonial'
                 : 'Additional controls activate when multiple approved testimonials are added'
             }
-            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 sm:translate-x-6 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#99BC44] text-white shadow-[0_10px_25px_rgba(153,188,68,0.35)] flex items-center justify-center transition-all focus-visible:outline-2 focus-visible:outline-[#183B2B] ${
+            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 sm:translate-x-6 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#F97316] text-white shadow-[0_10px_25px_rgba(249,115,22,0.35)] flex items-center justify-center transition-all focus-visible:outline-2 focus-visible:outline-[#EA580C] ${
               hasMultiple
-                ? 'hover:bg-[#86A835] cursor-pointer'
+                ? 'hover:bg-[#EA580C] cursor-pointer'
                 : 'opacity-90 cursor-default'
             }`}
           >

@@ -123,7 +123,7 @@ export const AdditionalSolutionsSection: React.FC<AdditionalSolutionsSectionProp
                 <button
                   type="button"
                   onClick={() => handleOpenSolution(backCard)}
-                  className="px-7 py-2.5 rounded-full bg-[#99BC44] text-white text-[12.5px] font-bold hover:bg-[#88a93a] transition-colors shadow-xs cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#99BC44]"
+                  className="px-7 py-2.5 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] transition-colors shadow-xs cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
                 >
                   {backCard.buttonLabel}
                 </button>

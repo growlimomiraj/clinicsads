@@ -97,7 +97,7 @@ export const Footer: React.FC<FooterProps> = ({
                   href={SITE_CONFIG.contact.phoneHref}
                   aria-label={`Call ${SITE_CONFIG.contact.phoneDisplay}`}
                   title={`Call ${SITE_CONFIG.contact.phoneDisplay}`}
-                  className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#99BC44] text-white hover:text-[#183B2B] flex items-center justify-center transition-colors"
+                  className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#F97316] text-white hover:text-white flex items-center justify-center transition-colors"
                 >
                   <Phone className="w-4 h-4" />
                 </a>
@@ -105,7 +105,7 @@ export const Footer: React.FC<FooterProps> = ({
                   href={SITE_CONFIG.contact.emailHref}
                   aria-label={`Email ${SITE_CONFIG.contact.email}`}
                   title={`Email ${SITE_CONFIG.contact.email}`}
-                  className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#99BC44] text-white hover:text-[#183B2B] flex items-center justify-center transition-colors"
+                  className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#F97316] text-white hover:text-white flex items-center justify-center transition-colors"
                 >
                   <Mail className="w-4 h-4" />
                 </a>
@@ -115,7 +115,7 @@ export const Footer: React.FC<FooterProps> = ({
                   rel="noopener noreferrer"
                   aria-label="Instagram (@adsbyusman_)"
                   title="Instagram (@adsbyusman_)"
-                  className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#99BC44] text-white hover:text-[#183B2B] flex items-center justify-center transition-colors"
+                  className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#F97316] text-white hover:text-white flex items-center justify-center transition-colors"
                 >
                   <Instagram className="w-4 h-4" />
                 </a>
@@ -124,7 +124,7 @@ export const Footer: React.FC<FooterProps> = ({
                   onClick={() => handleRouteClick('contact')}
                   aria-label="Go to Contact page"
                   title="Go to Contact page"
-                  className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#99BC44] text-white hover:text-[#183B2B] flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#F97316] text-white hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <Calendar className="w-4 h-4" />
                 </button>
@@ -263,7 +263,7 @@ export const Footer: React.FC<FooterProps> = ({
                     href={SITE_CONFIG.parentNetwork.founderUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-white/70 hover:text-[#99BC44] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-white/70 hover:text-[#F97316] transition-colors"
                   >
                     <span>adsbyusman.com — Muhammad Usman</span>
                     <ExternalLink className="w-3 h-3" />
@@ -276,7 +276,7 @@ export const Footer: React.FC<FooterProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenInquiry()}
-                className="px-6 py-2.5 rounded-full bg-[#99BC44] text-[#183B2B] text-[13px] font-bold hover:bg-[#a9cb53] transition-colors cursor-pointer whitespace-nowrap shadow-sm"
+                className="px-6 py-2.5 rounded-full bg-[#F97316] text-white text-[13px] font-bold hover:bg-[#EA580C] shadow-[0_6px_20px_rgba(249,115,22,0.35)] transition-colors cursor-pointer whitespace-nowrap"
               >
                 Book a Strategy Call
               </button>

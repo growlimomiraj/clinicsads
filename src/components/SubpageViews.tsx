@@ -118,7 +118,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenInquiry(primaryCtaService)}
-                className="px-7 py-3 rounded-full bg-[#99BC44] text-white text-[14px] font-bold hover:bg-[#88a93a] transition-colors shadow-sm cursor-pointer"
+                className="px-7 py-3 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_6px_20px_rgba(249,115,22,0.35)] cursor-pointer"
               >
                 {primaryCtaLabel}
               </button>
@@ -311,7 +311,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                   <button
                     type="button"
                     onClick={() => onOpenInquiry(serviceData.title)}
-                    className="w-full py-3 rounded-full bg-[#99BC44] text-white text-[13.5px] font-bold hover:bg-[#88a93a] transition-colors cursor-pointer"
+                    className="w-full py-3 rounded-full bg-[#F97316] text-white text-[13.5px] font-bold hover:bg-[#EA580C] shadow-[0_4px_14px_rgba(249,115,22,0.3)] transition-colors cursor-pointer"
                   >
                     Request a Free Clinic Audit
                   </button>
@@ -503,7 +503,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                   <button
                     type="button"
                     onClick={() => onOpenInquiry(solutionData.title)}
-                    className="w-full py-3 rounded-full bg-[#99BC44] text-white text-[13.5px] font-bold hover:bg-[#88a93a] transition-colors cursor-pointer"
+                    className="w-full py-3 rounded-full bg-[#F97316] text-white text-[13.5px] font-bold hover:bg-[#EA580C] shadow-[0_4px_14px_rgba(249,115,22,0.3)] transition-colors cursor-pointer"
                   >
                     Book a Strategy Consultation
                   </button>
@@ -638,7 +638,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenInquiry(card.title)}
-                      className="px-4 py-2 rounded-full bg-[#99BC44] text-white text-[12px] font-bold hover:bg-[#88a93a] cursor-pointer"
+                      className="px-4 py-2 rounded-full bg-[#F97316] text-white text-[12px] font-bold hover:bg-[#EA580C] shadow-[0_4px_10px_rgba(249,115,22,0.25)] cursor-pointer"
                     >
                       Inquire
                     </button>
@@ -770,7 +770,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenInquiry(sol.title)}
-                      className="px-5 py-2 rounded-full bg-[#99BC44] text-white text-[12.5px] font-bold hover:bg-[#88a93a] cursor-pointer"
+                      className="px-5 py-2 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] shadow-[0_4px_10px_rgba(249,115,22,0.25)] cursor-pointer"
                     >
                       Book Consultation
                     </button>
@@ -1026,14 +1026,14 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                           value={notes}
                           onChange={(e) => setNotes(e.target.value)}
                           placeholder="e.g., Growing dental implant inquiries, improving landing page conversion rate..."
-                          className="w-full px-4 py-2.5 rounded-xl border border-[#C7DCA5] text-[14px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44]"
+                          className="w-full px-4 py-2.5 rounded-xl border border-[#C7DCA5] text-[14px] text-[#183B2B] focus:outline-2 focus:outline-[#F97316]"
                         />
                       </div>
 
                       <div className="pt-2">
                         <button
                           type="submit"
-                          className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#99BC44] text-white text-[14px] font-bold hover:bg-[#88a93a] transition-colors shadow-sm cursor-pointer"
+                          className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_6px_20px_rgba(249,115,22,0.35)] cursor-pointer"
                         >
                           Prepare Consultation Request
                         </button>
@@ -1083,7 +1083,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                     <div className="flex flex-wrap gap-3">
                       <a
                         href={composedMailtoUrl}
-                        className="px-6 py-2.5 rounded-full bg-[#99BC44] text-[#183B2B] text-[13px] font-bold hover:bg-[#a9cb53] transition-colors"
+                        className="px-6 py-2.5 rounded-full bg-[#F97316] text-white text-[13px] font-bold hover:bg-[#EA580C] shadow-[0_4px_14px_rgba(249,115,22,0.3)] transition-colors"
                       >
                         Open in Email ({SITE_CONFIG.contact.email})
                       </a>

@@ -81,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => onOpenInquiry()}
-            className="px-6 py-2.5 rounded-full bg-[#99BC44] text-white text-[13px] font-bold tracking-wide hover:bg-[#88a93a] transition-colors shadow-sm whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#99BC44]"
+            className="px-6 py-2.5 rounded-full bg-[#F97316] text-white text-[13px] font-bold tracking-wide hover:bg-[#EA580C] transition-colors shadow-sm whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
           >
             Contact Us
           </button>
@@ -94,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            className="w-11 h-11 rounded-full bg-white/80 border border-[#C7DCA5] flex items-center justify-center text-[#183B2B] shadow-xs focus-visible:outline-2 focus-visible:outline-[#99BC44]"
+            className="w-11 h-11 rounded-full bg-white/80 border border-[#C7DCA5] flex items-center justify-center text-[#183B2B] shadow-xs focus-visible:outline-2 focus-visible:outline-[#F97316]"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -140,7 +140,7 @@ export const Header: React.FC<HeaderProps> = ({
                   setMobileMenuOpen(false);
                   onOpenInquiry();
                 }}
-                className="w-full py-3 rounded-full bg-[#99BC44] text-white text-[14px] font-bold hover:bg-[#88a93a] transition-colors shadow-sm"
+                className="w-full py-3 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-colors shadow-sm"
               >
                 Contact Us
               </button>

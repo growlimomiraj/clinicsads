@@ -228,7 +228,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-2.5 rounded-full bg-[#99BC44] text-white text-[13.5px] font-bold hover:bg-[#88a93a] transition-colors shadow-sm cursor-pointer"
+                  className="px-7 py-2.5 rounded-full bg-[#F97316] text-white text-[13.5px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_4px_14px_rgba(249,115,22,0.3)] cursor-pointer"
                 >
                   Preview Inquiry Summary
                 </button>
@@ -282,14 +282,14 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
               </button>
               <a
                 href={composedMailtoUrl}
-                className="px-5 py-2.5 rounded-full bg-[#99BC44] text-[#183B2B] text-[12.5px] font-bold hover:bg-[#a9cb53] transition-colors"
+                className="px-5 py-2.5 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] shadow-[0_4px_14px_rgba(249,115,22,0.3)] transition-colors"
               >
                 Open in Email ({SITE_CONFIG.contact.email})
               </a>
               <button
                 type="button"
                 onClick={handleResetAndClose}
-                className="px-5 py-2.5 rounded-full bg-[#99BC44] text-white text-[12.5px] font-bold hover:bg-[#88a93a] cursor-pointer"
+                className="px-5 py-2.5 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] cursor-pointer"
               >
                 Close
               </button>
