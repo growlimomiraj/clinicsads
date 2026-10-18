@@ -22,29 +22,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
     if (card.featured) {
       return 'bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]';
     }
-    switch (card.iconName) {
-      case 'google-ads':
-      case 'google':
-      case 'search':
-        return 'bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-[#DFECC8]';
-      case 'meta':
-      case 'users':
-        return 'bg-[#0064E0] text-white shadow-[0_4px_12px_rgba(0,100,224,0.22)]';
-      case 'landing-pages':
-      case 'layout':
-        return 'bg-white shadow-[0_4px_12px_rgba(24,59,43,0.08)] border border-[#DFECC8]';
-      case 'analytics':
-      case 'activity':
-        return 'bg-white shadow-[0_4px_12px_rgba(227,116,0,0.12)] border border-[#FFE4A0]';
-      case 'gpt':
-      case 'bot':
-        return 'bg-[#10A37F] text-white shadow-[0_4px_12px_rgba(16,163,127,0.22)]';
-      case 'seo':
-      case 'trending-up':
-        return 'bg-white shadow-[0_4px_12px_rgba(66,133,244,0.1)] border border-[#DFECC8]';
-      default:
-        return 'bg-[#183B2B] text-[#99BC44] shadow-xs';
-    }
+    return 'bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-[#DFECC8]';
   };
 
   const renderIcon = (iconName: ServiceCardData['iconName']) => {
@@ -55,7 +33,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
         return <GoogleAdsLogo className="w-6 h-6" />;
       case 'meta':
       case 'users':
-        return <MetaLogo className="w-6 h-6" color="currentColor" />;
+        return <MetaLogo className="w-6 h-6" />;
       case 'landing-pages':
       case 'layout':
         return <LandingPagesLogo className="w-6 h-6" />;
@@ -64,7 +42,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
         return <GoogleAnalyticsLogo className="w-6 h-6" />;
       case 'gpt':
       case 'bot':
-        return <GptLogo className="w-6 h-6" color="currentColor" />;
+        return <GptLogo className="w-6 h-6" />;
       case 'seo':
       case 'trending-up':
         return <GoogleSearchConsoleLogo className="w-6 h-6" />;

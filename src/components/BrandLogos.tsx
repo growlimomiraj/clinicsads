@@ -69,7 +69,7 @@ export const GoogleLogo: React.FC<LogoProps> = ({ className = 'w-6 h-6' }) => (
  */
 export const MetaLogo: React.FC<LogoProps> = ({
   className = 'w-6 h-6',
-  color = 'currentColor',
+  color = '#0064E0',
 }) => (
   <svg
     role="img"
@@ -88,7 +88,7 @@ export const MetaLogo: React.FC<LogoProps> = ({
  */
 export const GptLogo: React.FC<LogoProps> = ({
   className = 'w-6 h-6',
-  color = 'currentColor',
+  color = '#10A37F',
 }) => (
   <svg
     role="img"
