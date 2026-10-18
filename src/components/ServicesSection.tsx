@@ -1,7 +1,13 @@
 import React from 'react';
-import { Search, Users, Layout, Activity, Bot, TrendingUp } from 'lucide-react';
 import { SERVICES_CONTENT, ServiceCardData, PageRoute } from '../data/siteContent';
-import { GoogleLogo, MetaLogo, GptLogo } from './BrandLogos';
+import {
+  GoogleAdsLogo,
+  MetaLogo,
+  GptLogo,
+  LandingPagesLogo,
+  GoogleAnalyticsLogo,
+  GoogleSearchConsoleLogo,
+} from './BrandLogos';
 
 interface ServicesSectionProps {
   onSelectService: (service: ServiceCardData) => void;
@@ -17,43 +23,53 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       return 'bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]';
     }
     switch (card.iconName) {
+      case 'google-ads':
       case 'google':
       case 'search':
         return 'bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-[#DFECC8]';
       case 'meta':
       case 'users':
         return 'bg-[#0064E0] text-white shadow-[0_4px_12px_rgba(0,100,224,0.22)]';
+      case 'landing-pages':
+      case 'layout':
+        return 'bg-white shadow-[0_4px_12px_rgba(24,59,43,0.08)] border border-[#DFECC8]';
+      case 'analytics':
+      case 'activity':
+        return 'bg-white shadow-[0_4px_12px_rgba(227,116,0,0.12)] border border-[#FFE4A0]';
       case 'gpt':
       case 'bot':
         return 'bg-[#10A37F] text-white shadow-[0_4px_12px_rgba(16,163,127,0.22)]';
+      case 'seo':
+      case 'trending-up':
+        return 'bg-white shadow-[0_4px_12px_rgba(66,133,244,0.1)] border border-[#DFECC8]';
       default:
         return 'bg-[#183B2B] text-[#99BC44] shadow-xs';
     }
   };
 
   const renderIcon = (iconName: ServiceCardData['iconName']) => {
-    const iconProps = {
-      className: 'w-5 h-5 text-[#99BC44]',
-    };
     switch (iconName) {
+      case 'google-ads':
       case 'google':
-        return <GoogleLogo className="w-6 h-6" />;
-      case 'meta':
-        return <MetaLogo className="w-6 h-6" color="currentColor" />;
-      case 'gpt':
-        return <GptLogo className="w-6 h-6" color="currentColor" />;
       case 'search':
-        return <GoogleLogo className="w-6 h-6" />;
+        return <GoogleAdsLogo className="w-6 h-6" />;
+      case 'meta':
       case 'users':
         return <MetaLogo className="w-6 h-6" color="currentColor" />;
+      case 'landing-pages':
+      case 'layout':
+        return <LandingPagesLogo className="w-6 h-6" />;
+      case 'analytics':
+      case 'activity':
+        return <GoogleAnalyticsLogo className="w-6 h-6" />;
+      case 'gpt':
       case 'bot':
         return <GptLogo className="w-6 h-6" color="currentColor" />;
-      case 'layout':
-        return <Layout {...iconProps} />;
-      case 'activity':
-        return <Activity {...iconProps} />;
+      case 'seo':
       case 'trending-up':
-        return <TrendingUp {...iconProps} />;
+        return <GoogleSearchConsoleLogo className="w-6 h-6" />;
+      default:
+        return <GoogleAdsLogo className="w-6 h-6" />;
     }
   };
 

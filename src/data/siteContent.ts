@@ -26,15 +26,19 @@ export interface ServiceCardData {
   description: string;
   featured?: boolean;
   iconName:
+    | 'google-ads'
+    | 'google'
+    | 'meta'
+    | 'landing-pages'
+    | 'analytics'
+    | 'gpt'
+    | 'seo'
     | 'search'
     | 'users'
     | 'layout'
     | 'activity'
     | 'bot'
-    | 'trending-up'
-    | 'google'
-    | 'meta'
-    | 'gpt';
+    | 'trending-up';
   details: {
     tagline: string;
     overview: string;
@@ -163,7 +167,7 @@ export const SERVICES_CONTENT: {
       description:
         'Reach people actively searching for the services your clinic offers.',
       featured: true,
-      iconName: 'google',
+      iconName: 'google-ads',
       details: {
         tagline: 'High-Intent Local Search Campaigns for Healthcare & Dental Clinics',
         overview:
@@ -243,7 +247,7 @@ export const SERVICES_CONTENT: {
       description:
         'Give visitors a clear path from interest to inquiry.',
       featured: false,
-      iconName: 'layout',
+      iconName: 'landing-pages',
       details: {
         tagline: 'Sub-2-Second Mobile-First Service Pages Built to Convert Ad Traffic',
         overview:
@@ -283,7 +287,7 @@ export const SERVICES_CONTENT: {
       description:
         'Understand your inquiries and improve the steps toward a booked appointment.',
       featured: false,
-      iconName: 'activity',
+      iconName: 'analytics',
       details: {
         tagline: 'GA4, Google Tag Manager & Server-Side Attribution Without Blind Spots',
         overview:
@@ -363,7 +367,7 @@ export const SERVICES_CONTENT: {
       description:
         'Rank higher in Google local search and Google Maps for high-intent patient queries.',
       featured: false,
-      iconName: 'trending-up',
+      iconName: 'seo',
       details: {
         tagline: 'Google Maps 3-Pack & Organic Search Visibility for Healthcare Clinics',
         overview:
