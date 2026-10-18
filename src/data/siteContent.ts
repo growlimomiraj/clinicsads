@@ -25,7 +25,16 @@ export interface ServiceCardData {
   title: string;
   description: string;
   featured?: boolean;
-  iconName: 'search' | 'users' | 'layout' | 'activity' | 'bot' | 'trending-up';
+  iconName:
+    | 'search'
+    | 'users'
+    | 'layout'
+    | 'activity'
+    | 'bot'
+    | 'trending-up'
+    | 'google'
+    | 'meta'
+    | 'gpt';
   details: {
     tagline: string;
     overview: string;
@@ -154,7 +163,7 @@ export const SERVICES_CONTENT: {
       description:
         'Reach people actively searching for the services your clinic offers.',
       featured: true,
-      iconName: 'search',
+      iconName: 'google',
       details: {
         tagline: 'High-Intent Local Search Campaigns for Healthcare & Dental Clinics',
         overview:
@@ -194,7 +203,7 @@ export const SERVICES_CONTENT: {
       description:
         'Introduce your clinic to prospective patients through Facebook and Instagram.',
       featured: false,
-      iconName: 'users',
+      iconName: 'meta',
       details: {
         tagline: 'Local Patient Awareness & Paid Social Campaigns on Facebook & Instagram',
         overview:
@@ -314,7 +323,7 @@ export const SERVICES_CONTENT: {
       description:
         'Help patients find and choose your clinic through conversational AI and answer engines.',
       featured: false,
-      iconName: 'bot',
+      iconName: 'gpt',
       details: {
         tagline: 'AI-Powered Patient Discovery & Conversational Search Optimization',
         overview:

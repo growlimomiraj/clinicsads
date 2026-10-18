@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { GoogleLogo, MetaLogo, GptLogo } from './BrandLogos';
 import {
   ArrowLeft,
   ArrowRight,
@@ -152,18 +153,37 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
     const renderServiceHeroIcon = (iconName: ServiceCardData['iconName']) => {
       const props = { className: 'w-6 h-6 text-[#99BC44]' };
       switch (iconName) {
+        case 'google':
         case 'search':
-          return <Search {...props} />;
+          return <GoogleLogo className="w-6 h-6" />;
+        case 'meta':
         case 'users':
-          return <Users {...props} />;
+          return <MetaLogo className="w-6 h-6" color="currentColor" />;
+        case 'gpt':
+        case 'bot':
+          return <GptLogo className="w-6 h-6" color="currentColor" />;
         case 'layout':
           return <Layout {...props} />;
         case 'activity':
           return <Activity {...props} />;
-        case 'bot':
-          return <Bot {...props} />;
         case 'trending-up':
           return <TrendingUp {...props} />;
+      }
+    };
+
+    const getServiceHeroTileClass = (iconName: ServiceCardData['iconName']) => {
+      switch (iconName) {
+        case 'google':
+        case 'search':
+          return 'bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-[#DFECC8]';
+        case 'meta':
+        case 'users':
+          return 'bg-[#0064E0] text-white shadow-[0_4px_12px_rgba(0,100,224,0.22)]';
+        case 'gpt':
+        case 'bot':
+          return 'bg-[#10A37F] text-white shadow-[0_4px_12px_rgba(16,163,127,0.22)]';
+        default:
+          return 'bg-[#183B2B] text-[#99BC44]';
       }
     };
 
@@ -184,7 +204,11 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
               <div className="lg:col-span-7 space-y-8">
                 <div className="rounded-[24px] bg-white p-7 sm:p-8 shadow-[0_14px_40px_rgba(24,59,43,0.06)] border border-[#F3F8E9]">
                   <div className="flex items-center gap-3.5 mb-4">
-                    <div className="w-12 h-12 rounded-[14px] bg-[#183B2B] flex items-center justify-center shrink-0">
+                    <div
+                      className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 ${getServiceHeroTileClass(
+                        serviceData.iconName
+                      )}`}
+                    >
                       {renderServiceHeroIcon(serviceData.iconName)}
                     </div>
                     <div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, Users, Layout, Activity, Bot, TrendingUp } from 'lucide-react';
 import { SERVICES_CONTENT, ServiceCardData, PageRoute } from '../data/siteContent';
+import { GoogleLogo, MetaLogo, GptLogo } from './BrandLogos';
 
 interface ServicesSectionProps {
   onSelectService: (service: ServiceCardData) => void;
@@ -11,21 +12,46 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   onSelectService,
   onNavigate,
 }) => {
+  const getIconContainerClass = (card: ServiceCardData) => {
+    if (card.featured) {
+      return 'bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]';
+    }
+    switch (card.iconName) {
+      case 'google':
+      case 'search':
+        return 'bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-[#DFECC8]';
+      case 'meta':
+      case 'users':
+        return 'bg-[#0064E0] text-white shadow-[0_4px_12px_rgba(0,100,224,0.22)]';
+      case 'gpt':
+      case 'bot':
+        return 'bg-[#10A37F] text-white shadow-[0_4px_12px_rgba(16,163,127,0.22)]';
+      default:
+        return 'bg-[#183B2B] text-[#99BC44] shadow-xs';
+    }
+  };
+
   const renderIcon = (iconName: ServiceCardData['iconName']) => {
     const iconProps = {
       className: 'w-5 h-5 text-[#99BC44]',
     };
     switch (iconName) {
+      case 'google':
+        return <GoogleLogo className="w-6 h-6" />;
+      case 'meta':
+        return <MetaLogo className="w-6 h-6" color="currentColor" />;
+      case 'gpt':
+        return <GptLogo className="w-6 h-6" color="currentColor" />;
       case 'search':
-        return <Search {...iconProps} />;
+        return <GoogleLogo className="w-6 h-6" />;
       case 'users':
-        return <Users {...iconProps} />;
+        return <MetaLogo className="w-6 h-6" color="currentColor" />;
+      case 'bot':
+        return <GptLogo className="w-6 h-6" color="currentColor" />;
       case 'layout':
         return <Layout {...iconProps} />;
       case 'activity':
         return <Activity {...iconProps} />;
-      case 'bot':
-        return <Bot {...iconProps} />;
       case 'trending-up':
         return <TrendingUp {...iconProps} />;
     }
@@ -94,9 +120,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                 <div className="relative z-10 flex items-start gap-5">
                   {/* Small rounded icon container on the left */}
                   <div
-                    className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 mt-0.5 shadow-xs ${
-                      isFeatured ? 'bg-white' : 'bg-[#183B2B]'
-                    }`}
+                    className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 mt-0.5 ${getIconContainerClass(
+                      card
+                    )}`}
                   >
                     {renderIcon(card.iconName)}
                   </div>
