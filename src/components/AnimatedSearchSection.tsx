@@ -7,6 +7,7 @@ import {
   HeartPulse
 } from 'lucide-react';
 
+// Search phrases for typewriter animation in the search bar
 const SEARCH_PHRASES = [
   'Best clinics near me',
   'Best hospital near me',
