@@ -177,7 +177,7 @@ export const AnimatedSearchSection: React.FC = () => {
 
         {/* Accessible screen reader announcement (hidden visually, static text) */}
         <div className="sr-only">
-          Example patient searches include "Best clinics near me" and "Best hospital near me". Will you show up when local patients search for care?
+          Example patient searches include "Best clinics near me" and "Best hospital near me". Will you show up? We help you get found in Google, Bing, ChatGPT, and more.
         </div>
 
         {/* 2. Prominent Search Bar with Animated Text */}
@@ -222,7 +222,7 @@ export const AnimatedSearchSection: React.FC = () => {
 
         {/* 4. Supporting Text */}
         <p className="mt-4 sm:mt-5 text-[15px] sm:text-[16px] md:text-[17.5px] font-medium text-[#59665D] leading-relaxed max-w-[680px] mx-auto text-balance">
-          Help more patients discover your clinic when they search for care nearby.
+          We help you get found in Google, Bing, ChatGPT, and more.
         </p>
 
       </div>
