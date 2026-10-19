@@ -1,112 +1,114 @@
 import React, { useState, useMemo } from 'react';
 import {
   LayoutDashboard,
-  FileText,
+  Target,
+  Building2,
   Users,
-  GraduationCap,
   TrendingUp,
   HelpCircle,
   LogOut,
   Search,
   Settings,
   Bell,
-  User,
   ExternalLink,
   MessageSquare,
   Phone,
   CheckSquare,
   Square,
-  Sparkles,
   ArrowUpRight,
-  ArrowDownRight,
-  Calendar,
+  Send,
   X,
   PhoneCall,
-  Send,
-  SlidersHorizontal,
-  ChevronDown,
-  Filter
+  Activity,
+  Layers,
+  Sparkles,
+  Megaphone,
+  Share2,
+  Globe,
+  Bot
 } from 'lucide-react';
+import { SCALED_CLINICS } from './ClinicsScaledSection';
 
 interface AdminDashboardProps {
   onExit: () => void;
 }
 
-interface OnlineTutor {
+interface PartnerClinicItem {
   id: string;
   name: string;
+  logoSrc?: string;
   avatarBg: string;
   initials: string;
-  role: string;
-  status: 'online' | 'busy' | 'away';
+  service: string;
+  contactPerson: string;
+  status: 'active' | 'review' | 'scaling';
 }
 
-interface DueBilling {
-  studentId: string;
-  classCode: string;
-  studentName: string;
-  tutorName: string;
-  startDate: string;
-  fee: string;
-  due: string;
+interface ClinicBilling {
+  clinicId: string;
+  tier: string;
+  clinicName: string;
+  leadService: string;
+  billingDate: string;
+  adSpend: string;
+  retainerFee: string;
   status: 'Received' | 'Pending';
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
   // Navigation State
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'reports' | 'tutors' | 'students' | 'analytics'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'campaigns' | 'clinics' | 'leads' | 'attribution'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Weekly Plan items with interactive toggle
+  // Weekly Optimization Checklist (aligned with ClinicsAds services)
   const [weeklyPlan, setWeeklyPlan] = useState([
-    { id: '1', label: 'Webinar course', completed: false, icon: 'webinar' },
-    { id: '2', label: 'Parents day', completed: false, icon: 'parents' },
-    { id: '3', label: 'Discuss goals', completed: true, icon: 'goals' },
-    { id: '4', label: 'Weekly meeting', completed: true, icon: 'meeting' },
-    { id: '5', label: 'Tutor interview', completed: true, icon: 'interview' },
+    { id: '1', label: 'Negative keyword scrubbing', completed: false, service: 'Google Ads' },
+    { id: '2', label: 'Server-side GA4 conversion audit', completed: false, service: 'Tracking' },
+    { id: '3', label: 'Meta retargeting creative refresh', completed: true, service: 'Meta Ads' },
+    { id: '4', label: 'CallRail patient routing verification', completed: true, service: 'Tracking' },
+    { id: '5', label: 'Landing page sub-2s speed check', completed: true, service: 'Landing Pages' },
   ]);
 
-  // Today's courses items with interactive toggle
-  const [todayCourses, setTodayCourses] = useState([
-    { id: '1', label: 'Statistics', completed: false },
-    { id: '2', label: 'Public Speaking', completed: false },
-    { id: '3', label: 'Digital Marketing', completed: false },
-    { id: '4', label: 'English', completed: true },
-    { id: '5', label: 'SMM', completed: true },
-    { id: '6', label: 'Mathematics', completed: true },
+  // Today's Active Channels & Core Services
+  const [activeServices, setActiveServices] = useState([
+    { id: '1', label: 'Google Search Ads (Intent)', completed: true, icon: 'google' },
+    { id: '2', label: 'Meta Ads (FB & Instagram)', completed: true, icon: 'meta' },
+    { id: '3', label: 'Dedicated Clinic Landing Pages', completed: true, icon: 'landing' },
+    { id: '4', label: 'Server-Side Attribution & GA4', completed: true, icon: 'analytics' },
+    { id: '5', label: 'ChatGPT & AI Search Engine', completed: false, icon: 'gpt' },
+    { id: '6', label: 'Google Maps 3-Pack & Clinic SEO', completed: false, icon: 'seo' },
   ]);
 
-  // Online Tutors
-  const tutors: OnlineTutor[] = [
-    { id: '1', name: 'Dr Alice Meenss', avatarBg: 'bg-[#A77960]', initials: 'AM', role: 'Biology', status: 'online' },
-    { id: '2', name: 'Dr Christopher Smith', avatarBg: 'bg-[#407B64]', initials: 'CS', role: 'Chemistry', status: 'online' },
-    { id: '3', name: 'Mrs Monica Black', avatarBg: 'bg-[#4A7298]', initials: 'MB', role: 'Art & Design', status: 'online' },
-    { id: '4', name: 'Mr Ralph Fare', avatarBg: 'bg-[#76828E]', initials: 'RF', role: 'History', status: 'online' },
-    { id: '5', name: 'Ms Keith Rodman', avatarBg: 'bg-[#B68B4B]', initials: 'KR', role: 'Mathematics', status: 'online' },
-    { id: '6', name: 'Dr Daniel Kha', avatarBg: 'bg-[#3A7E64]', initials: 'DK', role: 'Physics', status: 'online' },
-    { id: '7', name: 'Ms Julie McLaren', avatarBg: 'bg-[#9C7058]', initials: 'JM', role: 'Literature', status: 'online' },
-    { id: '8', name: 'Dr Marcus MesCaline', avatarBg: 'bg-[#A2624D]', initials: 'MM', role: 'Medicine', status: 'online' },
-    { id: '9', name: 'Mr Maxim Accardo', avatarBg: 'bg-[#3B6B92]', initials: 'MA', role: 'Economics', status: 'online' },
+  // Partner Clinics (from ClinicsAds scaled clinics)
+  const partnerClinics: PartnerClinicItem[] = [
+    { id: '1', name: 'First Response Healthcare', logoSrc: '/logos/first-response-healthcare.webp', avatarBg: 'bg-[#183B2B]', initials: 'FR', service: 'Google & Meta Ads', contactPerson: 'Dr. Narayan', status: 'scaling' },
+    { id: '2', name: 'GetChecked', logoSrc: '/logos/getchecked.svg', avatarBg: 'bg-[#2A6F56]', initials: 'GC', service: 'ChatGPT & Search Ads', contactPerson: 'Sarah Jenkins', status: 'active' },
+    { id: '3', name: 'MMC Dubai', logoSrc: '/logos/mmc-dubai.png', avatarBg: 'bg-[#407B64]', initials: 'MM', service: 'Local Radius & Meta Ads', contactPerson: 'Dr. Tariq Al-Mansoor', status: 'active' },
+    { id: '4', name: 'Novelty Clinic', logoSrc: '/logos/novelty-clinic.svg', avatarBg: 'bg-[#628F79]', initials: 'NC', service: 'Landing Pages & Search', contactPerson: 'Elena Rostova', status: 'active' },
+    { id: '5', name: 'Art of Mobility', logoSrc: '/logos/art-of-mobility.svg', avatarBg: 'bg-[#76828E]', initials: 'AM', service: 'Physio Search & CRO', contactPerson: 'Mark Henderson', status: 'scaling' },
+    { id: '6', name: 'Bodyworks Physio', logoSrc: '/logos/bodyworks-physio.png', avatarBg: 'bg-[#3A7E64]', initials: 'BW', service: 'Maps 3-Pack & Google Ads', contactPerson: 'David Miller', status: 'active' },
+    { id: '7', name: 'Cambridge Physio', logoSrc: '/logos/cambridge-physio.webp', avatarBg: 'bg-[#899D78]', initials: 'CP', service: 'Meta Retargeting & GA4', contactPerson: 'Claire Bennett', status: 'active' },
+    { id: '8', name: 'Encore Physiotherapy', logoSrc: '/logos/encore-physiotherapy.jpeg', avatarBg: 'bg-[#374151]', initials: 'EP', service: 'Call Attribution & Search', contactPerson: 'Robert Hall', status: 'active' },
   ];
 
-  // Due Billings Table Data
-  const [billings, setBillings] = useState<DueBilling[]>([
-    { studentId: '2034789', classCode: 'A123', studentName: 'Susan Smith', tutorName: 'Dr Maxim Accardo', startDate: '01.01.2025', fee: '£1,300', due: '£800', status: 'Received' },
-    { studentId: '3434118', classCode: 'A123', studentName: 'Alex Smith', tutorName: 'Mr Ralph Perry', startDate: '01.10.2024', fee: '£950', due: '£0', status: 'Received' },
-    { studentId: '2035487', classCode: 'B12', studentName: 'Steven Black', tutorName: 'Ms Keith Rodman', startDate: '01.10.2024', fee: '£850', due: '£820', status: 'Pending' },
-    { studentId: '1034786', classCode: 'A100', studentName: 'Anna-Maria Mur', tutorName: 'Dr Marcus MesCaline', startDate: '15.09.2024', fee: '£1,240', due: '£200', status: 'Received' },
-    { studentId: '2065985', classCode: 'H78', studentName: 'Alice Rodman', tutorName: 'Ms Anna Long', startDate: '01.01.2025', fee: '£1,300', due: '£0', status: 'Received' },
-    { studentId: '2001389', classCode: 'B134', studentName: 'Tom Pitt', tutorName: 'Mrs Anna Dickens', startDate: '15.07.2024', fee: '£250', due: '£0', status: 'Received' },
-    { studentId: '2033789', classCode: 'G45', studentName: 'Alex Muller', tutorName: 'Dr Diana Lorens', startDate: '01.01.2025', fee: '£1,000', due: '£0', status: 'Received' },
-    { studentId: '1134289', classCode: 'A123', studentName: 'Aria Brown', tutorName: 'Mr Arthur John', startDate: '01.01.2025', fee: '£550', due: '£150', status: 'Received' },
+  // Clinic Billings / Invoices
+  const [billings, setBillings] = useState<ClinicBilling[]>([
+    { clinicId: 'CL-2034', tier: 'Scale', clinicName: 'First Response Healthcare', leadService: 'Google & Meta Ads', billingDate: '01.01.2025', adSpend: '£6,500', retainerFee: '£1,800', status: 'Received' },
+    { clinicId: 'CL-3434', tier: 'Growth', clinicName: 'GetChecked', leadService: 'AI Search & Google Ads', billingDate: '01.10.2024', adSpend: '£4,200', retainerFee: '£1,500', status: 'Received' },
+    { clinicId: 'CL-2035', tier: 'Starter', clinicName: 'MMC Dubai', leadService: 'Local Radius & Meta Ads', billingDate: '01.10.2024', adSpend: '£2,800', retainerFee: '£950', status: 'Pending' },
+    { clinicId: 'CL-1034', tier: 'Growth', clinicName: 'Novelty Clinic', leadService: 'Landing Pages & Search', billingDate: '15.09.2024', adSpend: '£5,100', retainerFee: '£1,650', status: 'Received' },
+    { clinicId: 'CL-2065', tier: 'Scale', clinicName: 'Art of Mobility', leadService: 'Physio Search & CRO', billingDate: '01.01.2025', adSpend: '£7,200', retainerFee: '£2,100', status: 'Received' },
+    { clinicId: 'CL-2001', tier: 'Starter', clinicName: 'Bodyworks Physio', leadService: 'Maps 3-Pack & Google Ads', billingDate: '15.07.2024', adSpend: '£2,100', retainerFee: '£850', status: 'Received' },
+    { clinicId: 'CL-2033', tier: 'Growth', clinicName: 'Cambridge Physio', leadService: 'Meta Retargeting & GA4', billingDate: '01.01.2025', adSpend: '£3,900', retainerFee: '£1,300', status: 'Received' },
+    { clinicId: 'CL-1134', tier: 'Starter', clinicName: 'Encore Physiotherapy', leadService: 'Call Attribution & Search', billingDate: '01.01.2025', adSpend: '£2,400', retainerFee: '£900', status: 'Received' },
   ]);
 
   const [billingFilter, setBillingFilter] = useState<'All' | 'Received' | 'Pending'>('All');
   const [billingSearch, setBillingSearch] = useState('');
 
-  // Modals for chat & call
-  const [activeChatTutor, setActiveChatTutor] = useState<OnlineTutor | null>(null);
-  const [activeCallTutor, setActiveCallTutor] = useState<OnlineTutor | null>(null);
+  // Modals for direct clinic communication
+  const [activeChatClinic, setActiveChatClinic] = useState<PartnerClinicItem | null>(null);
+  const [activeCallClinic, setActiveCallClinic] = useState<PartnerClinicItem | null>(null);
   const [chatMessage, setChatMessage] = useState('');
 
   // Dynamic calculation of weekly plan completion percentage
@@ -119,9 +121,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     );
   };
 
-  const toggleCourseItem = (id: string) => {
-    setTodayCourses(prev =>
-      prev.map(c => (c.id === id ? { ...c, completed: !c.completed } : c))
+  const toggleServiceItem = (id: string) => {
+    setActiveServices(prev =>
+      prev.map(s => (s.id === id ? { ...s, completed: !s.completed } : s))
     );
   };
 
@@ -130,18 +132,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       const matchesFilter = billingFilter === 'All' || b.status === billingFilter;
       const q = billingSearch.toLowerCase();
       const matchesSearch =
-        b.studentName.toLowerCase().includes(q) ||
-        b.studentId.includes(q) ||
-        b.tutorName.toLowerCase().includes(q) ||
-        b.classCode.toLowerCase().includes(q);
+        b.clinicName.toLowerCase().includes(q) ||
+        b.clinicId.toLowerCase().includes(q) ||
+        b.leadService.toLowerCase().includes(q) ||
+        b.tier.toLowerCase().includes(q);
       return matchesFilter && matchesSearch;
     });
   }, [billings, billingFilter, billingSearch]);
 
-  const toggleBillingStatus = (studentId: string) => {
+  const toggleBillingStatus = (clinicId: string) => {
     setBillings(prev =>
       prev.map(b => {
-        if (b.studentId === studentId) {
+        if (b.clinicId === clinicId) {
           const nextStatus = b.status === 'Received' ? 'Pending' : 'Received';
           return { ...b, status: nextStatus };
         }
@@ -157,14 +159,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
         {/* Brand Logo & Name */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-[#183B2B] flex items-center justify-center text-white shadow-sm">
-            {/* Hexagon / Graduation Academy Icon */}
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round" />
+            {/* Medical / Clinic Growth Cross */}
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.4">
+              <path d="M12 4v16m-8-8h16" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <span className="text-[17px] sm:text-[18px] font-extrabold text-[#183B2B] tracking-tight">
-            SkillSphere Academy
-          </span>
+          <div className="flex flex-col">
+            <span className="text-[17px] sm:text-[18px] font-extrabold text-[#183B2B] tracking-tight leading-none">
+              ClinicsAds
+            </span>
+            <span className="text-[10.5px] font-semibold text-[#183B2B]/60 tracking-wider uppercase mt-0.5">
+              Client &amp; Campaign Operations
+            </span>
+          </div>
         </div>
 
         {/* Global Search Bar */}
@@ -174,7 +181,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search courses, tutors, billings..."
+            placeholder="Search campaigns, partner clinics, patient leads..."
             className="w-full bg-white border border-gray-200 rounded-full pl-10 pr-4 py-2 text-[13.5px] text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#183B2B] focus:ring-1 focus:ring-[#183B2B] transition-all"
           />
         </div>
@@ -190,7 +197,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             <Settings className="w-3.5 h-3.5 text-gray-500" />
           </button>
 
-          {/* Notifications Bell */}
+          {/* Notifications Bell with Active Lead Alert */}
           <button
             type="button"
             aria-label="View notifications"
@@ -200,14 +207,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             <span className="w-2 h-2 rounded-full bg-[#34A853] absolute top-2 right-2 border-2 border-white" />
           </button>
 
-          {/* User Profile Avatar */}
+          {/* User Profile Avatar (Muhammad Usman / Admin) */}
           <div className="flex items-center gap-2 pl-1 sm:pl-2">
             <div className="w-9 h-9 rounded-full bg-[#183B2B] text-white flex items-center justify-center font-bold text-xs ring-2 ring-gray-100 cursor-pointer shadow-xs">
-              AD
+              MU
             </div>
             <div className="hidden lg:block text-left">
-              <p className="text-[13px] font-bold text-[#183B2B] leading-tight">Adam</p>
-              <p className="text-[11px] text-gray-500 font-medium">Head Administrator</p>
+              <p className="text-[13px] font-bold text-[#183B2B] leading-tight">Muhammad Usman</p>
+              <p className="text-[11px] text-gray-500 font-medium">Lead Growth Strategist</p>
             </div>
           </div>
 
@@ -216,7 +223,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             type="button"
             onClick={onExit}
             className="ml-2 px-3 py-1.5 rounded-full bg-[#183B2B]/10 hover:bg-[#183B2B]/20 text-[#183B2B] text-xs font-semibold transition-colors cursor-pointer"
-            title="Return to Main Website"
+            title="Return to Main ClinicsAds Website"
           >
             Back to Site
           </button>
@@ -243,54 +250,54 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
             <button
               type="button"
-              onClick={() => setActiveTab('reports')}
+              onClick={() => setActiveTab('campaigns')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-semibold transition-all cursor-pointer ${
-                activeTab === 'reports'
+                activeTab === 'campaigns'
                   ? 'bg-[#EBF3E4] text-[#183B2B]'
                   : 'text-gray-600 hover:bg-gray-100/70 hover:text-gray-900'
               }`}
             >
-              <FileText className={`w-4 h-4 shrink-0 ${activeTab === 'reports' ? 'text-[#183B2B]' : 'text-gray-500'}`} />
-              <span className="hidden md:inline">Reports</span>
+              <Target className={`w-4 h-4 shrink-0 ${activeTab === 'campaigns' ? 'text-[#183B2B]' : 'text-gray-500'}`} />
+              <span className="hidden md:inline">Campaigns</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setActiveTab('tutors')}
+              onClick={() => setActiveTab('clinics')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-semibold transition-all cursor-pointer ${
-                activeTab === 'tutors'
+                activeTab === 'clinics'
                   ? 'bg-[#EBF3E4] text-[#183B2B]'
                   : 'text-gray-600 hover:bg-gray-100/70 hover:text-gray-900'
               }`}
             >
-              <Users className={`w-4 h-4 shrink-0 ${activeTab === 'tutors' ? 'text-[#183B2B]' : 'text-gray-500'}`} />
-              <span className="hidden md:inline">Tutors</span>
+              <Building2 className={`w-4 h-4 shrink-0 ${activeTab === 'clinics' ? 'text-[#183B2B]' : 'text-gray-500'}`} />
+              <span className="hidden md:inline">Partner Clinics</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setActiveTab('students')}
+              onClick={() => setActiveTab('leads')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-semibold transition-all cursor-pointer ${
-                activeTab === 'students'
+                activeTab === 'leads'
                   ? 'bg-[#EBF3E4] text-[#183B2B]'
                   : 'text-gray-600 hover:bg-gray-100/70 hover:text-gray-900'
               }`}
             >
-              <GraduationCap className={`w-4 h-4 shrink-0 ${activeTab === 'students' ? 'text-[#183B2B]' : 'text-gray-500'}`} />
-              <span className="hidden md:inline">Students</span>
+              <Users className={`w-4 h-4 shrink-0 ${activeTab === 'leads' ? 'text-[#183B2B]' : 'text-gray-500'}`} />
+              <span className="hidden md:inline">Patient Leads</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setActiveTab('analytics')}
+              onClick={() => setActiveTab('attribution')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-semibold transition-all cursor-pointer ${
-                activeTab === 'analytics'
+                activeTab === 'attribution'
                   ? 'bg-[#EBF3E4] text-[#183B2B]'
                   : 'text-gray-600 hover:bg-gray-100/70 hover:text-gray-900'
               }`}
             >
-              <TrendingUp className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-[#183B2B]' : 'text-gray-500'}`} />
-              <span className="hidden md:inline">Analytics</span>
+              <TrendingUp className={`w-4 h-4 shrink-0 ${activeTab === 'attribution' ? 'text-[#183B2B]' : 'text-gray-500'}`} />
+              <span className="hidden md:inline">ROI Attribution</span>
             </button>
           </div>
 
@@ -301,7 +308,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100/60 transition-colors cursor-pointer"
             >
               <HelpCircle className="w-4 h-4 text-gray-400" />
-              <span className="hidden md:inline">Help</span>
+              <span className="hidden md:inline">Knowledge Base</span>
             </button>
             <button
               type="button"
@@ -309,7 +316,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-gray-500 hover:text-[#EA4335] hover:bg-red-50 transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden md:inline">Log out</span>
+              <span className="hidden md:inline">Back to Site</span>
             </button>
           </div>
         </aside>
@@ -319,10 +326,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
           {/* Welcome Headline */}
           <div>
             <h1 className="text-2xl sm:text-[27px] font-extrabold text-[#183B2B] tracking-tight">
-              Welcome back, Adam!
+              Welcome back, Usman!
             </h1>
             <p className="text-[13.5px] text-gray-500 mt-1 font-medium">
-              Plan, prioritize, and accomplish your tasks with ease.
+              Monitor active clinic campaigns, patient inquiries, and ad spend with precision.
             </p>
           </div>
 
@@ -332,101 +339,118 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             <div className="lg:col-span-8 xl:col-span-9 space-y-6">
               {/* 4 Metric Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {/* 1. Total courses (Dark Forest Green Highlight Card) */}
+                {/* 1. Active Campaigns (Dark Forest Green Highlight Card) */}
                 <div className="bg-[#183B2B] text-white rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-sm relative overflow-hidden group">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-semibold text-white/90">Total courses</span>
+                    <span className="text-[13px] font-semibold text-white/90">Active Campaigns</span>
                     <ExternalLink className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
                   </div>
                   <div className="my-3">
-                    <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">134</span>
+                    <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">48</span>
                   </div>
                   <div className="text-[11px] text-white/70 font-medium truncate">
-                    Incl: 2 pending courses
+                    Across 8 partner clinics
                   </div>
                 </div>
 
-                {/* 2. Running Card (Clean White) */}
+                {/* 2. Patient Inquiries (Clean White) */}
                 <div className="bg-white border border-gray-200/70 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xs relative group">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-semibold text-gray-700">Running</span>
+                    <span className="text-[13px] font-semibold text-gray-700">Patient Inquiries</span>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-700 transition-colors" />
                   </div>
                   <div className="my-3">
-                    <span className="text-3xl sm:text-4xl font-extrabold text-[#34A853] tracking-tight">42</span>
+                    <span className="text-3xl sm:text-4xl font-extrabold text-[#34A853] tracking-tight">1,284</span>
                   </div>
                   <div className="text-[11px] text-gray-400 font-medium truncate">
-                    Incl: 2 pending courses
+                    +42 today (Calls &amp; Forms)
                   </div>
                 </div>
 
-                {/* 3. Finished Card (Clean White) */}
+                {/* 3. Average CPL (Clean White) */}
                 <div className="bg-white border border-gray-200/70 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xs relative group">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-semibold text-gray-700">Finished</span>
+                    <span className="text-[13px] font-semibold text-gray-700">Average CPL</span>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-700 transition-colors" />
                   </div>
                   <div className="my-3">
-                    <span className="text-3xl sm:text-4xl font-extrabold text-[#183B2B] tracking-tight">92</span>
+                    <span className="text-3xl sm:text-4xl font-extrabold text-[#183B2B] tracking-tight">£18.40</span>
                   </div>
                   <div className="text-[11px] text-gray-400 font-medium truncate">
-                    Excl: 2 pending courses
+                    -14% vs benchmark (£21.40)
                   </div>
                 </div>
 
-                {/* 4. New Courses Card (Clean White) */}
+                {/* 4. Total Ad Spend Managed (Clean White) */}
                 <div className="bg-white border border-gray-200/70 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xs relative group">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-semibold text-gray-700">New courses</span>
+                    <span className="text-[13px] font-semibold text-gray-700">Managed Spend</span>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-700 transition-colors" />
                   </div>
                   <div className="my-3">
-                    <span className="text-3xl sm:text-4xl font-extrabold text-[#183B2B] tracking-tight">+28</span>
+                    <span className="text-3xl sm:text-4xl font-extrabold text-[#183B2B] tracking-tight">£42.5k</span>
                   </div>
                   <div className="text-[11px] text-gray-400 font-medium truncate">
-                    Incl: 4 this week
+                    98.4% monthly pacing
                   </div>
                 </div>
               </div>
 
-              {/* Middle Section: Online (Left) + Project Progress & Calendar (Right) */}
+              {/* Middle Section: Partner Clinics (Left) + Patient Lead Velocity & Calendar (Right) */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                {/* Online Tutors Column (5 cols) */}
+                {/* Partner Clinics (Left 5 cols) */}
                 <div className="md:col-span-5 bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between pb-3.5 border-b border-gray-100">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-[#34A853] inline-block animate-pulse" />
-                        <h2 className="text-[14px] font-bold text-gray-800">Online</h2>
+                        <h2 className="text-[14px] font-bold text-gray-800">Partner Clinics</h2>
                       </div>
-                      <ExternalLink className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700" />
+                      <span className="text-[11px] font-bold text-[#183B2B] bg-[#EBF3E4] px-2 py-0.5 rounded-full">
+                        8 Active
+                      </span>
                     </div>
 
                     <div className="divide-y divide-gray-50 pt-1">
-                      {tutors.map((tutor) => (
-                        <div key={tutor.id} className="py-2.5 flex items-center justify-between group hover:bg-gray-50/70 px-1 rounded-lg transition-colors">
+                      {partnerClinics.map((clinic) => (
+                        <div key={clinic.id} className="py-2.5 flex items-center justify-between group hover:bg-gray-50/70 px-1 rounded-lg transition-colors">
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <div className={`w-7 h-7 rounded-full ${tutor.avatarBg} text-white flex items-center justify-center text-[10px] font-bold shrink-0 shadow-xs`}>
-                              {tutor.initials}
+                            {clinic.logoSrc ? (
+                              <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center p-1 shrink-0">
+                                <img
+                                  src={clinic.logoSrc}
+                                  alt={clinic.name}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            ) : (
+                              <div className={`w-8 h-8 rounded-lg ${clinic.avatarBg} text-white flex items-center justify-center text-[10px] font-bold shrink-0 shadow-xs`}>
+                                {clinic.initials}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <span className="text-[12.5px] font-semibold text-gray-800 block truncate" title={clinic.name}>
+                                {clinic.name}
+                              </span>
+                              <span className="text-[10px] text-gray-400 block truncate">
+                                {clinic.service}
+                              </span>
                             </div>
-                            <span className="text-[12.5px] font-semibold text-gray-800 truncate" title={tutor.name}>
-                              {tutor.name}
-                            </span>
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
                             <button
                               type="button"
-                              onClick={() => setActiveChatTutor(tutor)}
+                              onClick={() => setActiveChatClinic(clinic)}
                               className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#183B2B] hover:bg-[#EBF3E4] transition-colors cursor-pointer"
-                              title={`Chat with ${tutor.name}`}
+                              title={`Message ${clinic.name}`}
                             >
                               <MessageSquare className="w-3.5 h-3.5" />
                             </button>
                             <button
                               type="button"
-                              onClick={() => setActiveCallTutor(tutor)}
+                              onClick={() => setActiveCallClinic(clinic)}
                               className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#183B2B] hover:bg-[#EBF3E4] transition-colors cursor-pointer"
-                              title={`Call ${tutor.name}`}
+                              title={`Call ${clinic.name}`}
                             >
                               <Phone className="w-3.5 h-3.5" />
                             </button>
@@ -437,57 +461,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                   </div>
                 </div>
 
-                {/* Project Progress & Calendar (7 cols) */}
+                {/* Patient Lead Inflow & Launch Calendar (Right 7 cols) */}
                 <div className="md:col-span-7 space-y-5">
-                  {/* Project Progress Bar Chart Card */}
+                  {/* Inquiry Inflow Bar Chart Card */}
                   <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h2 className="text-[14px] font-bold text-gray-800">Project progress</h2>
-                        <p className="text-[11.5px] text-gray-400 font-medium mt-0.5">Weekly average: 12.3h</p>
+                        <h2 className="text-[14px] font-bold text-gray-800">Weekly Patient Inquiries</h2>
+                        <p className="text-[11.5px] text-gray-400 font-medium mt-0.5">Daily average: 38 inquiries across all clinics</p>
                       </div>
                       <ExternalLink className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700" />
                     </div>
 
-                    {/* Bar Chart Visualization matching reference */}
+                    {/* Bar Chart Visualization */}
                     <div className="pt-6 pb-2">
                       <div className="h-32 flex items-end justify-between gap-3 px-3">
                         {/* Monday */}
                         <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
                           <div className="w-full max-w-[28px] bg-[#374151] rounded-full h-20 group-hover:brightness-110 transition-all relative">
-                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">12h</span>
+                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">42 leads</span>
                           </div>
                           <span className="text-[11px] font-bold text-gray-600">M</span>
                         </div>
 
                         {/* Tuesday */}
                         <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                          <div className="w-full max-w-[28px] bg-[#E5E7EB] rounded-full h-10 group-hover:bg-gray-300 transition-all relative">
-                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">6h</span>
+                          <div className="w-full max-w-[28px] bg-[#E5E7EB] rounded-full h-12 group-hover:bg-gray-300 transition-all relative">
+                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">28 leads</span>
                           </div>
                           <span className="text-[11px] font-bold text-gray-600">T</span>
                         </div>
 
                         {/* Wednesday */}
                         <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                          <div className="w-full max-w-[28px] bg-[#374151] rounded-full h-14 group-hover:brightness-110 transition-all relative">
-                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">9h</span>
+                          <div className="w-full max-w-[28px] bg-[#374151] rounded-full h-16 group-hover:brightness-110 transition-all relative">
+                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">36 leads</span>
                           </div>
                           <span className="text-[11px] font-bold text-gray-600">W</span>
                         </div>
 
                         {/* Thursday */}
                         <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                          <div className="w-full max-w-[28px] bg-[#374151] rounded-full h-18 group-hover:brightness-110 transition-all relative">
-                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">11h</span>
+                          <div className="w-full max-w-[28px] bg-[#374151] rounded-full h-20 group-hover:brightness-110 transition-all relative">
+                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">45 leads</span>
                           </div>
                           <span className="text-[11px] font-bold text-gray-600">T</span>
                         </div>
 
-                        {/* Friday (Highlighted with 17h badge & #183B2B color) */}
+                        {/* Friday (Peak Patient Booking Day) */}
                         <div className="flex-1 flex flex-col items-center gap-2 relative group cursor-pointer">
                           <span className="text-[11px] font-bold text-white bg-[#183B2B] px-2 py-0.5 rounded-full shadow-xs mb-1">
-                            17h
+                            64 leads
                           </span>
                           <div className="w-full max-w-[28px] bg-[#183B2B] rounded-full h-24 ring-2 ring-[#99BC44]/30 shadow-xs group-hover:brightness-110 transition-all" />
                           <span className="text-[11px] font-extrabold text-[#183B2B]">F</span>
@@ -495,16 +519,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
                         {/* Saturday */}
                         <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                          <div className="w-full max-w-[28px] bg-[#E5E7EB] rounded-full h-8 group-hover:bg-gray-300 transition-all relative">
-                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">4h</span>
+                          <div className="w-full max-w-[28px] bg-[#E5E7EB] rounded-full h-10 group-hover:bg-gray-300 transition-all relative">
+                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">22 leads</span>
                           </div>
                           <span className="text-[11px] font-bold text-gray-600">S</span>
                         </div>
 
                         {/* Sunday */}
                         <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                          <div className="w-full max-w-[28px] bg-[#E5E7EB] rounded-full h-10 group-hover:bg-gray-300 transition-all relative">
-                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">5h</span>
+                          <div className="w-full max-w-[28px] bg-[#E5E7EB] rounded-full h-14 group-hover:bg-gray-300 transition-all relative">
+                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">31 leads</span>
                           </div>
                           <span className="text-[11px] font-bold text-gray-600">S</span>
                         </div>
@@ -512,10 +536,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     </div>
                   </div>
 
-                  {/* Calendar Timetable Card */}
+                  {/* Campaign Launch & Optimization Schedule Card */}
                   <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
                     <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                      <h2 className="text-[14px] font-bold text-gray-800">Calendar</h2>
+                      <h2 className="text-[14px] font-bold text-gray-800">Optimization Schedule</h2>
                       <ExternalLink className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700" />
                     </div>
 
@@ -533,27 +557,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
                       {/* Timetable Events */}
                       <div className="pt-3 space-y-2.5 relative">
-                        {/* Event 1: English */}
+                        {/* Event 1: Google Ads Audit */}
                         <div className="flex items-center justify-between bg-[#374151] text-white px-3.5 py-2 rounded-xl text-[12px] shadow-xs">
                           <div>
-                            <span className="font-bold block">English</span>
-                            <span className="text-[10px] text-gray-300">Alina &amp; Daniel</span>
+                            <span className="font-bold block">Google Ads Bid Audit</span>
+                            <span className="text-[10px] text-gray-300">First Response &amp; GetChecked</span>
                           </div>
                           <div className="flex -space-x-1.5 overflow-hidden">
-                            <div className="w-5 h-5 rounded-full bg-amber-400 border border-[#374151]" />
+                            <div className="w-5 h-5 rounded-full bg-blue-500 border border-[#374151]" />
                             <div className="w-5 h-5 rounded-full bg-emerald-400 border border-[#374151]" />
                           </div>
                         </div>
 
-                        {/* Event 2: Art Fundamentals */}
+                        {/* Event 2: Landing Page CRO Test */}
                         <div className="flex items-center justify-between bg-[#F3F4F6] text-gray-800 px-3.5 py-2 rounded-xl text-[12px] border border-gray-200/60 shadow-xs">
                           <div>
-                            <span className="font-bold block">Art fundamentals</span>
-                            <span className="text-[10px] text-gray-500">Monica &amp; Christopher</span>
+                            <span className="font-bold block">Mobile Landing Page CRO Test</span>
+                            <span className="text-[10px] text-gray-500">Art of Mobility &amp; MMC Dubai</span>
                           </div>
                           <div className="flex -space-x-1.5 overflow-hidden">
-                            <div className="w-5 h-5 rounded-full bg-blue-400 border border-white" />
-                            <div className="w-5 h-5 rounded-full bg-green-500 border border-white" />
+                            <div className="w-5 h-5 rounded-full bg-amber-400 border border-white" />
+                            <div className="w-5 h-5 rounded-full bg-indigo-500 border border-white" />
                           </div>
                         </div>
                       </div>
@@ -563,12 +587,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
               </div>
             </div>
 
-            {/* Right Column: Weekly Plan & Today's Courses Widgets */}
+            {/* Right Column: Weekly Optimization Plan & Active Services Widgets */}
             <div className="lg:col-span-4 xl:col-span-3 space-y-6">
-              {/* Widget 1: Weekly Plan with SVG Donut Progress Chart */}
+              {/* Widget 1: Weekly Optimization Plan with SVG Donut Progress Chart */}
               <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-[14px] font-bold text-gray-800">Weekly plan</h2>
+                  <h2 className="text-[14px] font-bold text-gray-800">Weekly Optimization</h2>
                   <ExternalLink className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700" />
                 </div>
 
@@ -609,7 +633,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                   </div>
                 </div>
 
-                {/* Checklist items */}
+                {/* Checklist items tailored to ClinicsAds deliverables */}
                 <div className="space-y-2.5 pt-1">
                   {weeklyPlan.map((item) => (
                     <div
@@ -621,9 +645,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                         <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 group-hover:bg-[#EBF3E4] group-hover:text-[#183B2B] transition-colors">
                           <CheckSquare className="w-3.5 h-3.5" />
                         </div>
-                        <span className={`text-[12.5px] font-medium transition-colors ${item.completed ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
-                          {item.label}
-                        </span>
+                        <div>
+                          <span className={`text-[12px] font-semibold block transition-colors ${item.completed ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+                            {item.label}
+                          </span>
+                          <span className="text-[10px] text-gray-400">{item.service}</span>
+                        </div>
                       </div>
                       <div className="text-gray-400 group-hover:text-[#183B2B]">
                         {item.completed ? (
@@ -637,33 +664,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 </div>
               </div>
 
-              {/* Widget 2: Today's Courses (Dark Forest Green Card) */}
+              {/* Widget 2: What We Offer (Active Channels & Services in Dark Forest Green Card) */}
               <div className="bg-[#183B2B] text-white rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-[14px] font-bold text-white">Today&apos;s courses</h2>
+                  <h2 className="text-[14px] font-bold text-white">Active Channels</h2>
                   <ExternalLink className="w-4 h-4 text-white/70 hover:text-white cursor-pointer" />
                 </div>
 
                 <div className="space-y-2.5">
-                  {todayCourses.map((course) => (
+                  {activeServices.map((service) => (
                     <div
-                      key={course.id}
-                      onClick={() => toggleCourseItem(course.id)}
+                      key={service.id}
+                      onClick={() => toggleServiceItem(service.id)}
                       className="flex items-center justify-between py-1.5 px-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-2.5">
                         <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center text-white/90">
-                          <GraduationCap className="w-3.5 h-3.5" />
+                          <Target className="w-3.5 h-3.5" />
                         </div>
-                        <span className={`text-[12.5px] font-semibold transition-colors ${course.completed ? 'text-white/50 line-through' : 'text-white'}`}>
-                          {course.label}
+                        <span className={`text-[12px] font-semibold transition-colors ${service.completed ? 'text-white' : 'text-white/50'}`}>
+                          {service.label}
                         </span>
                       </div>
                       <div>
-                        {course.completed ? (
-                          <CheckSquare className="w-4 h-4 text-[#99BC44]" />
+                        {service.completed ? (
+                          <span className="text-[10px] font-bold bg-[#99BC44] text-[#183B2B] px-1.5 py-0.5 rounded">
+                            LIVE
+                          </span>
                         ) : (
-                          <Square className="w-4 h-4 text-white/40 group-hover:text-white" />
+                          <span className="text-[10px] font-medium text-white/40 border border-white/20 px-1.5 py-0.5 rounded">
+                            SETUP
+                          </span>
                         )}
                       </div>
                     </div>
@@ -673,23 +704,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             </div>
           </div>
 
-          {/* Row 3: January report review (3 Line Chart Sparkline Cards) */}
+          {/* Row 3: Monthly Growth Review (Inquiries, CTR, Bookings) */}
           <div className="space-y-3.5 pt-2">
             <h2 className="text-[16px] sm:text-[17px] font-bold text-[#183B2B] tracking-tight">
-              January report review
+              Monthly Growth &amp; Attribution Review
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {/* Sparkline 1: Website visits */}
+              {/* Sparkline 1: Total Patient Inquiries */}
               <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] font-semibold text-gray-700">Website visits</span>
+                  <span className="text-[13px] font-semibold text-gray-700">Patient Inquiries</span>
                   <ExternalLink className="w-4 h-4 text-gray-400 hover:text-gray-700 cursor-pointer" />
                 </div>
                 <div className="mt-2.5">
-                  <span className="text-3xl font-extrabold text-[#183B2B] tracking-tight">198</span>
+                  <span className="text-3xl font-extrabold text-[#183B2B] tracking-tight">1,498</span>
                   <div className="flex items-center gap-1.5 text-[11.5px] text-[#34A853] font-semibold mt-0.5">
-                    <span>2.6 more than usual</span>
+                    <span>+24% higher vs benchmark</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
@@ -700,7 +731,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     <line x1="0" y1="20" x2="240" y2="20" stroke="#E5E7EB" strokeDasharray="3 3" />
                     <line x1="0" y1="45" x2="240" y2="45" stroke="#E5E7EB" strokeDasharray="3 3" />
                     <line x1="0" y1="70" x2="240" y2="70" stroke="#E5E7EB" strokeDasharray="3 3" />
-                    {/* Area gradient */}
                     <defs>
                       <linearGradient id="gradVisits" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#183B2B" stopOpacity="0.2" />
@@ -720,22 +750,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     />
                   </svg>
                   <div className="flex items-center justify-between text-[10px] text-gray-400 font-medium pt-1">
-                    <span>Jan 25</span>
-                    <span>Feb 25</span>
+                    <span>Week 1</span>
+                    <span>Week 4</span>
                   </div>
                 </div>
               </div>
 
-              {/* Sparkline 2: Returning visits */}
+              {/* Sparkline 2: Click-to-Call Conversion Rate */}
               <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] font-semibold text-gray-700">Returning visits</span>
+                  <span className="text-[13px] font-semibold text-gray-700">Phone Conversion Rate</span>
                   <ExternalLink className="w-4 h-4 text-gray-400 hover:text-gray-700 cursor-pointer" />
                 </div>
                 <div className="mt-2.5">
-                  <span className="text-3xl font-extrabold text-[#183B2B] tracking-tight">46</span>
+                  <span className="text-3xl font-extrabold text-[#183B2B] tracking-tight">14.6%</span>
                   <div className="flex items-center gap-1.5 text-[11.5px] text-[#34A853] font-semibold mt-0.5">
-                    <span>1.4 more than usual</span>
+                    <span>+3.2% mobile CTR lift</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
@@ -765,22 +795,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     />
                   </svg>
                   <div className="flex items-center justify-between text-[10px] text-gray-400 font-medium pt-1">
-                    <span>Jan 25</span>
-                    <span>Feb 25</span>
+                    <span>Week 1</span>
+                    <span>Week 4</span>
                   </div>
                 </div>
               </div>
 
-              {/* Sparkline 3: Special visitors */}
+              {/* Sparkline 3: Booked Consultations */}
               <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] font-semibold text-gray-700">Special visitors</span>
+                  <span className="text-[13px] font-semibold text-gray-700">Booked Consultations</span>
                   <ExternalLink className="w-4 h-4 text-gray-400 hover:text-gray-700 cursor-pointer" />
                 </div>
                 <div className="mt-2.5">
-                  <span className="text-3xl font-extrabold text-[#183B2B] tracking-tight">14</span>
+                  <span className="text-3xl font-extrabold text-[#183B2B] tracking-tight">412</span>
                   <div className="flex items-center gap-1.5 text-[11.5px] text-[#34A853] font-semibold mt-0.5">
-                    <span>1.2 more than usual</span>
+                    <span>+18% qualified patients</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
@@ -800,26 +830,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     />
                   </svg>
                   <div className="flex items-center justify-between text-[10px] text-gray-400 font-medium pt-1">
-                    <span>Jan 25</span>
-                    <span>Feb 25</span>
+                    <span>Week 1</span>
+                    <span>Week 4</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Row 4: Track due billings (Upcoming Payments Table) */}
+          {/* Row 4: Track Client Retainers & Ad Spend (Upcoming Billings Table) */}
           <div className="space-y-3.5 pt-2">
             <h2 className="text-[16px] sm:text-[17px] font-bold text-[#183B2B] tracking-tight">
-              Track due billings
+              Track Clinic Retainers &amp; Managed Ad Spend
             </h2>
 
             <div className="bg-white border border-gray-200/70 rounded-2xl p-5 sm:p-6 shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-[14px] font-bold text-gray-800">Upcoming payments</h3>
+                  <h3 className="text-[14px] font-bold text-gray-800">Clinic Client Invoices</h3>
                   <span className="text-[11px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                    {filteredBillings.length} records
+                    {filteredBillings.length} partner clinics
                   </span>
                 </div>
 
@@ -849,44 +879,48 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-gray-100 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                      <th className="py-3 px-3">Student ID</th>
-                      <th className="py-3 px-3">Class</th>
-                      <th className="py-3 px-3">Student name</th>
-                      <th className="py-3 px-3">Tutor name</th>
-                      <th className="py-3 px-3">Start date</th>
-                      <th className="py-3 px-3">Fee</th>
-                      <th className="py-3 px-3">Due</th>
-                      <th className="py-3 px-3 text-right">Status</th>
+                      <th className="py-3 px-3">Clinic ID</th>
+                      <th className="py-3 px-3">Plan Tier</th>
+                      <th className="py-3 px-3">Clinic Name</th>
+                      <th className="py-3 px-3">Core Deliverables</th>
+                      <th className="py-3 px-3">Billing Cycle</th>
+                      <th className="py-3 px-3">Ad Spend</th>
+                      <th className="py-3 px-3">Retainer Fee</th>
+                      <th className="py-3 px-3 text-right">Invoice Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50 text-[12.5px]">
                     {filteredBillings.map((b) => (
-                      <tr key={b.studentId} className="hover:bg-gray-50/70 transition-colors group">
+                      <tr key={b.clinicId} className="hover:bg-gray-50/70 transition-colors group">
                         <td className="py-3 px-3 font-bold text-gray-900">
-                          {b.studentId}
+                          {b.clinicId}
                         </td>
                         <td className="py-3 px-3 font-medium text-gray-600">
-                          {b.classCode}
+                          <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                            b.tier === 'Scale' ? 'bg-[#183B2B] text-white' : b.tier === 'Growth' ? 'bg-[#EBF3E4] text-[#183B2B]' : 'bg-gray-100 text-gray-700'
+                          }`}>
+                            {b.tier}
+                          </span>
                         </td>
                         <td className="py-3 px-3 font-semibold text-gray-800">
-                          {b.studentName}
+                          {b.clinicName}
                         </td>
                         <td className="py-3 px-3 text-gray-600">
-                          {b.tutorName}
+                          {b.leadService}
                         </td>
                         <td className="py-3 px-3 text-gray-500">
-                          {b.startDate}
+                          {b.billingDate}
                         </td>
                         <td className="py-3 px-3 font-medium text-gray-700">
-                          {b.fee}
+                          {b.adSpend}
                         </td>
                         <td className="py-3 px-3 font-bold text-gray-900">
-                          {b.due}
+                          {b.retainerFee}
                         </td>
                         <td className="py-3 px-3 text-right">
                           <button
                             type="button"
-                            onClick={() => toggleBillingStatus(b.studentId)}
+                            onClick={() => toggleBillingStatus(b.clinicId)}
                             className={`inline-flex items-center px-3 py-1 rounded-full text-[11.5px] font-bold transition-all shadow-2xs cursor-pointer ${
                               b.status === 'Received'
                                 ? 'bg-[#3D6947] text-white hover:bg-[#32573a]'
@@ -907,22 +941,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
         </main>
       </div>
 
-      {/* Mini Chat Modal when clicking tutor chat */}
-      {activeChatTutor && (
+      {/* Mini Chat Modal with Partner Clinic */}
+      {activeChatClinic && (
         <div className="fixed bottom-4 right-4 z-50 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col">
           <div className="bg-[#183B2B] text-white p-3.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className={`w-7 h-7 rounded-full ${activeChatTutor.avatarBg} flex items-center justify-center text-xs font-bold`}>
-                {activeChatTutor.initials}
+              <div className={`w-7 h-7 rounded-full ${activeChatClinic.avatarBg} flex items-center justify-center text-xs font-bold`}>
+                {activeChatClinic.initials}
               </div>
-              <div>
-                <p className="text-xs font-bold leading-tight">{activeChatTutor.name}</p>
-                <p className="text-[10px] text-white/70">{activeChatTutor.role} · Active now</p>
+              <div className="min-w-0">
+                <p className="text-xs font-bold leading-tight truncate">{activeChatClinic.name}</p>
+                <p className="text-[10px] text-white/70">{activeChatClinic.contactPerson} · Online</p>
               </div>
             </div>
             <button
               type="button"
-              onClick={() => setActiveChatTutor(null)}
+              onClick={() => setActiveChatClinic(null)}
               className="text-white/70 hover:text-white"
             >
               <X className="w-4 h-4" />
@@ -930,7 +964,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
           </div>
           <div className="p-4 h-48 overflow-y-auto bg-gray-50 text-xs space-y-2">
             <div className="bg-white p-2.5 rounded-xl border border-gray-100 shadow-2xs max-w-[85%] text-gray-700">
-              Hello Adam! I have finished updating the coursework materials for today&apos;s session.
+              Hello Usman! Our reception team saw an increase of 14 patient calls from the new Google Search landing page today.
             </div>
           </div>
           <form
@@ -945,7 +979,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
               type="text"
               value={chatMessage}
               onChange={(e) => setChatMessage(e.target.value)}
-              placeholder="Write a message..."
+              placeholder="Reply to clinic..."
               className="flex-1 text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#183B2B]"
             />
             <button
@@ -958,22 +992,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
         </div>
       )}
 
-      {/* Mini Call Modal when clicking tutor call */}
-      {activeCallTutor && (
+      {/* Mini Call Modal with Partner Clinic */}
+      {activeCallClinic && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
           <div className="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl border border-gray-200 space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            <div className={`w-20 h-20 rounded-full ${activeCallTutor.avatarBg} text-white mx-auto flex items-center justify-center text-2xl font-bold shadow-lg ring-8 ring-green-50`}>
-              {activeCallTutor.initials}
+            <div className={`w-20 h-20 rounded-full ${activeCallClinic.avatarBg} text-white mx-auto flex items-center justify-center text-2xl font-bold shadow-lg ring-8 ring-green-50`}>
+              {activeCallClinic.initials}
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-800">{activeCallTutor.name}</h3>
-              <p className="text-xs text-gray-500 mt-1">{activeCallTutor.role} · Direct Voice Channel</p>
-              <p className="text-xs text-[#34A853] font-semibold mt-2 animate-pulse">Calling...</p>
+              <h3 className="text-lg font-bold text-gray-800">{activeCallClinic.name}</h3>
+              <p className="text-xs text-gray-500 mt-1">{activeCallClinic.contactPerson} · Campaign Review Line</p>
+              <p className="text-xs text-[#34A853] font-semibold mt-2 animate-pulse">Connecting to Clinic Director...</p>
             </div>
             <div className="flex items-center justify-center gap-4 pt-2">
               <button
                 type="button"
-                onClick={() => setActiveCallTutor(null)}
+                onClick={() => setActiveCallClinic(null)}
                 className="px-6 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md transition-colors cursor-pointer"
               >
                 End Call
