@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, CheckCircle2, Info, Phone, Mail } from 'lucide-react';
 import { SITE_CONFIG } from '../data/siteContent';
+import { addInquiry } from '../data/inquiriesStore';
 
 interface InquiryModalProps {
   isOpen: boolean;
@@ -40,6 +41,14 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    addInquiry({
+      name,
+      email,
+      clinicName: clinicName || 'Clinic Practice',
+      website: website || undefined,
+      service,
+      source: 'modal',
+    });
     setSubmittedDemo(true);
   };
 
@@ -241,15 +250,13 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
               <CheckCircle2 className="w-6 h-6 text-[#99BC44]" />
             </div>
 
-            <h3 className="text-[20px] font-extrabold text-[#183B2B] mb-2">
-              Demo Preview Ready (Not Automatically Sent)
+            <h3 className="text-[20px] font-extrabold text-[#183B2B] mb-1">
+              Inquiry Submitted &amp; Synced to Admin Portal!
             </h3>
             <p className="text-[13px] text-[#59665D] leading-relaxed mb-4">
-              Because no automated form webhook is configured yet, your inquiry
-              has been formatted below. You can send it directly via your email
-              client to{' '}
-              <strong className="text-[#183B2B]">{SITE_CONFIG.contact.email}</strong>{' '}
-              or call <strong className="text-[#183B2B]">{SITE_CONFIG.contact.phoneDisplay}</strong>.
+              Your inquiry has been successfully captured and registered in the{' '}
+              <strong className="text-[#183B2B]">ClinicsAds Admin Portal</strong>. You can also send a direct copy to{' '}
+              <strong className="text-[#183B2B]">{SITE_CONFIG.contact.email}</strong>.
             </p>
 
             <div className="rounded-xl bg-[#F3F8E9] p-4 space-y-2 text-[13px] text-[#183B2B] mb-6 border border-[#DFECC8]">
@@ -275,23 +282,26 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
             <div className="flex flex-wrap items-center justify-end gap-3">
               <button
                 type="button"
-                onClick={() => setSubmittedDemo(false)}
-                className="px-4 py-2.5 rounded-full border border-[#C7DCA5] text-[#183B2B] text-[12.5px] font-semibold hover:bg-[#F3F8E9] cursor-pointer"
+                onClick={() => {
+                  handleResetAndClose();
+                  window.location.hash = 'admin';
+                }}
+                className="px-4 py-2.5 rounded-full bg-[#183B2B] text-white text-[12.5px] font-bold hover:bg-[#23503b] transition-colors cursor-pointer shadow-xs"
               >
-                Edit Details
+                View in Admin Portal →
               </button>
               <a
                 href={composedMailtoUrl}
-                className="px-5 py-2.5 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] shadow-[0_4px_14px_rgba(249,115,22,0.3)] transition-colors"
+                className="px-4 py-2.5 rounded-full border border-[#C7DCA5] text-[#183B2B] text-[12.5px] font-bold hover:bg-[#F3F8E9] transition-colors"
               >
-                Open in Email ({SITE_CONFIG.contact.email})
+                Open in Email
               </a>
               <button
                 type="button"
                 onClick={handleResetAndClose}
-                className="px-5 py-2.5 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] cursor-pointer"
+                className="px-4 py-2.5 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] cursor-pointer"
               >
-                Close
+                Done
               </button>
             </div>
           </div>

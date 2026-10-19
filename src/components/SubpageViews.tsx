@@ -29,6 +29,7 @@ import {
   Bot,
   TrendingUp,
 } from 'lucide-react';
+import { addInquiry } from '../data/inquiriesStore';
 import {
   ADDITIONAL_SOLUTIONS_CONTENT,
   PageRoute,
@@ -912,6 +913,15 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
+                        addInquiry({
+                          name,
+                          email,
+                          clinicName: clinicName || 'Clinic Practice',
+                          website: website || undefined,
+                          service,
+                          message: notes || undefined,
+                          source: 'contact-page',
+                        });
                         setContactSubmitted(true);
                       }}
                       className="space-y-4"
@@ -1046,11 +1056,11 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                       <CheckCircle2 className="w-6 h-6 text-[#99BC44]" />
                     </div>
                     <h3 className="text-[22px] font-extrabold text-[#183B2B] mb-2">
-                      Consultation Summary Ready (Demo Mode)
+                      Inquiry Submitted &amp; Synced to Admin Portal!
                     </h3>
                     <p className="text-[14px] text-[#59665D] mb-5">
-                      Your inquiry details are ready below. Click{' '}
-                      <strong>Open in Email</strong> to send directly to{' '}
+                      Your consultation inquiry has been captured and registered in the{' '}
+                      <strong className="text-[#183B2B]">ClinicsAds Admin Portal</strong>. You can also send a direct copy to{' '}
                       <span className="font-semibold text-[#183B2B]">
                         {SITE_CONFIG.contact.email}
                       </span>
@@ -1081,18 +1091,28 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                       )}
                     </div>
                     <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setContactSubmitted(false);
+                          onNavigate('admin');
+                        }}
+                        className="px-6 py-2.5 rounded-full bg-[#183B2B] text-white text-[13px] font-bold hover:bg-[#23503b] transition-colors cursor-pointer shadow-xs"
+                      >
+                        View in Admin Portal →
+                      </button>
                       <a
                         href={composedMailtoUrl}
-                        className="px-6 py-2.5 rounded-full bg-[#F97316] text-white text-[13px] font-bold hover:bg-[#EA580C] shadow-[0_4px_14px_rgba(249,115,22,0.3)] transition-colors"
+                        className="px-6 py-2.5 rounded-full border border-[#C7DCA5] text-[#183B2B] text-[13px] font-bold hover:bg-[#F3F8E9] transition-colors"
                       >
                         Open in Email ({SITE_CONFIG.contact.email})
                       </a>
                       <button
                         type="button"
                         onClick={() => setContactSubmitted(false)}
-                        className="px-5 py-2.5 rounded-full border border-[#C7DCA5] text-[#183B2B] text-[13px] font-semibold hover:bg-[#F3F8E9] cursor-pointer"
+                        className="px-5 py-2.5 rounded-full bg-[#F97316] text-white text-[13px] font-bold hover:bg-[#EA580C] cursor-pointer"
                       >
-                        Edit Details
+                        New Inquiry
                       </button>
                     </div>
                   </div>

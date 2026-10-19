@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
             type="button"
             onClick={() => handleRouteSelect('admin')}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-[#183B2B]/20 text-[#183B2B] text-[13px] font-bold hover:bg-[#183B2B] hover:text-white transition-all whitespace-nowrap shrink-0 cursor-pointer shadow-2xs"
-            title="Open SkillSphere Academy Admin Panel"
+            title="Open ClinicsAds Admin Panel"
           >
             <LayoutDashboard className="w-3.5 h-3.5" />
             <span>Admin Panel</span>
