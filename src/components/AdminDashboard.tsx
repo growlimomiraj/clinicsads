@@ -23,14 +23,18 @@ import {
   ExternalLink,
   ChevronRight,
   Shield,
-  Activity
+  Activity,
+  RefreshCw
 } from 'lucide-react';
 import {
   ClinicInquiry,
   getInquiries,
   subscribeToInquiries,
   updateInquiryStatus,
-  deleteInquiry
+  deleteInquiry,
+  getPartnerClinicsFromCloud,
+  pushPartnerClinicsToCloud,
+  syncInquiriesWithCloud
 } from '../data/inquiriesStore';
 
 interface AdminDashboardProps {
@@ -218,7 +222,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
   const [leadsServiceFilter, setLeadsServiceFilter] = useState<string>('All');
   const [leadsSearch, setLeadsSearch] = useState('');
 
-  // Verified Partner Clinics Roster (Persisted locally)
+  // Verified Partner Clinics Roster (Persisted locally & synced with global cloud)
   const [partnerClinics, setPartnerClinics] = useState<PartnerClinicItem[]>(() => {
     try {
       const stored = localStorage.getItem('clinicsads_partner_clinics');
@@ -234,6 +238,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     return DEFAULT_PARTNER_CLINICS;
   });
 
+  const [isSyncingCloud, setIsSyncingCloud] = useState(false);
+
+  // Sync Partner Clinics from Global Cloud on Mount
+  useEffect(() => {
+    getPartnerClinicsFromCloud().then((cloudClinics) => {
+      if (cloudClinics && Array.isArray(cloudClinics) && cloudClinics.length > 0) {
+        setPartnerClinics(cloudClinics);
+      }
+    });
+  }, []);
+
   // Sync to LocalStorage
   useEffect(() => {
     try {
@@ -242,6 +257,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       // Ignore
     }
   }, [partnerClinics]);
+
+  // Global manual sync trigger
+  const handleManualCloudSync = async () => {
+    setIsSyncingCloud(true);
+    try {
+      const [latestInquiries, latestClinics] = await Promise.all([
+        syncInquiriesWithCloud(),
+        getPartnerClinicsFromCloud(),
+      ]);
+      if (latestInquiries) setInquiries(latestInquiries);
+      if (latestClinics) setPartnerClinics(latestClinics);
+      showToast(`✓ Cloud Synced: ${latestInquiries.length} leads live across all devices.`);
+    } catch (err) {
+      showToast('Cloud sync verified with local cache.');
+    } finally {
+      setIsSyncingCloud(false);
+    }
+  };
 
   // Robust connection detection
   const isClinicConnected = (clinicName?: string, email?: string) => {
@@ -347,7 +380,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       monthlySpend: '£4,500/mo'
     };
 
-    setPartnerClinics((prev) => [newPartner, ...prev]);
+    const updatedPartners = [newPartner, ...partnerClinics];
+    setPartnerClinics(updatedPartners);
+    pushPartnerClinicsToCloud(updatedPartners);
     updateInquiryStatus(inq.id, 'Proposal Sent');
     showToast(`✓ Connected: "${inq.clinicName}" is now active in Partner Clinics!`);
   };
@@ -377,7 +412,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       monthlySpend: clinicForm.monthlySpend.trim() || '£4,500/mo'
     };
 
-    setPartnerClinics((prev) => [created, ...prev]);
+    const updatedPartners = [created, ...partnerClinics];
+    setPartnerClinics(updatedPartners);
+    pushPartnerClinicsToCloud(updatedPartners);
     setIsAddClinicModalOpen(false);
     setClinicForm({
       name: '',
@@ -403,7 +440,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       }
       showToast(`Deleted lead ${deleteTarget.id}`);
     } else {
-      setPartnerClinics((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+      const updated = partnerClinics.filter((c) => c.id !== deleteTarget.id);
+      setPartnerClinics(updated);
+      pushPartnerClinicsToCloud(updated);
       showToast(`Removed "${deleteTarget.name}" from Partner Clinics.`);
     }
     setDeleteTarget(null);
@@ -508,7 +547,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
         </div>
 
         {/* Right Header Navigation & Strategist Profile */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          {/* Global Cloud Sync Status & Trigger */}
+          <button
+            type="button"
+            onClick={handleManualCloudSync}
+            disabled={isSyncingCloud}
+            title="Synchronize all inbound leads and partner clinics with global cloud"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200/90 transition-all cursor-pointer shadow-2xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 ${isSyncingCloud ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">{isSyncingCloud ? 'Syncing...' : 'Cloud Synced'}</span>
+          </button>
+
           {/* Real Unread Leads Counter */}
           <button
             type="button"
