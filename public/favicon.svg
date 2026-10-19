@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Rounded squircle background for high-contrast visibility on both dark and light browser tabs -->
+  <rect width="64" height="64" rx="18" fill="#99BC44"/>
+  
+  <!-- Subtle inner depth border -->
+  <rect x="2" y="2" width="60" height="60" rx="16" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.35"/>
+  
+  <!-- The signature ClinicsAds healthcare crescent emblem -->
+  <g transform="translate(6, 6) scale(2.166667)">
+    <path
+      d="M15.5 7.5C14.3 6.3 12.5 5.8 10.6 6.2C7.8 6.8 5.8 9.4 6 12.3C6.2 15.4 8.8 17.8 12 17.8C13.8 17.8 15.4 17 16.5 15.7"
+      stroke="#FFFFFF"
+      stroke-width="2.8"
+      stroke-linecap="round"
+    />
+    <!-- Center focal node with vibrant orange core -->
+    <circle cx="14.5" cy="12" r="2.2" fill="#F97316" stroke="#FFFFFF" stroke-width="0.6"/>
+  </g>
+</svg>
