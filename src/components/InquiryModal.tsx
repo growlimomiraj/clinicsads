@@ -297,7 +297,8 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
               Strategy Call Booked!
             </h3>
             <p className="text-[13.5px] text-[#59665D] leading-relaxed mb-4">
-              Your strategy call inquiry has been received. Usman and the healthcare marketing team will review your clinic's objectives and reach out for the consultation.
+              Your call inquiry has been routed directly to the{' '}
+              <strong className="text-[#183B2B]">ClinicsAds Admin Panel</strong>. Usman and the healthcare marketing team will review your clinic's objectives and reach out for the strategy consultation.
             </p>
 
             <div className="rounded-xl bg-[#F3F8E9] p-4 space-y-2 text-[13px] text-[#183B2B] mb-6 border border-[#DFECC8]">
@@ -333,11 +334,22 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
               )}
             </div>
 
-            <div className="flex items-center justify-end">
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  handleResetAndClose();
+                  window.location.hash = 'admin';
+                }}
+                className="px-5 py-2.5 rounded-full bg-[#183B2B] text-white text-[12.5px] font-bold hover:bg-[#23503b] transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
+              >
+                <span>View in Admin Portal</span>
+                <span>→</span>
+              </button>
               <button
                 type="button"
                 onClick={handleResetAndClose}
-                className="w-full sm:w-auto px-8 py-2.5 rounded-full bg-[#F97316] text-white text-[13px] font-bold hover:bg-[#EA580C] cursor-pointer shadow-sm transition-colors text-center"
+                className="px-5 py-2.5 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] cursor-pointer"
               >
                 Done
               </button>

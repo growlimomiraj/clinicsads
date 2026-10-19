@@ -300,6 +300,15 @@ export const Footer: React.FC<FooterProps> = ({
             </a>
             .
           </p>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => handleRouteClick('admin')}
+              className="hover:text-white transition-colors cursor-pointer underline decoration-white/30 underline-offset-4"
+            >
+              Admin Portal
+            </button>
+          </div>
         </div>
       </div>
     </footer>
