@@ -10,6 +10,9 @@ import {
 const SEARCH_PHRASES = [
   'Best clinics near me',
   'Best hospital near me',
+  'authentic clinic near me',
+  'fast test lab near me',
+  'specialist doctor near me',
 ];
 
 const TYPING_SPEED_MS = 70;
@@ -177,7 +180,7 @@ export const AnimatedSearchSection: React.FC = () => {
 
         {/* Accessible screen reader announcement (hidden visually, static text) */}
         <div className="sr-only">
-          Example patient searches include "Best clinics near me" and "Best hospital near me". Will you show up? We help you get found in Google, Bing, ChatGPT, and more.
+          Example patient searches include "Best clinics near me", "Best hospital near me", "authentic clinic near me", "fast test lab near me", and "specialist doctor near me". Will you show up? We help you get found in Google, Bing, ChatGPT, and more.
         </div>
 
         {/* 2. Prominent Search Bar with Animated Text */}
