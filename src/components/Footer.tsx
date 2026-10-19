@@ -1,9 +1,8 @@
 import React from 'react';
-import { Calendar, Mail, Phone, MapPin, ExternalLink, Camera, Instagram } from 'lucide-react';
+import { Calendar, Mail, Phone, MapPin, ExternalLink, Instagram } from 'lucide-react';
 import {
   ADDITIONAL_SOLUTIONS_CONTENT,
   NAV_ITEMS,
-  PHOTO_ASSETS,
   PageRoute,
   SERVICES_CONTENT,
   SITE_CONFIG,
@@ -17,18 +16,12 @@ interface FooterProps {
   onOpenInquiry: (defaultService?: string) => void;
   onSelectService: (service: ServiceCardData) => void;
   onSelectSolution: (solution: SolutionCardData) => void;
-  onOpenPhotoNotes: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onNavigate,
   onOpenInquiry,
-  onOpenPhotoNotes,
 }) => {
-  const substituteCount = Object.values(PHOTO_ASSETS).filter(
-    (p) => p.isSubstitute
-  ).length;
-
   const handleRouteClick = (route: PageRoute) => {
     onNavigate(route);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -284,7 +277,7 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
         </div>
 
-        {/* Bottom Copyright & Photography Substitute Attribution Note */}
+        {/* Bottom Copyright Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[12px] text-white/55">
           <p>
             © {new Date().getFullYear()} ClinicsAds ({SITE_CONFIG.domain}) · Powered by{' '}
@@ -307,17 +300,6 @@ export const Footer: React.FC<FooterProps> = ({
             </a>
             .
           </p>
-
-          {substituteCount > 0 && (
-            <button
-              type="button"
-              onClick={onOpenPhotoNotes}
-              className="inline-flex items-center gap-1.5 text-white/65 hover:text-[#99BC44] transition-colors cursor-pointer underline underline-offset-4"
-            >
-              <Camera className="w-3.5 h-3.5" />
-              <span>Photography Substitute Notes ({substituteCount} portraits)</span>
-            </button>
-          )}
         </div>
       </div>
     </footer>

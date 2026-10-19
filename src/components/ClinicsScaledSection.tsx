@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 
 export interface ScaledClinic {
   name: string;
@@ -54,10 +54,6 @@ export const SCALED_CLINICS: ScaledClinic[] = [
 
 export const ClinicsScaledSection: React.FC = () => {
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const firstGroupRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef(false);
-  const startPosRef = useRef({ x: 0, y: 0 });
 
   const handleImageError = (clinicName: string) => {
     setFailedImages((prev) => {
@@ -65,161 +61,6 @@ export const ClinicsScaledSection: React.FC = () => {
       return { ...prev, [clinicName]: true };
     });
   };
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    isDraggingRef.current = false;
-    startPosRef.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    const dx = Math.abs(e.clientX - startPosRef.current.x);
-    const dy = Math.abs(e.clientY - startPosRef.current.y);
-    if (dx > 6 || dy > 6) {
-      isDraggingRef.current = true;
-    }
-  };
-
-  const handleLinkClick = (e: React.MouseEvent) => {
-    if (isDraggingRef.current) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  };
-
-  useEffect(() => {
-    const el = viewportRef.current;
-    const firstGroup = firstGroupRef.current;
-    if (!el || !firstGroup) return;
-
-    let isInteracting = false;
-    let resumeTimeout: number | null = null;
-    let animationFrameId: number;
-    let lastTime = performance.now();
-    const speed = 32; // px per second
-
-    let setWidth = firstGroup.offsetWidth;
-    const updateSetWidth = () => {
-      if (firstGroup) {
-        setWidth = firstGroup.offsetWidth;
-      }
-    };
-
-    const resizeObserver = new ResizeObserver(updateSetWidth);
-    resizeObserver.observe(firstGroup);
-
-    // Initialize to the start of the second group for seamless bidirectional scrolling
-    if (setWidth > 0) {
-      el.scrollLeft = setWidth;
-    }
-
-    // Touch interaction handlers for mobile
-    const onTouchStart = () => {
-      isInteracting = true;
-      if (resumeTimeout) window.clearTimeout(resumeTimeout);
-    };
-
-    const onTouchEnd = () => {
-      if (resumeTimeout) window.clearTimeout(resumeTimeout);
-      // Resume auto-scroll after finger swipe momentum settles
-      resumeTimeout = window.setTimeout(() => {
-        isInteracting = false;
-        lastTime = performance.now();
-      }, 1200);
-    };
-
-    // Desktop hover handlers
-    const onMouseEnter = () => {
-      isInteracting = true;
-      if (resumeTimeout) window.clearTimeout(resumeTimeout);
-    };
-
-    const onMouseLeave = () => {
-      if (resumeTimeout) window.clearTimeout(resumeTimeout);
-      resumeTimeout = window.setTimeout(() => {
-        isInteracting = false;
-        lastTime = performance.now();
-      }, 600);
-    };
-
-    // Desktop mouse drag handlers
-    let isMouseDown = false;
-    let mouseStartX = 0;
-    let mouseStartScroll = 0;
-
-    const onMouseDown = (e: MouseEvent) => {
-      if (e.button !== 0) return;
-      isMouseDown = true;
-      isInteracting = true;
-      mouseStartX = e.pageX;
-      mouseStartScroll = el.scrollLeft;
-      if (resumeTimeout) window.clearTimeout(resumeTimeout);
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isMouseDown) return;
-      const dx = e.pageX - mouseStartX;
-      el.scrollLeft = mouseStartScroll - dx;
-    };
-
-    const onMouseUp = () => {
-      if (!isMouseDown) return;
-      isMouseDown = false;
-      if (resumeTimeout) window.clearTimeout(resumeTimeout);
-      resumeTimeout = window.setTimeout(() => {
-        isInteracting = false;
-        lastTime = performance.now();
-      }, 1000);
-    };
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // Continuous Animation Loop
-    const step = (now: number) => {
-      const dt = (now - lastTime) / 1000;
-      lastTime = now;
-      const safeDt = Math.min(dt, 0.1);
-
-      if (!prefersReducedMotion && !isInteracting && el && setWidth > 0) {
-        el.scrollLeft += speed * safeDt;
-      }
-
-      // Seamless bidirectional infinite wrap
-      if (el && setWidth > 0) {
-        if (el.scrollLeft >= setWidth * 2) {
-          el.scrollLeft -= setWidth;
-        } else if (el.scrollLeft <= 10) {
-          el.scrollLeft += setWidth;
-        }
-      }
-
-      animationFrameId = requestAnimationFrame(step);
-    };
-
-    animationFrameId = requestAnimationFrame(step);
-
-    el.addEventListener('touchstart', onTouchStart, { passive: true });
-    el.addEventListener('touchend', onTouchEnd, { passive: true });
-    el.addEventListener('touchcancel', onTouchEnd, { passive: true });
-    el.addEventListener('mouseenter', onMouseEnter);
-    el.addEventListener('mouseleave', onMouseLeave);
-    el.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      if (resumeTimeout) window.clearTimeout(resumeTimeout);
-      resizeObserver.disconnect();
-      el.removeEventListener('touchstart', onTouchStart);
-      el.removeEventListener('touchend', onTouchEnd);
-      el.removeEventListener('touchcancel', onTouchEnd);
-      el.removeEventListener('mouseenter', onMouseEnter);
-      el.removeEventListener('mouseleave', onMouseLeave);
-      el.removeEventListener('mousedown', onMouseDown);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-    };
-  }, []);
 
   const renderClinicItem = (clinic: ScaledClinic, key: string, isDuplicate = false) => {
     const hasLogo = Boolean(
@@ -234,22 +75,21 @@ export const ClinicsScaledSection: React.FC = () => {
         href={clinic.website}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={handleLinkClick}
         aria-hidden={isDuplicate ? 'true' : undefined}
         tabIndex={isDuplicate ? -1 : 0}
-        className="group shrink-0 flex items-center justify-center h-[46px] sm:h-[50px] px-2.5 py-1 rounded-lg transition-all duration-200 outline-none hover:bg-[#F3F8E9]/60 focus-visible:ring-2 focus-visible:ring-[#99BC44] cursor-pointer"
+        className="group shrink-0 flex items-center justify-center h-[52px] sm:h-[60px] px-4 py-1.5 rounded-xl transition-all duration-200 outline-none hover:bg-[#F3F8E9]/70 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-[#99BC44] cursor-pointer"
         title={`Visit ${clinic.name} website`}
       >
         {hasLogo ? (
           <img
             src={clinic.logoSrc}
             alt={isDuplicate ? '' : `${clinic.name} logo`}
-            className="max-h-[38px] sm:max-h-[44px] max-w-[125px] sm:max-w-[150px] w-auto h-auto object-contain transition-opacity duration-200 pointer-events-none select-none"
-            loading="lazy"
+            className="max-h-[38px] sm:max-h-[44px] max-w-[135px] sm:max-w-[165px] w-auto h-auto object-contain transition-opacity duration-200 pointer-events-none select-none"
+            loading="eager"
             onError={() => handleImageError(clinic.name)}
           />
         ) : (
-          <span className="text-center text-[13px] sm:text-[14px] font-semibold text-[#183B2B]/75 group-hover:text-[#183B2B] leading-tight tracking-tight whitespace-nowrap px-1 transition-colors select-none">
+          <span className="text-center text-[13px] sm:text-[14px] font-semibold text-[#183B2B]/80 group-hover:text-[#183B2B] leading-tight tracking-tight whitespace-nowrap px-2 transition-colors select-none">
             {clinic.name}
           </span>
         )}
@@ -264,39 +104,42 @@ export const ClinicsScaledSection: React.FC = () => {
       className="relative w-full bg-white py-10 sm:py-12 border-b border-[#183B2B]/6 overflow-hidden"
     >
       <style>{`
-        /* Smooth touch-enabled scrolling container */
-        .clinics-marquee-viewport {
-          overflow-x: auto;
-          overflow-y: hidden;
-          width: 100%;
-          user-select: none;
-          -webkit-user-select: none;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-          -webkit-overflow-scrolling: touch;
-          touch-action: pan-x pan-y;
-          cursor: grab;
+        @keyframes clinicsScrollContinuous {
+          0% {
+            transform: translate3d(0, 0, 0);
+          }
+          100% {
+            transform: translate3d(-50%, 0, 0);
+          }
         }
 
-        .clinics-marquee-viewport:active {
-          cursor: grabbing;
+        .clinics-marquee-track-continuous {
+          display: flex !important;
+          width: max-content !important;
+          animation: clinicsScrollContinuous 32s linear infinite !important;
+          will-change: transform;
         }
 
-        .clinics-marquee-viewport::-webkit-scrollbar {
-          display: none;
+        /* Ensure non-stop scrolling: never pause on hover or focus */
+        .clinics-marquee-track-continuous:hover,
+        .clinics-marquee-track-continuous:focus-within,
+        .clinics-marquee-track-continuous:active {
+          animation-play-state: running !important;
         }
 
-        .clinics-marquee-track {
-          display: flex;
-          width: max-content;
-        }
-
-        .clinics-marquee-group {
+        .clinics-marquee-set {
           display: flex;
           align-items: center;
-          gap: 1.25rem;
-          padding-right: 1.25rem;
+          gap: 2.5rem;
+          padding-right: 2.5rem;
           flex-shrink: 0;
+        }
+
+        @media (min-width: 640px) {
+          .clinics-marquee-set {
+            gap: 3.5rem;
+            padding-right: 3.5rem;
+          }
         }
       `}</style>
 
@@ -310,47 +153,46 @@ export const ClinicsScaledSection: React.FC = () => {
 
         {/* Logo Strip Container with Edge Fades */}
         <div className="relative w-full overflow-hidden">
-          {/* Subtle Left Edge Fade */}
+          {/* Left Edge Fade */}
           <div
-            className="pointer-events-none absolute left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-white via-white/80 to-transparent z-10"
+            className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-white via-white/85 to-transparent z-10"
             aria-hidden="true"
           />
 
-          {/* Subtle Right Edge Fade */}
+          {/* Right Edge Fade */}
           <div
-            className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-white via-white/80 to-transparent z-10"
+            className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-white via-white/85 to-transparent z-10"
             aria-hidden="true"
           />
 
-          {/* Marquee Viewport with Touch Dragging & Smooth Auto-Scroll */}
-          <div
-            ref={viewportRef}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            className="clinics-marquee-viewport py-2"
-          >
-            <div className="clinics-marquee-track">
-              {/* Group 1: Buffer for backward finger dragging */}
-              <div
-                ref={firstGroupRef}
-                className="clinics-marquee-group"
-              >
+          {/* Continuous Non-Stop Scrolling Marquee */}
+          <div className="w-full overflow-hidden py-2 select-none">
+            <div className="clinics-marquee-track-continuous">
+              {/* Set 1 */}
+              <div className="clinics-marquee-set">
                 {SCALED_CLINICS.map((clinic, idx) =>
-                  renderClinicItem(clinic, `g1-${idx}-${clinic.name}`, true)
+                  renderClinicItem(clinic, `set1-${idx}-${clinic.name}`, false)
                 )}
               </div>
 
-              {/* Group 2: Primary active group */}
-              <div className="clinics-marquee-group">
+              {/* Set 2 */}
+              <div className="clinics-marquee-set">
                 {SCALED_CLINICS.map((clinic, idx) =>
-                  renderClinicItem(clinic, `g2-${idx}-${clinic.name}`, false)
+                  renderClinicItem(clinic, `set2-${idx}-${clinic.name}`, true)
                 )}
               </div>
 
-              {/* Group 3: Forward loop group */}
-              <div className="clinics-marquee-group">
+              {/* Set 3 */}
+              <div className="clinics-marquee-set">
                 {SCALED_CLINICS.map((clinic, idx) =>
-                  renderClinicItem(clinic, `g3-${idx}-${clinic.name}`, true)
+                  renderClinicItem(clinic, `set3-${idx}-${clinic.name}`, true)
+                )}
+              </div>
+
+              {/* Set 4 */}
+              <div className="clinics-marquee-set">
+                {SCALED_CLINICS.map((clinic, idx) =>
+                  renderClinicItem(clinic, `set4-${idx}-${clinic.name}`, true)
                 )}
               </div>
             </div>

@@ -19,7 +19,6 @@ import { TestimonialsSection } from './components/TestimonialsSection';
 import { Footer } from './components/Footer';
 import { InquiryModal } from './components/InquiryModal';
 import { DetailPanelModal } from './components/DetailPanelModal';
-import { PhotoNotesModal } from './components/PhotoNotesModal';
 import { SubpageViews } from './components/SubpageViews';
 
 const VALID_ROUTES: PageRoute[] = [
@@ -54,7 +53,6 @@ export default function App() {
 
   const [selectedService, setSelectedService] = useState<ServiceCardData | null>(null);
   const [selectedSolution, setSelectedSolution] = useState<SolutionCardData | null>(null);
-  const [photoNotesOpen, setPhotoNotesOpen] = useState(false);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -155,7 +153,6 @@ export default function App() {
           setSelectedService(null);
           setSelectedSolution(solution);
         }}
-        onOpenPhotoNotes={() => setPhotoNotesOpen(true)}
       />
 
       {/* Accessible Inquiry Modal for "Book a Call" and "Contact Us" */}
@@ -174,12 +171,6 @@ export default function App() {
           setSelectedSolution(null);
         }}
         onBookService={(serviceTitle) => handleOpenInquiry(serviceTitle)}
-      />
-
-      {/* Photography Substitute Notes Modal */}
-      <PhotoNotesModal
-        isOpen={photoNotesOpen}
-        onClose={() => setPhotoNotesOpen(false)}
       />
     </div>
   );

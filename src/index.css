@@ -19,7 +19,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
+  *:not(.clinics-marquee-track):not(.clinics-marquee-track *),
   ::before,
   ::after {
     animation-duration: 0.01ms !important;
@@ -27,4 +27,20 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+@keyframes clinicsMarqueeScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.clinics-marquee-track {
+  display: flex !important;
+  width: max-content !important;
+  animation: clinicsMarqueeScroll 32s linear infinite !important;
+  will-change: transform;
 }
