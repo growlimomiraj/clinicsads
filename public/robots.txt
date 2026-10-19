@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /favicon*
+Allow: /logo*
+Allow: /apple-touch-icon.png
+Allow: /android-chrome*
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+Sitemap: https://clinicsads.com/sitemap.xml
