@@ -11,6 +11,7 @@ import {
 } from './data/siteContent';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
+import { AnimatedSearchSection } from './components/AnimatedSearchSection';
 import { ClinicsScaledSection } from './components/ClinicsScaledSection';
 import { ServicesSection } from './components/ServicesSection';
 import { WhyChooseSection } from './components/WhyChooseSection';
@@ -114,6 +115,9 @@ export default function App() {
       <main className="flex-1">
         {currentPage === 'home' ? (
           <>
+            {/* Animated Search Section ("Someone Near You Just Searched:") */}
+            <AnimatedSearchSection />
+
             {/* Clinics We've Scaled */}
             <ClinicsScaledSection />
 
