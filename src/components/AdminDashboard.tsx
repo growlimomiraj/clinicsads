@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   LayoutDashboard,
-  Target,
   Building2,
   Users,
   TrendingUp,
@@ -12,30 +11,19 @@ import {
   Mail,
   Trash2,
   CheckCircle2,
-  Clock,
-  ArrowUpRight,
   Download,
   Copy,
   Check,
-  Calendar,
   DollarSign,
-  Activity,
-  Filter,
-  Briefcase,
-  Shield,
   X,
-  Plus,
-  ChevronRight,
-  Sparkles,
-  AlertCircle
+  Plus
 } from 'lucide-react';
 import {
   ClinicInquiry,
   getInquiries,
   subscribeToInquiries,
   updateInquiryStatus,
-  deleteInquiry,
-  addInquiry
+  deleteInquiry
 } from '../data/inquiriesStore';
 
 interface AdminDashboardProps {
@@ -58,21 +46,9 @@ export interface PartnerClinicItem {
   monthlySpend: string;
 }
 
-export interface CampaignItem {
-  id: string;
-  name: string;
-  clinic: string;
-  network: 'Google Search' | 'Meta Ads' | 'Google PMax' | 'ChatGPT / AI Search' | 'Local Maps 3-Pack';
-  monthlyBudget: number;
-  inquiriesDelivered: number;
-  cpl: number; // Cost Per Patient Inquiry
-  roas: string;
-  status: 'Active' | 'Scaling' | 'Paused';
-}
-
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
-  // Navigation State
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'leads' | 'clinics' | 'campaigns' | 'calculator'>('dashboard');
+  // Navigation State (Clean 4 Core Tabs - Live Campaigns Removed)
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'leads' | 'clinics' | 'calculator'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedLeadId, setCopiedLeadId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -241,75 +217,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     status: 'Onboarding' as 'Active' | 'Scaling' | 'Onboarding'
   });
 
-  // Active Performance Campaigns
-  const [campaigns, setCampaigns] = useState<CampaignItem[]>([
-    {
-      id: 'CMP-801',
-      name: 'Emergency Medical & Doctor On-Call',
-      clinic: 'First Response Healthcare',
-      network: 'Google Search',
-      monthlyBudget: 8500,
-      inquiriesDelivered: 312,
-      cpl: 27.24,
-      roas: '5.8x',
-      status: 'Scaling'
-    },
-    {
-      id: 'CMP-802',
-      name: 'Private Walk-In Blood & Diagnostic Tests',
-      clinic: 'GetChecked',
-      network: 'Google Search',
-      monthlyBudget: 5500,
-      inquiriesDelivered: 428,
-      cpl: 12.85,
-      roas: '6.4x',
-      status: 'Active'
-    },
-    {
-      id: 'CMP-803',
-      name: 'VIP Cosmetic & Dental Consultation Funnel',
-      clinic: 'MMC Dubai',
-      network: 'Meta Ads',
-      monthlyBudget: 12000,
-      inquiriesDelivered: 194,
-      cpl: 61.85,
-      roas: '7.2x',
-      status: 'Scaling'
-    },
-    {
-      id: 'CMP-804',
-      name: 'Skin Laser & Aesthetic Teardown Landing Pages',
-      clinic: 'Novelty Clinic',
-      network: 'Google PMax',
-      monthlyBudget: 4800,
-      inquiriesDelivered: 176,
-      cpl: 27.27,
-      roas: '4.9x',
-      status: 'Active'
-    },
-    {
-      id: 'CMP-805',
-      name: 'Spine & Sports Physio Initial Evaluation',
-      clinic: 'Art of Mobility',
-      network: 'Google Search',
-      monthlyBudget: 3800,
-      inquiriesDelivered: 182,
-      cpl: 20.87,
-      roas: '4.6x',
-      status: 'Active'
-    }
-  ]);
-
-  // Modal State for New Campaign
-  const [isAddCampaignModalOpen, setIsAddCampaignModalOpen] = useState(false);
-  const [campaignForm, setCampaignForm] = useState({
-    name: '',
-    clinic: partnerClinics[0]?.name || 'First Response Healthcare',
-    network: 'Google Search' as CampaignItem['network'],
-    monthlyBudget: 5000,
-    status: 'Active' as CampaignItem['status']
-  });
-
   // Interactive Patient ROI Calculator State
   const [calcBudget, setCalcBudget] = useState<number>(5000);
   const [calcTreatmentValue, setCalcTreatmentValue] = useState<number>(1800);
@@ -423,35 +330,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     showToast(`Removed "${name}" from Partner Clinics.`);
   };
 
-  // ACTION: Handle New Campaign Creation
-  const handleCreateCampaign = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!campaignForm.name.trim()) return;
-
-    const newCamp: CampaignItem = {
-      id: `CMP-${800 + campaigns.length + 1}`,
-      name: campaignForm.name.trim(),
-      clinic: campaignForm.clinic,
-      network: campaignForm.network,
-      monthlyBudget: Number(campaignForm.monthlyBudget) || 5000,
-      inquiriesDelivered: 0,
-      cpl: 24.5,
-      roas: '5.2x',
-      status: campaignForm.status
-    };
-
-    setCampaigns((prev) => [newCamp, ...prev]);
-    setIsAddCampaignModalOpen(false);
-    setCampaignForm({
-      name: '',
-      clinic: partnerClinics[0]?.name || 'First Response Healthcare',
-      network: 'Google Search',
-      monthlyBudget: 5000,
-      status: 'Active'
-    });
-    showToast(`Campaign "${newCamp.name}" launched successfully!`);
-  };
-
   // Export Inquiries to CSV
   const handleExportCSV = () => {
     if (inquiries.length === 0) return;
@@ -486,18 +364,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     setCopiedLeadId(inq.id);
     showToast(`Lead ${inq.id} contact details copied to clipboard.`);
     setTimeout(() => setCopiedLeadId(null), 2000);
-  };
-
-  const handleToggleCampaignStatus = (id: string) => {
-    setCampaigns((prev) =>
-      prev.map((c) => {
-        if (c.id === id) {
-          const next = c.status === 'Active' ? 'Paused' : c.status === 'Paused' ? 'Scaling' : 'Active';
-          return { ...c, status: next };
-        }
-        return c;
-      })
-    );
   };
 
   return (
@@ -547,7 +413,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search leads, doctor names, clinics, or campaigns..."
+            placeholder="Search leads, doctor names, or clinics..."
             className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2 text-[13px] text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#183B2B] focus:bg-white transition-all"
           />
         </div>
@@ -652,24 +518,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
             <button
               type="button"
-              onClick={() => setActiveTab('campaigns')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13.5px] font-bold transition-all cursor-pointer ${
-                activeTab === 'campaigns'
-                  ? 'bg-[#183B2B] text-white shadow-xs'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Target className="w-4 h-4 shrink-0" />
-                <span className="hidden md:inline">Live Campaigns</span>
-              </div>
-              <span className="hidden md:inline text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-600">
-                {campaigns.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => setActiveTab('calculator')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold transition-all cursor-pointer ${
                 activeTab === 'calculator'
@@ -718,7 +566,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     Healthcare Performance Command Hub
                   </h1>
                   <p className="text-xs sm:text-[13px] text-gray-500 mt-1">
-                    Live client acquisition telemetry, patient inquiries, and paid ad spend tracking.
+                    Live client acquisition telemetry, patient inquiries, and clinical partner roster.
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -801,7 +649,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 </div>
 
                 <div className="divide-y divide-gray-100">
-                  {inquiries.slice(0, 4).map((inq) => (
+                  {inquiries.slice(0, 5).map((inq) => (
                     <div key={inq.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50/80 px-2 rounded-xl transition-colors">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
@@ -860,45 +708,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                           <Mail className="w-3 h-3" />
                           <span>Email</span>
                         </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Core Active Campaigns Snapshot */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-xs space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                  <h2 className="text-sm font-black text-gray-900">Active Paid Search &amp; Social Campaigns</h2>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('campaigns')}
-                    className="text-xs font-bold text-[#183B2B] hover:underline cursor-pointer"
-                  >
-                    View All Campaigns →
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {campaigns.slice(0, 3).map((camp) => (
-                    <div key={camp.id} className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{camp.network}</span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-900">
-                          {camp.status}
-                        </span>
-                      </div>
-                      <h3 className="text-xs font-bold text-gray-900 line-clamp-1">{camp.name}</h3>
-                      <p className="text-[11px] text-gray-500 font-medium">{camp.clinic}</p>
-                      <div className="pt-2 border-t border-gray-200 flex items-center justify-between text-xs">
-                        <div>
-                          <span className="text-[10px] text-gray-400 block">Deliveries</span>
-                          <span className="font-bold text-gray-900">{camp.inquiriesDelivered} Patients</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[10px] text-gray-400 block">ROAS</span>
-                          <span className="font-bold text-emerald-600">{camp.roas}</span>
-                        </div>
                       </div>
                     </div>
                   ))}
@@ -1206,97 +1015,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
           )}
 
           {/* ========================================================= */}
-          {/* VIEW 4: LIVE CAMPAIGNS                                   */}
-          {/* ========================================================= */}
-          {activeTab === 'campaigns' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl sm:text-[26px] font-black text-[#183B2B] tracking-tight">
-                    Healthcare Ad Campaigns
-                  </h1>
-                  <p className="text-xs sm:text-[13px] text-gray-500 mt-1">
-                    Algorithmic bidding and creative deployment across Google Search, Meta Ads, and AI search engines.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsAddCampaignModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#183B2B] text-white text-xs font-bold hover:bg-[#204e39] transition-colors cursor-pointer shadow-xs"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>+ Launch Campaign</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-200 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                      <th className="py-3 px-3">Campaign</th>
-                      <th className="py-3 px-3">Partner Clinic</th>
-                      <th className="py-3 px-3">Ad Network</th>
-                      <th className="py-3 px-3">Monthly Budget</th>
-                      <th className="py-3 px-3">Patient Inquiries</th>
-                      <th className="py-3 px-3">Avg CPL</th>
-                      <th className="py-3 px-3">ROAS</th>
-                      <th className="py-3 px-3 text-right">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 text-xs">
-                    {campaigns.map((camp) => (
-                      <tr key={camp.id} className="hover:bg-gray-50/70 transition-colors">
-                        <td className="py-3.5 px-3">
-                          <span className="font-bold text-gray-900 block">{camp.name}</span>
-                          <span className="text-[10px] font-mono text-gray-400">{camp.id}</span>
-                        </td>
-                        <td className="py-3.5 px-3 font-medium text-gray-800">{camp.clinic}</td>
-                        <td className="py-3.5 px-3">
-                          <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-800 font-semibold text-[11px]">
-                            {camp.network}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-3 font-mono font-bold text-gray-900">
-                          £{camp.monthlyBudget.toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-3 font-bold text-emerald-700">
-                          {camp.inquiriesDelivered} Bookings
-                        </td>
-                        <td className="py-3.5 px-3 font-mono font-medium text-gray-700">
-                          £{camp.cpl.toFixed(2)}
-                        </td>
-                        <td className="py-3.5 px-3 font-bold text-[#183B2B]">{camp.roas}</td>
-                        <td className="py-3.5 px-3 text-right">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              handleToggleCampaignStatus(camp.id);
-                              showToast(`Toggled ${camp.id} status`);
-                            }}
-                            className={`px-3 py-1 rounded-full text-[11px] font-bold cursor-pointer transition-colors shadow-2xs ${
-                              camp.status === 'Scaling'
-                                ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                                : camp.status === 'Active'
-                                ? 'bg-emerald-100 text-emerald-900 hover:bg-emerald-200'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                          >
-                            {camp.status}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================= */}
-          {/* VIEW 5: PATIENT UNIT ECONOMICS & ROI CALCULATOR           */}
+          {/* VIEW 4: PATIENT UNIT ECONOMICS & ROI CALCULATOR           */}
           {/* ========================================================= */}
           {activeTab === 'calculator' && (
             <div className="space-y-6">
@@ -1540,102 +1259,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                   className="px-5 py-2 rounded-xl bg-[#183B2B] text-white font-bold hover:bg-[#204e39] transition-colors cursor-pointer shadow-xs"
                 >
                   Add Partner Clinic
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* MODAL: LAUNCH NEW CAMPAIGN                                */}
-      {/* ========================================================= */}
-      {isAddCampaignModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-[#183B2B]" />
-                <h3 className="text-base font-black text-gray-900">Launch New Ad Campaign</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsAddCampaignModalOpen(false)}
-                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateCampaign} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block font-bold text-gray-700 mb-1">Campaign Headline *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Private MRI & Diagnostic Patient Funnel"
-                  value={campaignForm.name}
-                  onChange={(e) => setCampaignForm({ ...campaignForm, name: e.target.value })}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#183B2B]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-gray-700 mb-1">Partner Clinic *</label>
-                <select
-                  value={campaignForm.clinic}
-                  onChange={(e) => setCampaignForm({ ...campaignForm, clinic: e.target.value })}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#183B2B] bg-white"
-                >
-                  {partnerClinics.map((c) => (
-                    <option key={c.id} value={c.name}>
-                      {c.name} ({c.city})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-gray-700 mb-1">Ad Network</label>
-                  <select
-                    value={campaignForm.network}
-                    onChange={(e) => setCampaignForm({ ...campaignForm, network: e.target.value as any })}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#183B2B] bg-white"
-                  >
-                    <option value="Google Search">Google Search</option>
-                    <option value="Meta Ads">Meta Ads</option>
-                    <option value="Google PMax">Google PMax</option>
-                    <option value="ChatGPT / AI Search">ChatGPT / AI Search</option>
-                    <option value="Local Maps 3-Pack">Local Maps 3-Pack</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-bold text-gray-700 mb-1">Monthly Ad Spend (£)</label>
-                  <input
-                    type="number"
-                    min={500}
-                    step={100}
-                    value={campaignForm.monthlyBudget}
-                    onChange={(e) => setCampaignForm({ ...campaignForm, monthlyBudget: Number(e.target.value) })}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#183B2B]"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={() => setIsAddCampaignModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-gray-600 hover:bg-gray-100 font-bold transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#183B2B] text-white font-bold hover:bg-[#204e39] transition-colors cursor-pointer shadow-xs"
-                >
-                  Deploy Campaign
                 </button>
               </div>
             </form>
