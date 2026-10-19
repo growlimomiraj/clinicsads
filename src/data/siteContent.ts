@@ -98,27 +98,26 @@ export interface PhotoAssetInfo {
 }
 
 /**
- * Core brand & contact details enriched from growlimo.com and adsbyusman.com
+ * Core brand & contact details for ClinicsAds (clinicsads.com)
  */
 export const SITE_CONFIG = {
   brandName: 'ClinicsAds',
   domain: 'clinicsads.com',
   parentNetwork: {
-    agencyName: 'GrowLimo',
-    agencyUrl: 'https://growlimo.com',
-    founderSiteName: 'Ads by Usman',
-    founderUrl: 'https://adsbyusman.com',
-    founderName: 'Muhammad Usman',
-    founderRole: 'Founder & Lead Growth Strategist',
+    agencyName: 'ClinicsAds',
+    agencyUrl: 'https://clinicsads.com',
+    founderSiteName: 'ClinicsAds',
+    founderUrl: 'https://clinicsads.com',
+    founderName: 'ClinicsAds Healthcare Team',
+    founderRole: 'Clinical Marketing Specialists',
   },
   contact: {
     phoneDisplay: '+1 (667) 347-4729',
     phoneHref: 'tel:+16673474729',
-    email: 'info@growlimo.com',
-    emailHref: 'mailto:info@growlimo.com',
+    email: 'info@clinicsads.com',
+    emailHref: 'mailto:info@clinicsads.com',
     address: '7917 Mountain Rd NE, Albuquerque, NM 87110',
     serviceHours: 'Mon – Fri, 9:00 AM – 6:00 PM MST (Month-to-Month Agreements)',
-    instagramUrl: 'https://www.instagram.com/adsbyusman_/',
   },
   submissionEndpoint: '', // Leave empty for transparent demo mode; populate with webhook/API URL in production
   showUnapprovedTestimonialsInPreview: true,
@@ -172,7 +171,7 @@ export const SERVICES_CONTENT: {
       details: {
         tagline: 'High-Intent Local Search Campaigns for Healthcare & Dental Clinics',
         overview:
-          'Led by Google Ads specialist methodology (Ads by Usman & GrowLimo), we build conversion-centered search campaigns that capture prospective patients at the exact moment they search for treatments, consultations, or urgent care in your area.',
+          'Led by focused healthcare advertising methodology, we build conversion-centered search campaigns that capture prospective patients at the exact moment they search for treatments, consultations, or urgent care in your area.',
         deliverables: [
           'Local search radius and high-intent treatment keyword architecture',
           'Healthcare advertising policy & patient-privacy compliant ad copy',
@@ -196,7 +195,7 @@ export const SERVICES_CONTENT: {
           {
             question: 'Do we have to sign a long-term lock-in contract?',
             answer:
-              'No. Following GrowLimo’s engagement standard, all management agreements are flexible and month-to-month.',
+              'No. Following ClinicsAds’ engagement standard, all management agreements are flexible and month-to-month.',
           },
         ],
       },
@@ -252,7 +251,7 @@ export const SERVICES_CONTENT: {
       details: {
         tagline: 'Sub-2-Second Mobile-First Service Pages Built to Convert Ad Traffic',
         overview:
-          'Engineered with GrowLimo’s conversion-focused web design standards—delivering sub-2-second mobile load times, clear treatment explanations, and frictionless appointment request flows.',
+          'Engineered with conversion-focused healthcare web design standards—delivering sub-2-second mobile load times, clear treatment explanations, and frictionless appointment request flows.',
         deliverables: [
           'Sub-2-second mobile-first page speed architecture for paid ad traffic',
           'Treatment-specific layouts with clinician credentials, FAQs, and location maps',
@@ -453,9 +452,9 @@ export const ADDITIONAL_SOLUTIONS_CONTENT: {
       variant: 'primary-green',
       iconName: 'heart-handshake',
       modalDetails: {
-        subtitle: 'Sub-2-Second Conversion-Focused Web Experience (GrowLimo Architecture)',
+        subtitle: 'Sub-2-Second Conversion-Focused Web Experience',
         summary:
-          'When prospective patients click an ad, a slow or cluttered homepage often leaves them searching for answers. Drawing on GrowLimo’s healthcare web design standards, we build fast, mobile-first service pages that answer patient questions clearly and make requesting an appointment effortless.',
+          'When prospective patients click an ad, a slow or cluttered homepage often leaves them searching for answers. Drawing on our healthcare web design standards, we build fast, mobile-first service pages that answer patient questions clearly and make requesting an appointment effortless.',
         keyPoints: [
           'Sub-2-second mobile load times engineered for high paid-search Quality Scores',
           'Dedicated structure for individual high-priority treatments (dental implants, physio, dermatology, urgent care)',
@@ -493,7 +492,7 @@ export const ADDITIONAL_SOLUTIONS_CONTENT: {
       variant: 'secondary-white',
       iconName: 'sparkles',
       modalDetails: {
-        subtitle: 'ChatGPT Ads & Generative AI Search Visibility (GrowLimo & Ads by Usman)',
+        subtitle: 'ChatGPT Ads & Generative AI Search Visibility',
         summary:
           'As patients increasingly ask ChatGPT and conversational AI platforms for local clinic recommendations and treatment advice, we prepare and manage your clinic’s presence for ChatGPT Ads alongside generative AI search visibility.',
         keyPoints: [

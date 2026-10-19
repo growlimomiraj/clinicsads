@@ -256,9 +256,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                     </h3>
                   </div>
                   <p className="text-[13.5px] text-[#59665D] mb-5">
-                    Powered by our proven healthcare growth methodology from{' '}
-                    <strong className="text-[#183B2B]">GrowLimo</strong> &amp;{' '}
-                    <strong className="text-[#183B2B]">Ads by Usman</strong>:
+                    Powered by our proven healthcare growth methodology:
                   </p>
                   <div className="space-y-3">
                     {serviceData.details.methodology.map((step, idx) => (
@@ -661,7 +659,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
         {renderPageHeroBanner(
           'Why ClinicsAds',
           'Built Specifically Around How Patients Choose a Clinic',
-          'Backed by GrowLimo and Muhammad Usman (Ads by Usman), we combine healthcare-compliant ad management, sub-2-second landing pages, and clear inquiry tracking.',
+          'We combine healthcare-compliant ad management, sub-2-second landing pages, and clear inquiry tracking to help your clinic grow.',
           'Book a Discovery Call'
         )}
 
@@ -798,7 +796,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
       <section className="py-12 lg:py-20 bg-white">
         <div className="max-w-[1060px] mx-auto px-5 sm:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-            {/* Left 5 Columns: Verified Contact Info from growlimo.com & adsbyusman.com */}
+            {/* Left 5 Columns: Verified Contact Info */}
             <div className="lg:col-span-5 space-y-6">
               <div className="rounded-[24px] bg-[#F3F8E9] p-7 border border-[#DFECC8] space-y-6">
                 <div>
@@ -809,7 +807,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                     Get in Touch
                   </h2>
                   <p className="text-[13.5px] text-[#59665D] mt-1">
-                    Speak directly with our healthcare marketing strategists at ClinicsAds ({SITE_CONFIG.parentNetwork.agencyName} &amp; {SITE_CONFIG.parentNetwork.founderSiteName}).
+                    Speak directly with our healthcare marketing strategists at ClinicsAds.
                   </p>
                 </div>
 

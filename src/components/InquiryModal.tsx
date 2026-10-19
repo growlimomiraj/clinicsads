@@ -84,7 +84,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
           <>
             <div className="mb-4 pr-8">
               <span className="text-[12px] font-bold text-[#7A9A2E] tracking-wide inline-flex items-center gap-1.5">
-                ClinicsAds · GrowLimo &amp; Ads by Usman
+                ClinicsAds
               </span>
               <h2
                 id="inquiry-modal-title"
@@ -297,7 +297,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
               Strategy Call Booked!
             </h3>
             <p className="text-[13.5px] text-[#59665D] leading-relaxed mb-4">
-              Your strategy call inquiry has been received. Usman and the healthcare marketing team will review your clinic's objectives and reach out for the strategy consultation.
+              Your strategy call inquiry has been received. Our healthcare marketing team will review your clinic's objectives and reach out for the strategy consultation.
             </p>
 
             <div className="rounded-xl bg-[#F3F8E9] p-4 space-y-2 text-[13px] text-[#183B2B] mb-6 border border-[#DFECC8]">

@@ -98,7 +98,7 @@ export const DetailPanelModal: React.FC<DetailPanelModalProps> = ({
             <div className="flex items-center gap-2 mb-3">
               <Layers className="w-4 h-4 text-[#7A9A2E]" />
               <h3 className="text-[13.5px] font-bold text-[#183B2B]">
-                4-Step Execution Framework (Ads by Usman &amp; GrowLimo)
+                4-Step Execution Framework
               </h3>
             </div>
             <ul className="space-y-2">

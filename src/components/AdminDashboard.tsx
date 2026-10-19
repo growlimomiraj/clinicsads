@@ -579,11 +579,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
           {/* Lead Growth Strategist Profile Badge */}
           <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
             <div className="w-8 h-8 rounded-full bg-[#183B2B] text-white flex items-center justify-center font-bold text-xs shadow-xs">
-              MU
+              CA
             </div>
             <div className="hidden lg:block text-left">
-              <p className="text-[12.5px] font-bold text-[#183B2B] leading-tight">Muhammad Usman</p>
-              <p className="text-[10.5px] text-gray-500 font-medium">Senior Clinical PPC Lead</p>
+              <p className="text-[12.5px] font-bold text-[#183B2B] leading-tight">ClinicsAds Admin</p>
+              <p className="text-[10.5px] text-gray-500 font-medium">Marketing Operations Lead</p>
             </div>
           </div>
 

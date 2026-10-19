@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Mail, Phone, MapPin, ExternalLink, Instagram } from 'lucide-react';
+import { Calendar, Mail, Phone, MapPin } from 'lucide-react';
 import {
   ADDITIONAL_SOLUTIONS_CONTENT,
   NAV_ITEMS,
@@ -57,25 +57,7 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="lg:col-span-4 space-y-6">
             <div>
               <p className="text-[13.5px] text-white/75 leading-[1.7] max-w-[300px]">
-                A dedicated healthcare marketing division of{' '}
-                <a
-                  href={SITE_CONFIG.parentNetwork.agencyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white underline decoration-[#99BC44]/70 underline-offset-4 hover:text-[#99BC44] transition-colors"
-                >
-                  {SITE_CONFIG.parentNetwork.agencyName}
-                </a>{' '}
-                &amp;{' '}
-                <a
-                  href={SITE_CONFIG.parentNetwork.founderUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white underline decoration-[#99BC44]/70 underline-offset-4 hover:text-[#99BC44] transition-colors"
-                >
-                  {SITE_CONFIG.parentNetwork.founderSiteName}
-                </a>
-                , helping clinics grow patient inquiries with Google Ads, Meta Ads,
+                A dedicated healthcare marketing agency helping clinics grow patient inquiries with Google Ads, Meta Ads,
                 ChatGPT Ads, landing pages, and conversion tracking.
               </p>
             </div>
@@ -101,16 +83,6 @@ export const Footer: React.FC<FooterProps> = ({
                   className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#F97316] text-white hover:text-white flex items-center justify-center transition-colors"
                 >
                   <Mail className="w-4 h-4" />
-                </a>
-                <a
-                  href={SITE_CONFIG.contact.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram (@adsbyusman_)"
-                  title="Instagram (@adsbyusman_)"
-                  className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#F97316] text-white hover:text-white flex items-center justify-center transition-colors"
-                >
-                  <Instagram className="w-4 h-4" />
                 </a>
                 <button
                   type="button"
@@ -235,36 +207,6 @@ export const Footer: React.FC<FooterProps> = ({
               </ul>
             </div>
 
-            <div>
-              <h3 className="text-[14px] font-bold text-white mb-3">
-                Agency Network
-              </h3>
-              <ul className="space-y-2 text-[13px]">
-                <li>
-                  <a
-                    href={SITE_CONFIG.parentNetwork.agencyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-white/70 hover:text-[#99BC44] transition-colors"
-                  >
-                    <span>growlimo.com — Healthcare &amp; Local Growth</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href={SITE_CONFIG.parentNetwork.founderUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-white/70 hover:text-[#F97316] transition-colors"
-                  >
-                    <span>adsbyusman.com — Muhammad Usman</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </li>
-              </ul>
-            </div>
-
             <div className="pt-1 flex flex-wrap gap-3">
               <button
                 type="button"
@@ -280,25 +222,7 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Bottom Copyright Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[12px] text-white/55">
           <p>
-            © {new Date().getFullYear()} ClinicsAds ({SITE_CONFIG.domain}) · Powered by{' '}
-            <a
-              href={SITE_CONFIG.parentNetwork.agencyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              GrowLimo
-            </a>{' '}
-            &amp;{' '}
-            <a
-              href={SITE_CONFIG.parentNetwork.founderUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              Ads by Usman
-            </a>
-            .
+            © {new Date().getFullYear()} ClinicsAds ({SITE_CONFIG.domain}). All rights reserved.
           </p>
         </div>
       </div>
