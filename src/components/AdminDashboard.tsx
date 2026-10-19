@@ -46,8 +46,131 @@ export interface PartnerClinicItem {
   monthlySpend: string;
 }
 
+const DEFAULT_PARTNER_CLINICS: PartnerClinicItem[] = [
+  {
+    id: 'PC-101',
+    name: 'First Response Healthcare',
+    logoSrc: '/logos/first-response-healthcare.webp',
+    avatarBg: 'bg-[#183B2B]',
+    initials: 'FR',
+    vertical: 'Urgent & Home Healthcare',
+    service: 'Google Search + Meta Ads',
+    contactPerson: 'Dr. Narayan',
+    email: 'partners@firstresponse.ae',
+    phone: '+971 4 345 6789',
+    city: 'Dubai, UAE',
+    status: 'Scaling',
+    monthlySpend: '£8,500/mo'
+  },
+  {
+    id: 'PC-102',
+    name: 'GetChecked',
+    logoSrc: '/logos/getchecked.svg',
+    avatarBg: 'bg-[#2A6F56]',
+    initials: 'GC',
+    vertical: 'Private Diagnostics & Testing',
+    service: 'ChatGPT & High-Intent Search',
+    contactPerson: 'Sarah Jenkins',
+    email: 'clinical@getchecked.co.uk',
+    phone: '+44 20 7946 0912',
+    city: 'London, UK',
+    status: 'Active',
+    monthlySpend: '£5,500/mo'
+  },
+  {
+    id: 'PC-103',
+    name: 'MMC Dubai',
+    logoSrc: '/logos/mmc-dubai.png',
+    avatarBg: 'bg-[#407B64]',
+    initials: 'MM',
+    vertical: 'Cosmetic & Aesthetic Surgery',
+    service: 'Local Radius + Meta Retargeting',
+    contactPerson: 'Dr. Tariq Al-Mansoor',
+    email: 'director@mmcdubai.ae',
+    phone: '+971 4 892 1100',
+    city: 'Dubai, UAE',
+    status: 'Scaling',
+    monthlySpend: '£12,000/mo'
+  },
+  {
+    id: 'PC-104',
+    name: 'Novelty Clinic',
+    logoSrc: '/logos/novelty-clinic.svg',
+    avatarBg: 'bg-[#628F79]',
+    initials: 'NC',
+    vertical: 'Dermatology & Skin Laser',
+    service: 'Dedicated Conversion Landing Pages',
+    contactPerson: 'Elena Rostova',
+    email: 'inquiries@noveltyclinic.com',
+    phone: '+44 20 7123 4567',
+    city: 'London, UK',
+    status: 'Active',
+    monthlySpend: '£4,800/mo'
+  },
+  {
+    id: 'PC-105',
+    name: 'Art of Mobility',
+    logoSrc: '/logos/art-of-mobility.svg',
+    avatarBg: 'bg-[#76828E]',
+    initials: 'AM',
+    vertical: 'Physiotherapy & Spine Rehab',
+    service: 'Paid Search & CRO',
+    contactPerson: 'Mark Henderson',
+    email: 'clinics@artofmobility.co.uk',
+    phone: '+44 161 496 0182',
+    city: 'Manchester, UK',
+    status: 'Active',
+    monthlySpend: '£3,800/mo'
+  },
+  {
+    id: 'PC-106',
+    name: 'Bodyworks Physio',
+    logoSrc: '/logos/bodyworks-physio.png',
+    avatarBg: 'bg-[#3A7E64]',
+    initials: 'BW',
+    vertical: 'Sports Rehabilitation',
+    service: 'Google Maps 3-Pack + Search',
+    contactPerson: 'David Miller',
+    email: 'info@bodyworksphysio.com',
+    phone: '+44 121 496 0883',
+    city: 'Birmingham, UK',
+    status: 'Active',
+    monthlySpend: '£3,200/mo'
+  },
+  {
+    id: 'PC-107',
+    name: 'Cambridge Physio',
+    logoSrc: '/logos/cambridge-physio.webp',
+    avatarBg: 'bg-[#899D78]',
+    initials: 'CP',
+    vertical: 'Orthopedic & Joint Care',
+    service: 'Meta Ads Retargeting & GA4',
+    contactPerson: 'Claire Bennett',
+    email: 'appointments@cambridgephysio.co.uk',
+    phone: '+44 1223 456789',
+    city: 'Cambridge, UK',
+    status: 'Active',
+    monthlySpend: '£4,100/mo'
+  },
+  {
+    id: 'PC-108',
+    name: 'Encore Physiotherapy',
+    logoSrc: '/logos/encore-physiotherapy.jpeg',
+    avatarBg: 'bg-[#374151]',
+    initials: 'EP',
+    vertical: 'Musculoskeletal & Post-Op Rehab',
+    service: 'Call Attribution & Paid Search',
+    contactPerson: 'Robert Hall',
+    email: 'admin@encorephysio.co.uk',
+    phone: '+44 113 496 0234',
+    city: 'Leeds, UK',
+    status: 'Scaling',
+    monthlySpend: '£4,900/mo'
+  }
+];
+
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
-  // Navigation State (Clean 4 Core Tabs - Live Campaigns Removed)
+  // Navigation State
   const [activeTab, setActiveTab] = useState<'dashboard' | 'leads' | 'clinics' | 'calculator'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedLeadId, setCopiedLeadId] = useState<string | null>(null);
@@ -79,129 +202,42 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
   const [leadsServiceFilter, setLeadsServiceFilter] = useState<string>('All');
   const [leadsSearch, setLeadsSearch] = useState('');
 
-  // Verified Partner Clinics Roster
-  const [partnerClinics, setPartnerClinics] = useState<PartnerClinicItem[]>([
-    {
-      id: 'PC-101',
-      name: 'First Response Healthcare',
-      logoSrc: '/logos/first-response-healthcare.webp',
-      avatarBg: 'bg-[#183B2B]',
-      initials: 'FR',
-      vertical: 'Urgent & Home Healthcare',
-      service: 'Google Search + Meta Ads',
-      contactPerson: 'Dr. Narayan',
-      email: 'partners@firstresponse.ae',
-      phone: '+971 4 345 6789',
-      city: 'Dubai, UAE',
-      status: 'Scaling',
-      monthlySpend: '£8,500/mo'
-    },
-    {
-      id: 'PC-102',
-      name: 'GetChecked',
-      logoSrc: '/logos/getchecked.svg',
-      avatarBg: 'bg-[#2A6F56]',
-      initials: 'GC',
-      vertical: 'Private Diagnostics & Testing',
-      service: 'ChatGPT & High-Intent Search',
-      contactPerson: 'Sarah Jenkins',
-      email: 'clinical@getchecked.co.uk',
-      phone: '+44 20 7946 0912',
-      city: 'London, UK',
-      status: 'Active',
-      monthlySpend: '£5,500/mo'
-    },
-    {
-      id: 'PC-103',
-      name: 'MMC Dubai',
-      logoSrc: '/logos/mmc-dubai.png',
-      avatarBg: 'bg-[#407B64]',
-      initials: 'MM',
-      vertical: 'Cosmetic & Aesthetic Surgery',
-      service: 'Local Radius + Meta Retargeting',
-      contactPerson: 'Dr. Tariq Al-Mansoor',
-      email: 'director@mmcdubai.ae',
-      phone: '+971 4 892 1100',
-      city: 'Dubai, UAE',
-      status: 'Scaling',
-      monthlySpend: '£12,000/mo'
-    },
-    {
-      id: 'PC-104',
-      name: 'Novelty Clinic',
-      logoSrc: '/logos/novelty-clinic.svg',
-      avatarBg: 'bg-[#628F79]',
-      initials: 'NC',
-      vertical: 'Dermatology & Skin Laser',
-      service: 'Dedicated Conversion Landing Pages',
-      contactPerson: 'Elena Rostova',
-      email: 'inquiries@noveltyclinic.com',
-      phone: '+44 20 7123 4567',
-      city: 'London, UK',
-      status: 'Active',
-      monthlySpend: '£4,800/mo'
-    },
-    {
-      id: 'PC-105',
-      name: 'Art of Mobility',
-      logoSrc: '/logos/art-of-mobility.svg',
-      avatarBg: 'bg-[#76828E]',
-      initials: 'AM',
-      vertical: 'Physiotherapy & Spine Rehab',
-      service: 'Paid Search & CRO',
-      contactPerson: 'Mark Henderson',
-      email: 'clinics@artofmobility.co.uk',
-      phone: '+44 161 496 0182',
-      city: 'Manchester, UK',
-      status: 'Active',
-      monthlySpend: '£3,800/mo'
-    },
-    {
-      id: 'PC-106',
-      name: 'Bodyworks Physio',
-      logoSrc: '/logos/bodyworks-physio.png',
-      avatarBg: 'bg-[#3A7E64]',
-      initials: 'BW',
-      vertical: 'Sports Rehabilitation',
-      service: 'Google Maps 3-Pack + Search',
-      contactPerson: 'David Miller',
-      email: 'info@bodyworksphysio.com',
-      phone: '+44 121 496 0883',
-      city: 'Birmingham, UK',
-      status: 'Active',
-      monthlySpend: '£3,200/mo'
-    },
-    {
-      id: 'PC-107',
-      name: 'Cambridge Physio',
-      logoSrc: '/logos/cambridge-physio.webp',
-      avatarBg: 'bg-[#899D78]',
-      initials: 'CP',
-      vertical: 'Orthopedic & Joint Care',
-      service: 'Meta Ads Retargeting & GA4',
-      contactPerson: 'Claire Bennett',
-      email: 'appointments@cambridgephysio.co.uk',
-      phone: '+44 1223 456789',
-      city: 'Cambridge, UK',
-      status: 'Active',
-      monthlySpend: '£4,100/mo'
-    },
-    {
-      id: 'PC-108',
-      name: 'Encore Physiotherapy',
-      logoSrc: '/logos/encore-physiotherapy.jpeg',
-      avatarBg: 'bg-[#374151]',
-      initials: 'EP',
-      vertical: 'Musculoskeletal & Post-Op Rehab',
-      service: 'Call Attribution & Paid Search',
-      contactPerson: 'Robert Hall',
-      email: 'admin@encorephysio.co.uk',
-      phone: '+44 113 496 0234',
-      city: 'Leeds, UK',
-      status: 'Scaling',
-      monthlySpend: '£4,900/mo'
+  // Verified Partner Clinics Roster (Persisted locally so added partners stay saved)
+  const [partnerClinics, setPartnerClinics] = useState<PartnerClinicItem[]>(() => {
+    try {
+      const stored = localStorage.getItem('clinicsads_partner_clinics');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {
+      // Fallback
     }
-  ]);
+    return DEFAULT_PARTNER_CLINICS;
+  });
+
+  // Sync to LocalStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('clinicsads_partner_clinics', JSON.stringify(partnerClinics));
+    } catch {
+      // Ignore storage errors
+    }
+  }, [partnerClinics]);
+
+  // Check if a clinic is already connected in the Partner Clinics directory
+  const isClinicConnected = (clinicName?: string, email?: string) => {
+    if (!clinicName) return false;
+    const cleanName = clinicName.trim().toLowerCase();
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
+    return partnerClinics.some((c) => {
+      const cName = c.name.trim().toLowerCase();
+      const cEmail = c.email ? c.email.trim().toLowerCase() : '';
+      return cName === cleanName || (cleanEmail && cEmail && cEmail === cleanEmail);
+    });
+  };
 
   // Modal State for Manual Add Partner Clinic
   const [isAddClinicModalOpen, setIsAddClinicModalOpen] = useState(false);
@@ -214,7 +250,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     vertical: 'Private Healthcare Clinic',
     service: 'Google Ads & CRO',
     monthlySpend: '£4,500/mo',
-    status: 'Onboarding' as 'Active' | 'Scaling' | 'Onboarding'
+    status: 'Active' as 'Active' | 'Scaling' | 'Onboarding'
   });
 
   // Interactive Patient ROI Calculator State
@@ -248,12 +284,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
   // ACTION: Add an Inbound Lead directly to Partner Clinics Directory
   const handleAddLeadToPartnerClinics = (inq: ClinicInquiry) => {
-    const alreadyExists = partnerClinics.some(
-      (c) => c.name.toLowerCase() === inq.clinicName.toLowerCase() || c.email.toLowerCase() === inq.email.toLowerCase()
-    );
-
-    if (alreadyExists) {
-      showToast(`"${inq.clinicName}" is already listed in Partner Clinics!`);
+    if (isClinicConnected(inq.clinicName, inq.email)) {
+      showToast(`✓ "${inq.clinicName}" is already connected to Partner Clinics!`);
       setActiveTab('clinics');
       return;
     }
@@ -274,13 +306,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       email: inq.email,
       phone: inq.phone || '+44 20 7946 0000',
       city: 'London, UK',
-      status: 'Onboarding',
+      status: 'Active',
       monthlySpend: '£4,500/mo'
     };
 
     setPartnerClinics((prev) => [newPartner, ...prev]);
     updateInquiryStatus(inq.id, 'Proposal Sent');
-    showToast(`Added "${inq.clinicName}" to Partner Clinics! Status updated.`);
+    showToast(`✓ Connected: "${inq.clinicName}" is now active in Partner Clinics!`);
   };
 
   // ACTION: Handle Manual Partner Clinic Creation
@@ -319,9 +351,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       vertical: 'Private Healthcare Clinic',
       service: 'Google Ads & CRO',
       monthlySpend: '£4,500/mo',
-      status: 'Onboarding'
+      status: 'Active'
     });
-    showToast(`Partner clinic "${created.name}" created successfully!`);
+    showToast(`✓ Connected: "${created.name}" added to Partner Clinics!`);
   };
 
   // ACTION: Delete Partner Clinic
@@ -376,7 +408,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
           <button
             type="button"
             onClick={() => setToastMessage(null)}
-            className="p-1 text-white/70 hover:text-white ml-2 rounded-lg"
+            className="p-1 text-white/70 hover:text-white ml-2 rounded-lg cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -511,7 +543,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 <Building2 className="w-4 h-4 shrink-0" />
                 <span className="hidden md:inline">Partner Clinics</span>
               </div>
-              <span className="hidden md:inline text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-600">
+              <span className="hidden md:inline text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
                 {partnerClinics.length}
               </span>
             </button>
@@ -608,12 +640,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
                 <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
                   <div className="flex items-center justify-between text-gray-500 text-xs font-bold">
-                    <span>Active Partner Clinics</span>
-                    <Building2 className="w-4 h-4 text-[#183B2B]" />
+                    <span>Connected Partner Clinics</span>
+                    <Building2 className="w-4 h-4 text-emerald-700" />
                   </div>
                   <p className="text-3xl font-black text-[#183B2B] mt-2">{partnerClinics.length}</p>
-                  <span className="text-[11px] text-gray-500 font-medium block mt-1">
-                    Verified medical institutions
+                  <span className="text-[11px] text-emerald-600 font-semibold block mt-1 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Live connected healthcare network
                   </span>
                 </div>
 
@@ -649,68 +682,95 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 </div>
 
                 <div className="divide-y divide-gray-100">
-                  {inquiries.slice(0, 5).map((inq) => (
-                    <div key={inq.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50/80 px-2 rounded-xl transition-colors">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                            {inq.id}
-                          </span>
-                          <span className="text-sm font-black text-gray-900">{inq.clinicName}</span>
-                          <span className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full ${
-                            inq.status === 'New'
-                              ? 'bg-emerald-100 text-emerald-900 border border-emerald-200'
-                              : inq.status === 'Call Booked'
-                              ? 'bg-blue-100 text-blue-900 border border-blue-200'
-                              : inq.status === 'Proposal Sent'
-                              ? 'bg-purple-100 text-purple-900 border border-purple-200'
-                              : 'bg-gray-100 text-gray-700'
-                          }`}>
-                            {inq.status}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600">
-                          <strong>{inq.name}</strong> • <a href={`mailto:${inq.email}`} className="text-[#183B2B] hover:underline font-medium">{inq.email}</a>
-                          {inq.phone && ` • ${inq.phone}`}
-                        </p>
-                        {inq.message && (
-                          <p className="text-xs text-gray-500 italic line-clamp-1">
-                            &ldquo;{inq.message}&rdquo;
+                  {inquiries.slice(0, 5).map((inq) => {
+                    const isConnected = isClinicConnected(inq.clinicName, inq.email);
+                    return (
+                      <div key={inq.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50/80 px-2 rounded-xl transition-colors">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-mono font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                              {inq.id}
+                            </span>
+                            <span className="text-sm font-black text-gray-900">{inq.clinicName}</span>
+
+                            {/* Connected badge on lead */}
+                            {isConnected ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                Connected
+                              </span>
+                            ) : (
+                              <span className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full ${
+                                inq.status === 'New'
+                                  ? 'bg-emerald-100 text-emerald-900 border border-emerald-200'
+                                  : inq.status === 'Call Booked'
+                                  ? 'bg-blue-100 text-blue-900 border border-blue-200'
+                                  : inq.status === 'Proposal Sent'
+                                  ? 'bg-purple-100 text-purple-900 border border-purple-200'
+                                  : 'bg-gray-100 text-gray-700'
+                              }`}>
+                                {inq.status}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-600">
+                            <strong>{inq.name}</strong> • <a href={`mailto:${inq.email}`} className="text-[#183B2B] hover:underline font-medium">{inq.email}</a>
+                            {inq.phone && ` • ${inq.phone}`}
                           </p>
-                        )}
-                      </div>
+                          {inq.message && (
+                            <p className="text-xs text-gray-500 italic line-clamp-1">
+                              &ldquo;{inq.message}&rdquo;
+                            </p>
+                          )}
+                        </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
-                        {/* Option to Add Lead to Partner Clinics */}
-                        <button
-                          type="button"
-                          onClick={() => handleAddLeadToPartnerClinics(inq)}
-                          className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer border border-emerald-200"
-                          title="Add this clinic to Partner Clinics"
-                        >
-                          <Building2 className="w-3.5 h-3.5" />
-                          <span>+ Add to Partner Clinics</span>
-                        </button>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {/* Connected button or Add to Partner Clinics */}
+                          {isConnected ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveTab('clinics');
+                                showToast(`✓ Connected: Viewing ${inq.clinicName} in Partner Clinics roster`);
+                              }}
+                              className="px-2.5 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-xs font-black transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                              title="Clinic is connected to Partner Clinics. Click to view."
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                              <span>Connected</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleAddLeadToPartnerClinics(inq)}
+                              className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer border border-emerald-200 shadow-2xs"
+                              title="Add this clinic to Partner Clinics"
+                            >
+                              <Building2 className="w-3.5 h-3.5 text-emerald-700" />
+                              <span>+ Add to Partner Clinics</span>
+                            </button>
+                          )}
 
-                        {inq.phone && (
+                          {inq.phone && (
+                            <a
+                              href={`tel:${inq.phone}`}
+                              className="px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold transition-colors flex items-center gap-1"
+                            >
+                              <Phone className="w-3 h-3" />
+                              <span>Call</span>
+                            </a>
+                          )}
                           <a
-                            href={`tel:${inq.phone}`}
-                            className="px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold transition-colors flex items-center gap-1"
+                            href={`mailto:${inq.email}?subject=ClinicsAds Consultation: ${encodeURIComponent(inq.clinicName)}`}
+                            className="px-2.5 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 text-gray-800 text-xs font-bold transition-colors flex items-center gap-1"
                           >
-                            <Phone className="w-3 h-3" />
-                            <span>Call</span>
+                            <Mail className="w-3 h-3" />
+                            <span>Email</span>
                           </a>
-                        )}
-                        <a
-                          href={`mailto:${inq.email}?subject=ClinicsAds Consultation: ${encodeURIComponent(inq.clinicName)}`}
-                          className="px-2.5 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 text-gray-800 text-xs font-bold transition-colors flex items-center gap-1"
-                        >
-                          <Mail className="w-3 h-3" />
-                          <span>Email</span>
-                        </a>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -802,7 +862,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                         <th className="py-3 px-3">Contact</th>
                         <th className="py-3 px-3">Service</th>
                         <th className="py-3 px-3">Status</th>
-                        <th className="py-3 px-3 text-right">Partner Roster &amp; Actions</th>
+                        <th className="py-3 px-3 text-right">Partner Status &amp; Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-xs">
@@ -813,94 +873,120 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                           </td>
                         </tr>
                       ) : (
-                        filteredInquiries.map((inq) => (
-                          <tr key={inq.id} className="hover:bg-gray-50/70 transition-colors">
-                            <td className="py-3 px-3 font-mono font-bold text-gray-900 whitespace-nowrap">
-                              {inq.id}
-                            </td>
-                            <td className="py-3 px-3 text-gray-500 whitespace-nowrap">
-                              {new Date(inq.submittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                            </td>
-                            <td className="py-3 px-3 font-medium">
-                              <span className="font-bold text-gray-900 block">{inq.clinicName}</span>
-                              <span className="text-[11px] text-gray-500">{inq.name}</span>
-                            </td>
-                            <td className="py-3 px-3 whitespace-nowrap">
-                              <span className="text-gray-800 block font-medium">{inq.email}</span>
-                              <span className="text-[11px] text-gray-500">{inq.phone || 'No phone provided'}</span>
-                            </td>
-                            <td className="py-3 px-3">
-                              <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-800 font-semibold text-[11px]">
-                                {inq.service}
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 whitespace-nowrap">
-                              <select
-                                value={inq.status}
-                                onChange={(e) => {
-                                  updateInquiryStatus(inq.id, e.target.value as any);
-                                  showToast(`Updated ${inq.id} status to ${e.target.value}`);
-                                }}
-                                className="text-xs font-bold rounded-lg border border-gray-200 px-2 py-1 bg-white text-gray-800 focus:outline-none cursor-pointer"
-                              >
-                                <option value="New">New</option>
-                                <option value="Contacted">Contacted</option>
-                                <option value="Call Booked">Call Booked</option>
-                                <option value="Proposal Sent">Proposal Sent</option>
-                              </select>
-                            </td>
-                            <td className="py-3 px-3 text-right whitespace-nowrap">
-                              <div className="flex items-center justify-end gap-1.5">
-                                {/* Option to Add Lead to Partner Clinics */}
-                                <button
-                                  type="button"
-                                  onClick={() => handleAddLeadToPartnerClinics(inq)}
-                                  className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
-                                  title="Add this lead to Partner Clinics"
-                                >
-                                  <Building2 className="w-3 h-3 text-emerald-700" />
-                                  <span>+ Add to Partner Clinics</span>
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => handleCopyLead(inq)}
-                                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
-                                  title="Copy Lead Summary"
-                                >
-                                  {copiedLeadId === inq.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                                </button>
-                                {inq.phone && (
-                                  <a
-                                    href={`tel:${inq.phone}`}
-                                    className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
-                                    title="Call Phone"
-                                  >
-                                    <Phone className="w-3.5 h-3.5" />
-                                  </a>
-                                )}
-                                <a
-                                  href={`mailto:${inq.email}?subject=ClinicsAds Consultation: ${encodeURIComponent(inq.clinicName)}`}
-                                  className="p-1.5 rounded-lg text-gray-400 hover:text-[#183B2B] hover:bg-gray-100 transition-colors"
-                                  title="Send Email"
-                                >
-                                  <Mail className="w-3.5 h-3.5" />
-                                </a>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    deleteInquiry(inq.id);
-                                    showToast(`Deleted lead ${inq.id}`);
+                        filteredInquiries.map((inq) => {
+                          const isConnected = isClinicConnected(inq.clinicName, inq.email);
+                          return (
+                            <tr key={inq.id} className="hover:bg-gray-50/70 transition-colors">
+                              <td className="py-3 px-3 font-mono font-bold text-gray-900 whitespace-nowrap">
+                                {inq.id}
+                              </td>
+                              <td className="py-3 px-3 text-gray-500 whitespace-nowrap">
+                                {new Date(inq.submittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                              </td>
+                              <td className="py-3 px-3 font-medium">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="font-bold text-gray-900">{inq.clinicName}</span>
+                                  {isConnected && (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                      Connected
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-[11px] text-gray-500">{inq.name}</span>
+                              </td>
+                              <td className="py-3 px-3 whitespace-nowrap">
+                                <span className="text-gray-800 block font-medium">{inq.email}</span>
+                                <span className="text-[11px] text-gray-500">{inq.phone || 'No phone provided'}</span>
+                              </td>
+                              <td className="py-3 px-3">
+                                <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-800 font-semibold text-[11px]">
+                                  {inq.service}
+                                </span>
+                              </td>
+                              <td className="py-3 px-3 whitespace-nowrap">
+                                <select
+                                  value={inq.status}
+                                  onChange={(e) => {
+                                    updateInquiryStatus(inq.id, e.target.value as any);
+                                    showToast(`Updated ${inq.id} status to ${e.target.value}`);
                                   }}
-                                  className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-                                  title="Delete Lead"
+                                  className="text-xs font-bold rounded-lg border border-gray-200 px-2 py-1 bg-white text-gray-800 focus:outline-none cursor-pointer"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
+                                  <option value="New">New</option>
+                                  <option value="Contacted">Contacted</option>
+                                  <option value="Call Booked">Call Booked</option>
+                                  <option value="Proposal Sent">Proposal Sent</option>
+                                </select>
+                              </td>
+                              <td className="py-3 px-3 text-right whitespace-nowrap">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  {/* Displays "Connected" badge button once added to Partner Clinics */}
+                                  {isConnected ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setActiveTab('clinics');
+                                        showToast(`✓ Connected: Viewing ${inq.clinicName} in Partner Clinics directory`);
+                                      }}
+                                      className="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-[11px] font-black transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                                      title="Clinic is connected to Partner Clinics. Click to view."
+                                    >
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                      <span>Connected</span>
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleAddLeadToPartnerClinics(inq)}
+                                      className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
+                                      title="Add this lead to Partner Clinics"
+                                    >
+                                      <Building2 className="w-3 h-3 text-emerald-700" />
+                                      <span>+ Add to Partner Clinics</span>
+                                    </button>
+                                  )}
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCopyLead(inq)}
+                                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                                    title="Copy Lead Summary"
+                                  >
+                                    {copiedLeadId === inq.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                  </button>
+                                  {inq.phone && (
+                                    <a
+                                      href={`tel:${inq.phone}`}
+                                      className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                                      title="Call Phone"
+                                    >
+                                      <Phone className="w-3.5 h-3.5" />
+                                    </a>
+                                  )}
+                                  <a
+                                    href={`mailto:${inq.email}?subject=ClinicsAds Consultation: ${encodeURIComponent(inq.clinicName)}`}
+                                    className="p-1.5 rounded-lg text-gray-400 hover:text-[#183B2B] hover:bg-gray-100 transition-colors"
+                                    title="Send Email"
+                                  >
+                                    <Mail className="w-3.5 h-3.5" />
+                                  </a>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      deleteInquiry(inq.id);
+                                      showToast(`Deleted lead ${inq.id}`);
+                                    }}
+                                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                    title="Delete Lead"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
@@ -945,19 +1031,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                           {clinic.id}
                         </span>
                         <div className="flex items-center gap-2">
+                          {/* Connected indicator badge */}
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Connected
+                          </span>
                           <span className={`px-2 py-0.5 rounded-full text-[10.5px] font-bold ${
                             clinic.status === 'Scaling'
-                              ? 'bg-emerald-100 text-emerald-900 border border-emerald-200'
-                              : clinic.status === 'Active'
                               ? 'bg-blue-100 text-blue-900 border border-blue-200'
-                              : 'bg-amber-100 text-amber-900 border border-amber-200'
+                              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                           }`}>
                             {clinic.status}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleDeletePartnerClinic(clinic.id, clinic.name)}
-                            className="p-1 text-gray-300 hover:text-red-500 rounded transition-colors"
+                            className="p-1 text-gray-300 hover:text-red-500 rounded transition-colors cursor-pointer"
                             title="Remove Partner Clinic"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1158,7 +1247,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
               <button
                 type="button"
                 onClick={() => setIsAddClinicModalOpen(false)}
-                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
