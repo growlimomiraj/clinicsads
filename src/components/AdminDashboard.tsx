@@ -589,6 +589,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                           <tr key={inq.id} className="hover:bg-gray-50/70 transition-colors group">
                             <td className="py-3 px-3 font-bold text-gray-900 whitespace-nowrap">
                               {inq.id}
+                              {inq.source === 'call-booking' && (
+                                <span className="block text-[9.5px] font-extrabold uppercase text-[#183B2B] bg-[#EBF3E4] px-1.5 py-0.5 rounded w-max mt-0.5">
+                                  📞 Call Booked
+                                </span>
+                              )}
                             </td>
                             <td className="py-3 px-3 text-gray-500 whitespace-nowrap text-xs">
                               {formatTimeAgo(inq.submittedAt)}
@@ -597,14 +602,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                               <span className="font-bold text-gray-900 block leading-tight">{inq.name}</span>
                               <span className="text-xs text-[#183B2B] font-semibold block">{inq.clinicName}</span>
                               <span className="text-[11px] text-gray-400 block">{inq.email}</span>
+                              {inq.phone && (
+                                <a
+                                  href={`tel:${inq.phone}`}
+                                  className="text-[11px] text-[#34A853] font-semibold hover:underline flex items-center gap-1 mt-0.5"
+                                >
+                                  <Phone className="w-2.5 h-2.5 shrink-0" />
+                                  <span>{inq.phone}</span>
+                                </a>
+                              )}
                             </td>
                             <td className="py-3 px-3">
                               <span className="inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[#EBF3E4] text-[#183B2B] whitespace-nowrap">
                                 {inq.service}
                               </span>
                             </td>
-                            <td className="py-3 px-3 text-gray-600 max-w-xs text-xs truncate" title={inq.message || 'Standard consultation requested.'}>
-                              {inq.message || 'Standard consultation requested.'}
+                            <td className="py-3 px-3 text-gray-600 max-w-xs text-xs">
+                              {inq.preferredTime && (
+                                <div className="text-[11px] font-semibold text-[#183B2B] flex items-center gap-1 mb-0.5">
+                                  <Clock className="w-3 h-3 text-[#7A9A2E] shrink-0" />
+                                  <span>{inq.preferredTime}</span>
+                                </div>
+                              )}
+                              <p className="truncate text-gray-600" title={inq.message || 'Strategy consultation requested.'}>
+                                {inq.message || 'Strategy consultation requested.'}
+                              </p>
                             </td>
                             <td className="py-3 px-3 whitespace-nowrap">
                               <select
@@ -628,6 +650,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                             </td>
                             <td className="py-3 px-3 text-right whitespace-nowrap">
                               <div className="flex items-center justify-end gap-1.5">
+                                {inq.phone && (
+                                  <a
+                                    href={`tel:${inq.phone}`}
+                                    className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#34A853] hover:bg-[#EBF3E4] transition-colors"
+                                    title={`Call ${inq.name} (${inq.phone})`}
+                                  >
+                                    <Phone className="w-3.5 h-3.5" />
+                                  </a>
+                                )}
                                 <a
                                   href={`mailto:${inq.email}?subject=ClinicsAds Consultation: ${encodeURIComponent(inq.clinicName)}`}
                                   className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#183B2B] hover:bg-[#EBF3E4] transition-colors"
@@ -766,11 +797,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                             <div>
                               <div className="flex items-center gap-2">
                                 <span className="text-[13px] font-bold text-gray-900">{inq.clinicName}</span>
+                                {inq.source === 'call-booking' && (
+                                  <span className="text-[10px] font-extrabold uppercase bg-[#EBF3E4] text-[#183B2B] px-1.5 py-0.5 rounded">
+                                    📞 Call Booked
+                                  </span>
+                                )}
                                 <span className="text-[10px] text-gray-400">· {formatTimeAgo(inq.submittedAt)}</span>
                               </div>
                               <p className="text-xs text-gray-600 mt-0.5">
                                 <strong className="text-gray-800">{inq.name}</strong> ({inq.email}) requested{' '}
                                 <span className="font-semibold text-[#183B2B]">{inq.service}</span>
+                                {inq.preferredTime && (
+                                  <span className="text-gray-500 font-medium"> · 🕒 {inq.preferredTime}</span>
+                                )}
                               </p>
                               {inq.message && (
                                 <p className="text-[11px] text-gray-500 italic mt-0.5 line-clamp-1">
@@ -790,6 +829,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                             >
                               {inq.status}
                             </span>
+                            {inq.phone && (
+                              <a
+                                href={`tel:${inq.phone}`}
+                                className="px-2.5 py-1 rounded-lg bg-[#EBF3E4] text-[#183B2B] text-xs font-bold hover:bg-[#d8e8ca] transition-colors flex items-center gap-1"
+                              >
+                                <Phone className="w-3 h-3" />
+                                <span>Call</span>
+                              </a>
+                            )}
                             <a
                               href={`mailto:${inq.email}`}
                               className="px-3 py-1 rounded-lg border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"

@@ -64,6 +64,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
   const [clinicName, setClinicName] = useState('');
   const [website, setWebsite] = useState('');
   const [service, setService] = useState('Google Ads');
+  const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
@@ -786,16 +787,6 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
   }
 
   // 6. Top-Level "Contact" Page
-  const mailtoSubject = encodeURIComponent(
-    `ClinicsAds Strategy Inquiry — ${clinicName || 'New Clinic'}`
-  );
-  const mailtoBody = encodeURIComponent(
-    `Name: ${name}\nWork Email: ${email}\nClinic Name: ${clinicName}\nWebsite: ${
-      website || 'Not provided'
-    }\nService of Interest: ${service}\nNotes: ${notes || 'None'}`
-  );
-  const composedMailtoUrl = `mailto:${SITE_CONFIG.contact.email}?subject=${mailtoSubject}&body=${mailtoBody}`;
-
   return (
     <div>
       {renderPageHeroBanner(
@@ -900,15 +891,12 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                       Complete the form below to review your clinic’s search demand, landing page experience, and ad opportunities.
                     </p>
 
-                    {!SITE_CONFIG.submissionEndpoint && (
-                      <div className="mb-6 p-3.5 rounded-xl bg-[#F3F8E9] border border-[#C7DCA5] flex items-start gap-2.5 text-[12px] text-[#183B2B]">
-                        <Info className="w-4 h-4 text-[#7A9A2E] shrink-0 mt-0.5" />
-                        <span>
-                          <strong>Interactive Demo Mode:</strong> Submitting formats your consultation request so you can review it or send it directly via email to{' '}
-                          <span className="font-semibold">{SITE_CONFIG.contact.email}</span>.
-                        </span>
-                      </div>
-                    )}
+                    <div className="mb-6 p-3.5 rounded-xl bg-[#F3F8E9] border border-[#DFECC8] flex items-center gap-2 text-[12.5px] text-[#183B2B]">
+                      <CheckCircle2 className="w-4 h-4 text-[#99BC44] shrink-0" />
+                      <span>
+                        <strong>Direct Clinic Intake:</strong> Your consultation request is routed immediately to our Admin Dashboard for review.
+                      </span>
+                    </div>
 
                     <form
                       onSubmit={(e) => {
@@ -916,10 +904,11 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                         addInquiry({
                           name,
                           email,
+                          phone: phone || undefined,
                           clinicName: clinicName || 'Clinic Practice',
                           website: website || undefined,
                           service,
-                          message: notes || undefined,
+                          message: notes || `Direct consultation request for ${service}`,
                           source: 'contact-page',
                         });
                         setContactSubmitted(true);
@@ -964,7 +953,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                           <label
                             htmlFor="page-contact-clinic"
@@ -978,7 +967,24 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                             required
                             value={clinicName}
                             onChange={(e) => setClinicName(e.target.value)}
-                            placeholder="Oakridge Dental & Wellness"
+                            placeholder="Oakridge Dental"
+                            className="w-full px-4 py-2.5 rounded-xl border border-[#C7DCA5] text-[14px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44]"
+                          />
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor="page-contact-phone"
+                            className="block text-[13px] font-semibold text-[#183B2B] mb-1"
+                          >
+                            Phone / WhatsApp <span className="text-[#59665D] font-normal">(optional)</span>
+                          </label>
+                          <input
+                            id="page-contact-phone"
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="+44 7123 456789"
                             className="w-full px-4 py-2.5 rounded-xl border border-[#C7DCA5] text-[14px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44]"
                           />
                         </div>
@@ -988,7 +994,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                             htmlFor="page-contact-website"
                             className="block text-[13px] font-semibold text-[#183B2B] mb-1"
                           >
-                            Clinic Website <span className="text-[#59665D] font-normal">(optional)</span>
+                            Website <span className="text-[#59665D] font-normal">(optional)</span>
                           </label>
                           <input
                             id="page-contact-website"
@@ -1018,6 +1024,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                           <option value="Meta Ads">Meta Ads</option>
                           <option value="ChatGPT Ads & AI Search">ChatGPT Ads &amp; AI Search</option>
                           <option value="Landing Pages">Landing Pages</option>
+                          <option value="Clinic SEO & Local Search">Clinic SEO &amp; Maps 3-Pack</option>
                           <option value="Tracking & Follow-Up">Tracking &amp; Follow-Up (GA4 / GTM)</option>
                           <option value="Clinic Landing Pages">Clinic Landing Pages</option>
                         </select>
@@ -1045,7 +1052,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                           type="submit"
                           className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_6px_20px_rgba(249,115,22,0.35)] cursor-pointer"
                         >
-                          Prepare Consultation Request
+                          Submit Consultation Request →
                         </button>
                       </div>
                     </form>
@@ -1056,15 +1063,11 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                       <CheckCircle2 className="w-6 h-6 text-[#99BC44]" />
                     </div>
                     <h3 className="text-[22px] font-extrabold text-[#183B2B] mb-2">
-                      Inquiry Submitted &amp; Synced to Admin Portal!
+                      Consultation Request Received!
                     </h3>
                     <p className="text-[14px] text-[#59665D] mb-5">
-                      Your consultation inquiry has been captured and registered in the{' '}
-                      <strong className="text-[#183B2B]">ClinicsAds Admin Portal</strong>. You can also send a direct copy to{' '}
-                      <span className="font-semibold text-[#183B2B]">
-                        {SITE_CONFIG.contact.email}
-                      </span>
-                      .
+                      Your inquiry has been directly registered in the{' '}
+                      <strong className="text-[#183B2B]">ClinicsAds Admin Portal</strong>. Our healthcare growth team will review your clinic's objectives and reach out shortly.
                     </p>
                     <div className="rounded-xl bg-[#F3F8E9] p-5 space-y-2 text-[13.5px] text-[#183B2B] mb-6 border border-[#DFECC8]">
                       <div>
@@ -1073,6 +1076,11 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                       <div>
                         <strong>Work Email:</strong> {email}
                       </div>
+                      {phone && (
+                        <div>
+                          <strong>Phone / WhatsApp:</strong> {phone}
+                        </div>
+                      )}
                       <div>
                         <strong>Clinic Name:</strong> {clinicName}
                       </div>
@@ -1101,18 +1109,12 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                       >
                         View in Admin Portal →
                       </button>
-                      <a
-                        href={composedMailtoUrl}
-                        className="px-6 py-2.5 rounded-full border border-[#C7DCA5] text-[#183B2B] text-[13px] font-bold hover:bg-[#F3F8E9] transition-colors"
-                      >
-                        Open in Email ({SITE_CONFIG.contact.email})
-                      </a>
                       <button
                         type="button"
                         onClick={() => setContactSubmitted(false)}
                         className="px-5 py-2.5 rounded-full bg-[#F97316] text-white text-[13px] font-bold hover:bg-[#EA580C] cursor-pointer"
                       >
-                        New Inquiry
+                        Submit Another Request
                       </button>
                     </div>
                   </div>

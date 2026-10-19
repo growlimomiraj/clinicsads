@@ -7,13 +7,15 @@ export interface ClinicInquiry {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   clinicName: string;
   website?: string;
   service: string;
   message?: string;
+  preferredTime?: string;
   submittedAt: string;
   status: 'New' | 'Contacted' | 'Call Booked' | 'Proposal Sent';
-  source: 'modal' | 'contact-page';
+  source: 'modal' | 'contact-page' | 'call-booking';
 }
 
 const STORAGE_KEY = 'clinicsads_inquiries_v1';

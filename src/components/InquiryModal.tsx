@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, CheckCircle2, Info, Phone, Mail } from 'lucide-react';
+import { X, CheckCircle2, Phone, Mail, Calendar, Clock, Sparkles } from 'lucide-react';
 import { SITE_CONFIG } from '../data/siteContent';
 import { addInquiry } from '../data/inquiriesStore';
 
@@ -16,9 +16,12 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [clinicName, setClinicName] = useState('');
   const [website, setWebsite] = useState('');
   const [service, setService] = useState(defaultService);
+  const [preferredTime, setPreferredTime] = useState('Morning (9am - 12pm)');
+  const [notes, setNotes] = useState('');
   const [submittedDemo, setSubmittedDemo] = useState(false);
 
   useEffect(() => {
@@ -44,10 +47,13 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
     addInquiry({
       name,
       email,
+      phone: phone || undefined,
       clinicName: clinicName || 'Clinic Practice',
       website: website || undefined,
       service,
-      source: 'modal',
+      preferredTime,
+      message: notes || `Requested Strategy Call for ${service}`,
+      source: 'call-booking',
     });
     setSubmittedDemo(true);
   };
@@ -57,16 +63,6 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
     onClose();
   };
 
-  const mailtoSubject = encodeURIComponent(
-    `ClinicsAds Strategy Call Request — ${clinicName || 'Clinic Inquiry'}`
-  );
-  const mailtoBody = encodeURIComponent(
-    `Name: ${name}\nWork Email: ${email}\nClinic Name: ${clinicName}\nWebsite: ${
-      website || 'Not provided'
-    }\nService of Interest: ${service}`
-  );
-  const composedMailtoUrl = `mailto:${SITE_CONFIG.contact.email}?subject=${mailtoSubject}&body=${mailtoBody}`;
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#183B2B]/60 backdrop-blur-xs"
@@ -74,7 +70,7 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
       aria-modal="true"
       aria-labelledby="inquiry-modal-title"
     >
-      <div className="relative w-full max-w-[510px] rounded-[24px] bg-white p-6 sm:p-8 shadow-2xl border border-[#DFECC8] max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-[530px] rounded-[24px] bg-white p-6 sm:p-8 shadow-2xl border border-[#DFECC8] max-h-[92vh] overflow-y-auto">
         <button
           type="button"
           onClick={handleResetAndClose}
@@ -86,24 +82,24 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
 
         {!submittedDemo ? (
           <>
-            <div className="mb-5 pr-8">
-              <span className="text-[12px] font-bold text-[#7A9A2E] tracking-wide">
-                ClinicsAds · {SITE_CONFIG.parentNetwork.agencyName} &amp;{' '}
-                {SITE_CONFIG.parentNetwork.founderSiteName}
+            <div className="mb-4 pr-8">
+              <span className="text-[12px] font-bold text-[#7A9A2E] tracking-wide inline-flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#99BC44]" />
+                ClinicsAds · Direct Strategy Intake
               </span>
               <h2
                 id="inquiry-modal-title"
-                className="text-[24px] font-extrabold text-[#183B2B] mt-0.5"
+                className="text-[23px] font-extrabold text-[#183B2B] mt-0.5 tracking-tight"
               >
-                Book a Strategy Consultation
+                Book a Growth Strategy Call
               </h2>
-              <p className="text-[13.5px] text-[#59665D] mt-1">
-                Tell us about your clinic and the services you want to grow. Flexible month-to-month agreements.
+              <p className="text-[13px] text-[#59665D] mt-1">
+                Your booking request is routed directly to our Admin Dashboard for instant review. No email client needed.
               </p>
             </div>
 
-            {/* Direct Contact Strip from growlimo.com */}
-            <div className="mb-4 px-3.5 py-2.5 rounded-xl bg-[#F9FCF4] border border-[#E7F0D8] flex flex-wrap items-center justify-between gap-2 text-[12px] text-[#183B2B]">
+            {/* Direct Contact Strip */}
+            <div className="mb-4 px-3.5 py-2 rounded-xl bg-[#F9FCF4] border border-[#E7F0D8] flex flex-wrap items-center justify-between gap-2 text-[12px] text-[#183B2B]">
               <a
                 href={SITE_CONFIG.contact.phoneHref}
                 className="inline-flex items-center gap-1.5 font-semibold hover:text-[#7A9A2E] transition-colors"
@@ -111,88 +107,137 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                 <Phone className="w-3.5 h-3.5 text-[#99BC44]" />
                 <span>{SITE_CONFIG.contact.phoneDisplay}</span>
               </a>
-              <a
-                href={SITE_CONFIG.contact.emailHref}
-                className="inline-flex items-center gap-1.5 font-semibold hover:text-[#7A9A2E] transition-colors"
-              >
-                <Mail className="w-3.5 h-3.5 text-[#99BC44]" />
-                <span>{SITE_CONFIG.contact.email}</span>
-              </a>
+              <span className="text-gray-400">·</span>
+              <span className="text-gray-600 font-medium">Direct routing to Admin Dashboard</span>
             </div>
 
-            {!SITE_CONFIG.submissionEndpoint && (
-              <div className="mb-5 p-3.5 rounded-xl bg-[#F3F8E9] border border-[#C7DCA5] flex items-start gap-2.5 text-[12px] text-[#183B2B]">
-                <Info className="w-4 h-4 text-[#7A9A2E] shrink-0 mt-0.5" />
-                <span>
-                  <strong>Interactive Demo Mode:</strong> No backend API endpoint is
-                  configured yet. Submitting prepares your inquiry summary so you
-                  can review it or send it directly to{' '}
-                  <span className="font-semibold">{SITE_CONFIG.contact.email}</span>.
-                </span>
-              </div>
-            )}
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label
+                    htmlFor="inquiry-name"
+                    className="block text-[12.5px] font-semibold text-[#183B2B] mb-1"
+                  >
+                    Your Name <span className="text-[#7A9A2E]">*</span>
+                  </label>
+                  <input
+                    id="inquiry-name"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Dr. Sarah Jenkins"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#C7DCA5] text-[13.5px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
+                  />
+                </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="inquiry-name"
-                  className="block text-[13px] font-semibold text-[#183B2B] mb-1"
-                >
-                  Name <span className="text-[#7A9A2E]">*</span>
-                </label>
-                <input
-                  id="inquiry-name"
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Dr. Sarah Jenkins / Practice Manager"
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#C7DCA5] text-[14px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="inquiry-email"
-                  className="block text-[13px] font-semibold text-[#183B2B] mb-1"
-                >
-                  Work Email <span className="text-[#7A9A2E]">*</span>
-                </label>
-                <input
-                  id="inquiry-email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@yourclinic.com"
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#C7DCA5] text-[14px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
-                />
+                <div>
+                  <label
+                    htmlFor="inquiry-email"
+                    className="block text-[12.5px] font-semibold text-[#183B2B] mb-1"
+                  >
+                    Work Email <span className="text-[#7A9A2E]">*</span>
+                  </label>
+                  <input
+                    id="inquiry-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@yourclinic.com"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#C7DCA5] text-[13.5px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="inquiry-clinic"
-                  className="block text-[13px] font-semibold text-[#183B2B] mb-1"
-                >
-                  Clinic Name <span className="text-[#7A9A2E]">*</span>
-                </label>
-                <input
-                  id="inquiry-clinic"
-                  type="text"
-                  required
-                  value={clinicName}
-                  onChange={(e) => setClinicName(e.target.value)}
-                  placeholder="Oakridge Dental & Family Clinic"
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#C7DCA5] text-[14px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label
+                    htmlFor="inquiry-clinic"
+                    className="block text-[12.5px] font-semibold text-[#183B2B] mb-1"
+                  >
+                    Clinic Name <span className="text-[#7A9A2E]">*</span>
+                  </label>
+                  <input
+                    id="inquiry-clinic"
+                    type="text"
+                    required
+                    value={clinicName}
+                    onChange={(e) => setClinicName(e.target.value)}
+                    placeholder="Oakridge Dental & Aesthetics"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#C7DCA5] text-[13.5px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="inquiry-phone"
+                    className="block text-[12.5px] font-semibold text-[#183B2B] mb-1"
+                  >
+                    Phone / WhatsApp <span className="text-[#59665D] font-normal">(optional)</span>
+                  </label>
+                  <input
+                    id="inquiry-phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+44 7123 456789"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#C7DCA5] text-[13.5px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label
+                    htmlFor="inquiry-service"
+                    className="block text-[12.5px] font-semibold text-[#183B2B] mb-1"
+                  >
+                    Primary Service Needed
+                  </label>
+                  <select
+                    id="inquiry-service"
+                    value={service}
+                    onChange={(e) => setService(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#C7DCA5] text-[13.5px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
+                  >
+                    <option value="Google Ads">Google Ads</option>
+                    <option value="Meta Ads">Meta Ads</option>
+                    <option value="Landing Pages">Landing Pages</option>
+                    <option value="ChatGPT & AI Search">ChatGPT &amp; AI Search</option>
+                    <option value="Clinic SEO & Local Search">Clinic SEO &amp; Maps 3-Pack</option>
+                    <option value="Tracking & Follow-Up">Tracking &amp; Follow-Up (GA4 / GTM)</option>
+                    <option value="Clinic Landing Pages">Clinic Landing Pages</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="inquiry-time"
+                    className="block text-[12.5px] font-semibold text-[#183B2B] mb-1"
+                  >
+                    Preferred Call Time
+                  </label>
+                  <select
+                    id="inquiry-time"
+                    value={preferredTime}
+                    onChange={(e) => setPreferredTime(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#C7DCA5] text-[13.5px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
+                  >
+                    <option value="Morning (9am - 12pm)">Morning (9am - 12pm)</option>
+                    <option value="Afternoon (12pm - 4pm)">Afternoon (12pm - 4pm)</option>
+                    <option value="Evening (4pm - 7pm)">Evening (4pm - 7pm)</option>
+                    <option value="ASAP / Next Available">ASAP / Next Available</option>
+                  </select>
+                </div>
               </div>
 
               <div>
                 <label
                   htmlFor="inquiry-website"
-                  className="block text-[13px] font-semibold text-[#183B2B] mb-1"
+                  className="block text-[12.5px] font-semibold text-[#183B2B] mb-1"
                 >
-                  Website <span className="text-[#59665D] font-normal">(optional)</span>
+                  Clinic Website <span className="text-[#59665D] font-normal">(optional)</span>
                 </label>
                 <input
                   id="inquiry-website"
@@ -200,34 +245,28 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
                   placeholder="https://yourclinic.com"
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#C7DCA5] text-[14px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#C7DCA5] text-[13.5px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="inquiry-service"
-                  className="block text-[13px] font-semibold text-[#183B2B] mb-1"
+                  htmlFor="inquiry-notes"
+                  className="block text-[12.5px] font-semibold text-[#183B2B] mb-1"
                 >
-                  Service of Interest
+                  Key Objectives / Current Monthly Spend <span className="text-[#59665D] font-normal">(optional)</span>
                 </label>
-                <select
-                  id="inquiry-service"
-                  value={service}
-                  onChange={(e) => setService(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#C7DCA5] text-[14px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
-                >
-                  <option value="Google Ads">Google Ads</option>
-                  <option value="Meta Ads">Meta Ads</option>
-                  <option value="ChatGPT & AI Search">ChatGPT &amp; AI Search</option>
-                  <option value="Clinic SEO & Local Search">Clinic SEO &amp; Local Search</option>
-                  <option value="Landing Pages">Landing Pages</option>
-                  <option value="Tracking & Follow-Up">Tracking &amp; Follow-Up (GA4 / GTM)</option>
-                  <option value="Clinic Landing Pages">Clinic Landing Pages</option>
-                </select>
+                <textarea
+                  id="inquiry-notes"
+                  rows={2}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="e.g. Opening new branch in November, aiming for 25+ private patient consultations/mo..."
+                  className="w-full px-3.5 py-2 rounded-xl border border-[#C7DCA5] text-[13px] text-[#183B2B] focus:outline-2 focus:outline-[#99BC44] bg-white"
+                />
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-3">
+              <div className="pt-2 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={handleResetAndClose}
@@ -237,9 +276,9 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-2.5 rounded-full bg-[#F97316] text-white text-[13.5px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_4px_14px_rgba(249,115,22,0.3)] cursor-pointer"
+                  className="px-7 py-3 rounded-full bg-[#F97316] text-white text-[13.5px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_4px_14px_rgba(249,115,22,0.3)] cursor-pointer"
                 >
-                  Preview Inquiry Summary
+                  Confirm Strategy Call Booking →
                 </button>
               </div>
             </form>
@@ -250,33 +289,45 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
               <CheckCircle2 className="w-6 h-6 text-[#99BC44]" />
             </div>
 
-            <h3 className="text-[20px] font-extrabold text-[#183B2B] mb-1">
-              Inquiry Submitted &amp; Synced to Admin Portal!
+            <h3 className="text-[21px] font-extrabold text-[#183B2B] mb-1">
+              Strategy Call Booked!
             </h3>
-            <p className="text-[13px] text-[#59665D] leading-relaxed mb-4">
-              Your inquiry has been successfully captured and registered in the{' '}
-              <strong className="text-[#183B2B]">ClinicsAds Admin Portal</strong>. You can also send a direct copy to{' '}
-              <strong className="text-[#183B2B]">{SITE_CONFIG.contact.email}</strong>.
+            <p className="text-[13.5px] text-[#59665D] leading-relaxed mb-4">
+              Your call inquiry has been routed directly to the{' '}
+              <strong className="text-[#183B2B]">ClinicsAds Admin Panel</strong>. Usman and the healthcare marketing team will review your clinic's objectives and reach out for the strategy consultation.
             </p>
 
             <div className="rounded-xl bg-[#F3F8E9] p-4 space-y-2 text-[13px] text-[#183B2B] mb-6 border border-[#DFECC8]">
               <div>
-                <span className="font-semibold">Name:</span> {name}
+                <span className="font-semibold text-gray-700">Client / Doctor:</span> {name}
               </div>
               <div>
-                <span className="font-semibold">Work Email:</span> {email}
+                <span className="font-semibold text-gray-700">Work Email:</span> {email}
               </div>
-              <div>
-                <span className="font-semibold">Clinic Name:</span> {clinicName}
-              </div>
-              {website && (
+              {phone && (
                 <div>
-                  <span className="font-semibold">Website:</span> {website}
+                  <span className="font-semibold text-gray-700">Phone / WhatsApp:</span> {phone}
                 </div>
               )}
               <div>
-                <span className="font-semibold">Selected Service:</span> {service}
+                <span className="font-semibold text-gray-700">Clinic Name:</span> {clinicName}
               </div>
+              {website && (
+                <div>
+                  <span className="font-semibold text-gray-700">Website:</span> {website}
+                </div>
+              )}
+              <div>
+                <span className="font-semibold text-gray-700">Selected Service:</span> {service}
+              </div>
+              <div>
+                <span className="font-semibold text-gray-700">Preferred Time:</span> {preferredTime}
+              </div>
+              {notes && (
+                <div>
+                  <span className="font-semibold text-gray-700">Notes:</span> {notes}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-wrap items-center justify-end gap-3">
@@ -286,20 +337,15 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                   handleResetAndClose();
                   window.location.hash = 'admin';
                 }}
-                className="px-4 py-2.5 rounded-full bg-[#183B2B] text-white text-[12.5px] font-bold hover:bg-[#23503b] transition-colors cursor-pointer shadow-xs"
+                className="px-5 py-2.5 rounded-full bg-[#183B2B] text-white text-[12.5px] font-bold hover:bg-[#23503b] transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
               >
-                View in Admin Portal →
+                <span>View in Admin Portal</span>
+                <span>→</span>
               </button>
-              <a
-                href={composedMailtoUrl}
-                className="px-4 py-2.5 rounded-full border border-[#C7DCA5] text-[#183B2B] text-[12.5px] font-bold hover:bg-[#F3F8E9] transition-colors"
-              >
-                Open in Email
-              </a>
               <button
                 type="button"
                 onClick={handleResetAndClose}
-                className="px-4 py-2.5 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] cursor-pointer"
+                className="px-5 py-2.5 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] cursor-pointer"
               >
                 Done
               </button>
