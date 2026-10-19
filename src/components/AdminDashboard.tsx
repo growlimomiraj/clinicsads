@@ -18,6 +18,7 @@ import {
   ArrowUpRight,
   Send,
   X,
+  PhoneCall,
   Activity,
   Layers,
   Sparkles,
@@ -30,9 +31,8 @@ import {
   CheckCircle2,
   Clock,
   PlusCircle,
-  RotateCcw,
-  ShieldCheck,
-  Check
+  ChevronDown,
+  Filter
 } from 'lucide-react';
 import {
   ClinicInquiry,
@@ -40,8 +40,7 @@ import {
   subscribeToInquiries,
   updateInquiryStatus,
   deleteInquiry,
-  addInquiry,
-  resetToRealInquiries
+  addInquiry
 } from '../data/inquiriesStore';
 
 interface AdminDashboardProps {
@@ -51,25 +50,23 @@ interface AdminDashboardProps {
 interface PartnerClinicItem {
   id: string;
   name: string;
-  location: string;
   logoSrc?: string;
   avatarBg: string;
   initials: string;
   service: string;
   contactPerson: string;
-  phone: string;
-  email: string;
-  status: 'active' | 'scaling';
+  status: 'active' | 'review' | 'scaling';
 }
 
-interface ClinicEngagement {
+interface ClinicBilling {
   clinicId: string;
-  plan: string;
+  tier: string;
   clinicName: string;
   leadService: string;
-  agreement: string;
-  channels: string;
-  status: 'Active' | 'Scaling';
+  billingDate: string;
+  adSpend: string;
+  retainerFee: string;
+  status: 'Received' | 'Pending';
 }
 
 function formatTimeAgo(isoString: string): string {
@@ -96,7 +93,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
-  // Live Connected Inquiries Store (Real Data)
+  // Live Connected Inquiries Store
   const [inquiries, setInquiries] = useState<ClinicInquiry[]>(getInquiries);
 
   useEffect(() => {
@@ -109,77 +106,63 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     return inquiries.filter((i) => i.status === 'New').length;
   }, [inquiries]);
 
-  const callsBookedCount = useMemo(() => {
-    return inquiries.filter((i) => i.status === 'Call Booked' || i.source === 'call-booking').length;
-  }, [inquiries]);
-
   // Leads Filter State
   const [leadsStatusFilter, setLeadsStatusFilter] = useState<'All' | 'New' | 'Contacted' | 'Call Booked' | 'Proposal Sent'>('All');
   const [leadsServiceFilter, setLeadsServiceFilter] = useState<string>('All');
   const [leadsSearch, setLeadsSearch] = useState('');
 
-  // Manual Add Lead Modal State
-  const [showAddLeadModal, setShowAddLeadModal] = useState(false);
-  const [newLeadName, setNewLeadName] = useState('');
-  const [newLeadEmail, setNewLeadEmail] = useState('');
-  const [newLeadPhone, setNewLeadPhone] = useState('');
-  const [newLeadClinic, setNewLeadClinic] = useState('');
-  const [newLeadWebsite, setNewLeadWebsite] = useState('');
-  const [newLeadService, setNewLeadService] = useState('Google Ads');
-  const [newLeadTime, setNewLeadTime] = useState('Morning (9am - 12pm)');
-  const [newLeadMessage, setNewLeadMessage] = useState('');
-
-  // Weekly Optimization Checklist (Real ClinicsAds Deliverables)
+  // Weekly Optimization Checklist (aligned with ClinicsAds services)
   const [weeklyPlan, setWeeklyPlan] = useState([
-    { id: '1', label: 'Negative keyword scrubbing in Google Ads to cut wasted budget', completed: false, service: 'Google Ads' },
-    { id: '2', label: 'Server-side GA4 & CallRail conversion tracking verification', completed: false, service: 'Attribution' },
-    { id: '3', label: 'Meta retargeting ad creative refresh with clinical proof', completed: true, service: 'Meta Ads' },
-    { id: '4', label: 'CallRail dynamic number insertion routing check', completed: true, service: 'Attribution' },
-    { id: '5', label: 'Clinic landing page sub-2.0s mobile speed audit', completed: true, service: 'Landing Pages' },
+    { id: '1', label: 'Negative keyword scrubbing', completed: false, service: 'Google Ads' },
+    { id: '2', label: 'Server-side GA4 conversion audit', completed: false, service: 'Tracking' },
+    { id: '3', label: 'Meta retargeting creative refresh', completed: true, service: 'Meta Ads' },
+    { id: '4', label: 'CallRail patient routing verification', completed: true, service: 'Tracking' },
+    { id: '5', label: 'Landing page sub-2s speed check', completed: true, service: 'Landing Pages' },
   ]);
 
-  // Real Healthcare Marketing Channels
+  // Today's Active Channels & Core Services
   const [activeServices, setActiveServices] = useState([
-    { id: '1', label: 'Google Search Ads (High-Intent Patients)', completed: true, icon: 'google' },
-    { id: '2', label: 'Meta Ads (FB & Instagram Local Radius)', completed: true, icon: 'meta' },
-    { id: '3', label: 'Dedicated Clinic Landing Pages (<2s CRO)', completed: true, icon: 'landing' },
-    { id: '4', label: 'Server-Side GA4 & Call Attribution', completed: true, icon: 'analytics' },
-    { id: '5', label: 'ChatGPT & AI Search Engine Placement', completed: true, icon: 'gpt' },
-    { id: '6', label: 'Google Maps 3-Pack & Clinic Local SEO', completed: true, icon: 'seo' },
+    { id: '1', label: 'Google Search Ads (Intent)', completed: true, icon: 'google' },
+    { id: '2', label: 'Meta Ads (FB & Instagram)', completed: true, icon: 'meta' },
+    { id: '3', label: 'Dedicated Clinic Landing Pages', completed: true, icon: 'landing' },
+    { id: '4', label: 'Server-Side Attribution & GA4', completed: true, icon: 'analytics' },
+    { id: '5', label: 'ChatGPT & AI Search Engine', completed: false, icon: 'gpt' },
+    { id: '6', label: 'Google Maps 3-Pack & Clinic SEO', completed: false, icon: 'seo' },
   ]);
 
-  // Real Partner Clinics from the Website
+  // Partner Clinics
   const partnerClinics: PartnerClinicItem[] = [
-    { id: '1', name: 'First Response Healthcare', location: 'Dubai, UAE', logoSrc: '/logos/first-response-healthcare.webp', avatarBg: 'bg-[#183B2B]', initials: 'FR', service: 'Google & Meta Ads', contactPerson: 'Dr. Narayan', phone: '+971 4 330 0999', email: 'director@firstresponse.ae', status: 'scaling' },
-    { id: '2', name: 'GetChecked', location: 'Albuquerque, NM', logoSrc: '/logos/getchecked.svg', avatarBg: 'bg-[#2A6F56]', initials: 'GC', service: 'ChatGPT & Search Ads', contactPerson: 'Sarah Jenkins', phone: '+1 (667) 347-4729', email: 'contact@getchecked.com', status: 'active' },
-    { id: '3', name: 'MMC Dubai', location: 'Dubai, UAE', logoSrc: '/logos/mmc-dubai.png', avatarBg: 'bg-[#407B64]', initials: 'MM', service: 'Local Radius & Meta Ads', contactPerson: 'Dr. Tariq Al-Mansoor', phone: '+971 4 388 9988', email: 'appointments@mmcdubai.ae', status: 'active' },
-    { id: '4', name: 'Novelty Clinic', location: 'Dubai, UAE', logoSrc: '/logos/novelty-clinic.svg', avatarBg: 'bg-[#628F79]', initials: 'NC', service: 'Landing Pages & Search', contactPerson: 'Elena Rostova', phone: '+971 4 220 1100', email: 'growth@noveltyclinic.ae', status: 'active' },
-    { id: '5', name: 'Art of Mobility', location: 'Ontario, Canada', logoSrc: '/logos/art-of-mobility.svg', avatarBg: 'bg-[#76828E]', initials: 'AM', service: 'Physio Search & CRO', contactPerson: 'Mark Henderson', phone: '+1 416 555 0192', email: 'mark@artofmobility.ca', status: 'scaling' },
-    { id: '6', name: 'Bodyworks Physio', location: 'Sydney, Australia', logoSrc: '/logos/bodyworks-physio.png', avatarBg: 'bg-[#3A7E64]', initials: 'BW', service: 'Maps 3-Pack & Google Ads', contactPerson: 'David Miller', phone: '+61 2 9555 1200', email: 'info@bodyworksphysio.com.au', status: 'active' },
-    { id: '7', name: 'Cambridge Physio', location: 'Cambridge, UK', logoSrc: '/logos/cambridge-physio.webp', avatarBg: 'bg-[#899D78]', initials: 'CP', service: 'Meta Retargeting & GA4', contactPerson: 'Claire Bennett', phone: '+44 1223 555432', email: 'claire@cambridgephysio.co.uk', status: 'active' },
-    { id: '8', name: 'Encore Physiotherapy', location: 'Edmonton, Canada', logoSrc: '/logos/encore-physiotherapy.jpeg', avatarBg: 'bg-[#374151]', initials: 'EP', service: 'Call Attribution & Search', contactPerson: 'Robert Hall', phone: '+1 780 555 8899', email: 'robert@encorephysio.ca', status: 'active' },
+    { id: '1', name: 'First Response Healthcare', logoSrc: '/logos/first-response-healthcare.webp', avatarBg: 'bg-[#183B2B]', initials: 'FR', service: 'Google & Meta Ads', contactPerson: 'Dr. Narayan', status: 'scaling' },
+    { id: '2', name: 'GetChecked', logoSrc: '/logos/getchecked.svg', avatarBg: 'bg-[#2A6F56]', initials: 'GC', service: 'ChatGPT & Search Ads', contactPerson: 'Sarah Jenkins', status: 'active' },
+    { id: '3', name: 'MMC Dubai', logoSrc: '/logos/mmc-dubai.png', avatarBg: 'bg-[#407B64]', initials: 'MM', service: 'Local Radius & Meta Ads', contactPerson: 'Dr. Tariq Al-Mansoor', status: 'active' },
+    { id: '4', name: 'Novelty Clinic', logoSrc: '/logos/novelty-clinic.svg', avatarBg: 'bg-[#628F79]', initials: 'NC', service: 'Landing Pages & Search', contactPerson: 'Elena Rostova', status: 'active' },
+    { id: '5', name: 'Art of Mobility', logoSrc: '/logos/art-of-mobility.svg', avatarBg: 'bg-[#76828E]', initials: 'AM', service: 'Physio Search & CRO', contactPerson: 'Mark Henderson', status: 'scaling' },
+    { id: '6', name: 'Bodyworks Physio', logoSrc: '/logos/bodyworks-physio.png', avatarBg: 'bg-[#3A7E64]', initials: 'BW', service: 'Maps 3-Pack & Google Ads', contactPerson: 'David Miller', status: 'active' },
+    { id: '7', name: 'Cambridge Physio', logoSrc: '/logos/cambridge-physio.webp', avatarBg: 'bg-[#899D78]', initials: 'CP', service: 'Meta Retargeting & GA4', contactPerson: 'Claire Bennett', status: 'active' },
+    { id: '8', name: 'Encore Physiotherapy', logoSrc: '/logos/encore-physiotherapy.jpeg', avatarBg: 'bg-[#374151]', initials: 'EP', service: 'Call Attribution & Search', contactPerson: 'Robert Hall', status: 'active' },
   ];
 
-  // Active Partner Clinic Engagements & Deliverables
-  const [engagements, setEngagements] = useState<ClinicEngagement[]>([
-    { clinicId: 'CL-2034', plan: 'Scale Plan', clinicName: 'First Response Healthcare', leadService: 'Google & Meta Search', agreement: 'Month-to-Month', channels: 'Search Ads & Instagram Reels', status: 'Scaling' },
-    { clinicId: 'CL-3434', plan: 'AI Growth', clinicName: 'GetChecked', leadService: 'AI Search & Google Ads', agreement: 'Month-to-Month', channels: 'ChatGPT Citations & Google Ads', status: 'Active' },
-    { clinicId: 'CL-2035', plan: 'Local Radius', clinicName: 'MMC Dubai', leadService: 'Local Radius Meta Ads', agreement: 'Month-to-Month', channels: 'Meta Feed & WhatsApp Direct', status: 'Active' },
-    { clinicId: 'CL-1034', plan: 'CRO & Search', clinicName: 'Novelty Clinic', leadService: 'Clinic Landing Pages & CRO', agreement: 'Month-to-Month', channels: 'Sub-2s Landers & Search Ads', status: 'Active' },
-    { clinicId: 'CL-2065', plan: 'Physio Scale', clinicName: 'Art of Mobility', leadService: 'Physio Search & CRO', agreement: 'Month-to-Month', channels: 'Private Patient Funnels', status: 'Scaling' },
-    { clinicId: 'CL-2001', plan: 'Maps Dominance', clinicName: 'Bodyworks Physio', leadService: 'Maps 3-Pack & Local Search', agreement: 'Month-to-Month', channels: 'Google Business Profile & SEO', status: 'Active' },
-    { clinicId: 'CL-2033', plan: 'Retargeting', clinicName: 'Cambridge Physio', leadService: 'Meta Retargeting & GA4', agreement: 'Month-to-Month', channels: 'Custom Audiences & GA4', status: 'Active' },
-    { clinicId: 'CL-1134', plan: 'Call Tracking', clinicName: 'Encore Physiotherapy', leadService: 'Call Attribution & Search', agreement: 'Month-to-Month', channels: 'CallRail & High-Intent Search', status: 'Active' },
+  // Clinic Billings / Invoices
+  const [billings, setBillings] = useState<ClinicBilling[]>([
+    { clinicId: 'CL-2034', tier: 'Scale', clinicName: 'First Response Healthcare', leadService: 'Google & Meta Ads', billingDate: '01.01.2025', adSpend: '£6,500', retainerFee: '£1,800', status: 'Received' },
+    { clinicId: 'CL-3434', tier: 'Growth', clinicName: 'GetChecked', leadService: 'AI Search & Google Ads', billingDate: '01.10.2024', adSpend: '£4,200', retainerFee: '£1,500', status: 'Received' },
+    { clinicId: 'CL-2035', tier: 'Starter', clinicName: 'MMC Dubai', leadService: 'Local Radius & Meta Ads', billingDate: '01.10.2024', adSpend: '£2,800', retainerFee: '£950', status: 'Pending' },
+    { clinicId: 'CL-1034', tier: 'Growth', clinicName: 'Novelty Clinic', leadService: 'Landing Pages & Search', billingDate: '15.09.2024', adSpend: '£5,100', retainerFee: '£1,650', status: 'Received' },
+    { clinicId: 'CL-2065', tier: 'Scale', clinicName: 'Art of Mobility', leadService: 'Physio Search & CRO', billingDate: '01.01.2025', adSpend: '£7,200', retainerFee: '£2,100', status: 'Received' },
+    { clinicId: 'CL-2001', tier: 'Starter', clinicName: 'Bodyworks Physio', leadService: 'Maps 3-Pack & Google Ads', billingDate: '15.07.2024', adSpend: '£2,100', retainerFee: '£850', status: 'Received' },
+    { clinicId: 'CL-2033', tier: 'Growth', clinicName: 'Cambridge Physio', leadService: 'Meta Retargeting & GA4', billingDate: '01.01.2025', adSpend: '£3,900', retainerFee: '£1,300', status: 'Received' },
+    { clinicId: 'CL-1134', tier: 'Starter', clinicName: 'Encore Physiotherapy', leadService: 'Call Attribution & Search', billingDate: '01.01.2025', adSpend: '£2,400', retainerFee: '£900', status: 'Received' },
   ]);
 
-  const [engagementFilter, setEngagementFilter] = useState<'All' | 'Active' | 'Scaling'>('All');
-  const [engagementSearch, setEngagementSearch] = useState('');
+  const [billingFilter, setBillingFilter] = useState<'All' | 'Received' | 'Pending'>('All');
+  const [billingSearch, setBillingSearch] = useState('');
 
   // Modals for direct clinic communication
   const [activeChatClinic, setActiveChatClinic] = useState<PartnerClinicItem | null>(null);
   const [activeCallClinic, setActiveCallClinic] = useState<PartnerClinicItem | null>(null);
   const [chatMessage, setChatMessage] = useState('');
 
+  // Dynamic calculation of weekly plan completion percentage
   const planCompletedCount = weeklyPlan.filter(p => p.completed).length;
   const planPercentage = Math.round((planCompletedCount / weeklyPlan.length) * 100);
 
@@ -195,32 +178,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     );
   };
 
-  const filteredEngagements = useMemo(() => {
-    return engagements.filter(e => {
-      const matchesFilter = engagementFilter === 'All' || e.status === engagementFilter;
-      const q = engagementSearch.toLowerCase();
+  const filteredBillings = useMemo(() => {
+    return billings.filter(b => {
+      const matchesFilter = billingFilter === 'All' || b.status === billingFilter;
+      const q = billingSearch.toLowerCase();
       const matchesSearch =
-        e.clinicName.toLowerCase().includes(q) ||
-        e.clinicId.toLowerCase().includes(q) ||
-        e.leadService.toLowerCase().includes(q) ||
-        e.channels.toLowerCase().includes(q);
+        b.clinicName.toLowerCase().includes(q) ||
+        b.clinicId.toLowerCase().includes(q) ||
+        b.leadService.toLowerCase().includes(q) ||
+        b.tier.toLowerCase().includes(q);
       return matchesFilter && matchesSearch;
     });
-  }, [engagements, engagementFilter, engagementSearch]);
+  }, [billings, billingFilter, billingSearch]);
 
-  const toggleEngagementStatus = (clinicId: string) => {
-    setEngagements(prev =>
-      prev.map(e => {
-        if (e.clinicId === clinicId) {
-          const nextStatus = e.status === 'Active' ? 'Scaling' : 'Active';
-          return { ...e, status: nextStatus };
+  const toggleBillingStatus = (clinicId: string) => {
+    setBillings(prev =>
+      prev.map(b => {
+        if (b.clinicId === clinicId) {
+          const nextStatus = b.status === 'Received' ? 'Pending' : 'Received';
+          return { ...b, status: nextStatus };
         }
-        return e;
+        return b;
       })
     );
   };
 
-  // Filtered Inquiries for the Patient Leads view (Real Data)
+  // Filtered Inquiries for the Patient Leads view
   const filteredInquiries = useMemo(() => {
     return inquiries.filter(inq => {
       const matchesStatus = leadsStatusFilter === 'All' || inq.status === leadsStatusFilter;
@@ -230,35 +213,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
         inq.name.toLowerCase().includes(q) ||
         inq.clinicName.toLowerCase().includes(q) ||
         inq.email.toLowerCase().includes(q) ||
-        (inq.phone && inq.phone.toLowerCase().includes(q)) ||
         (inq.message && inq.message.toLowerCase().includes(q));
       return matchesStatus && matchesService && matchesSearch;
     });
   }, [inquiries, leadsStatusFilter, leadsServiceFilter, leadsSearch]);
 
-  const handleManualAddLead = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newLeadName.trim() || !newLeadEmail.trim()) return;
-
+  // Simulate a test incoming lead
+  const handleSimulateLead = () => {
+    const testClinics = [
+      { name: 'Dr. Robert Hayes', clinic: 'Highland Spinal & Sports Physio', email: 'rhayes@highlandphysio.com', service: 'Google Ads' },
+      { name: 'Dr. Layla Mansour', clinic: 'Elysian Aesthetic Dental', email: 'layla@elysiandental.ae', service: 'Meta Ads' },
+      { name: 'Dr. James Thorne', clinic: 'Pinnacle Urgent Care', email: 'jthorne@pinnacleurgent.com', service: 'Landing Pages' }
+    ];
+    const pick = testClinics[Math.floor(Math.random() * testClinics.length)];
     addInquiry({
-      name: newLeadName.trim(),
-      email: newLeadEmail.trim(),
-      phone: newLeadPhone.trim() || undefined,
-      clinicName: newLeadClinic.trim() || 'Clinic Client',
-      website: newLeadWebsite.trim() || undefined,
-      service: newLeadService,
-      preferredTime: newLeadTime,
-      message: newLeadMessage.trim() || `Manual Intake lead logged for ${newLeadService}`,
-      source: 'call-booking',
+      name: pick.name,
+      clinicName: pick.clinic,
+      email: pick.email,
+      website: `https://${pick.clinic.toLowerCase().replace(/[^a-z]/g, '')}.com`,
+      service: pick.service,
+      message: 'Interested in growing patient booking volume through targeted healthcare campaigns.',
+      source: 'modal'
     });
-
-    setNewLeadName('');
-    setNewLeadEmail('');
-    setNewLeadPhone('');
-    setNewLeadClinic('');
-    setNewLeadWebsite('');
-    setNewLeadMessage('');
-    setShowAddLeadModal(false);
   };
 
   return (
@@ -296,16 +272,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
         {/* Right Header Actions */}
         <div className="flex items-center gap-2 sm:gap-3 relative">
+          {/* Settings Button */}
           <button
             type="button"
-            onClick={() => setActiveTab('campaigns')}
             className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-gray-200 text-gray-700 text-[13px] font-medium hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            <ShieldCheck className="w-3.5 h-3.5 text-[#34A853]" />
-            <span>6 Active Channels</span>
+            <span>Settings</span>
+            <Settings className="w-3.5 h-3.5 text-gray-500" />
           </button>
 
-          {/* Notifications Bell with Real Leads Badge */}
+          {/* Notifications Bell with Connected Leads Badge */}
           <div className="relative">
             <button
               type="button"
@@ -325,36 +301,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             {notificationsOpen && (
               <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 z-50 animate-in fade-in zoom-in-95">
                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-                  <span className="text-xs font-bold text-[#183B2B]">Live Website Submissions</span>
+                  <span className="text-xs font-bold text-[#183B2B]">Live Patient Inquiries</span>
                   <span className="text-[10px] font-semibold bg-[#EBF3E4] text-[#183B2B] px-1.5 py-0.5 rounded">
                     {newInquiriesCount} New
                   </span>
                 </div>
                 <div className="divide-y divide-gray-50 max-h-60 overflow-y-auto">
-                  {inquiries.length === 0 ? (
-                    <div className="py-4 text-center text-xs text-gray-400">
-                      No inquiries received yet.
-                    </div>
-                  ) : (
-                    inquiries.slice(0, 4).map((inq) => (
-                      <div
-                        key={inq.id}
-                        onClick={() => {
-                          setActiveTab('leads');
-                          setNotificationsOpen(false);
-                        }}
-                        className="py-2.5 px-1 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-[12px] font-bold text-gray-800">{inq.clinicName}</span>
-                          <span className="text-[10px] text-gray-400">{formatTimeAgo(inq.submittedAt)}</span>
-                        </div>
-                        <p className="text-[11px] text-gray-500 truncate mt-0.5">
-                          {inq.name} · {inq.service}
-                        </p>
+                  {inquiries.slice(0, 4).map((inq) => (
+                    <div
+                      key={inq.id}
+                      onClick={() => {
+                        setActiveTab('leads');
+                        setNotificationsOpen(false);
+                      }}
+                      className="py-2.5 px-1 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold text-gray-800">{inq.clinicName}</span>
+                        <span className="text-[10px] text-gray-400">{formatTimeAgo(inq.submittedAt)}</span>
                       </div>
-                    ))
-                  )}
+                      <p className="text-[11px] text-gray-500 truncate mt-0.5">
+                        {inq.name} · {inq.service}
+                      </p>
+                    </div>
+                  ))}
                 </div>
                 <div className="pt-2 border-t border-gray-100 text-center">
                   <button
@@ -387,18 +357,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
           <button
             type="button"
             onClick={onExit}
-            className="ml-2 px-3.5 py-1.5 rounded-full bg-[#183B2B]/10 hover:bg-[#183B2B]/20 text-[#183B2B] text-xs font-bold transition-colors cursor-pointer"
-            title="Return to Public Website"
+            className="ml-2 px-3 py-1.5 rounded-full bg-[#183B2B]/10 hover:bg-[#183B2B]/20 text-[#183B2B] text-xs font-semibold transition-colors cursor-pointer"
+            title="Return to Main ClinicsAds Website"
           >
             Back to Site
           </button>
         </div>
       </header>
 
-      {/* Main Body */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Vertical Navigation Sidebar */}
-        <aside className="w-16 md:w-60 bg-white border-r border-gray-200/80 p-3 md:p-4 flex flex-col justify-between shrink-0">
+      {/* Main Container: Left Sidebar + Content Canvas */}
+      <div className="flex-1 flex w-full max-w-[1560px] mx-auto">
+        {/* Left Vertical Sidebar */}
+        <aside className="w-20 md:w-56 shrink-0 bg-white border-r border-gray-200/80 p-3 sm:p-5 flex flex-col justify-between">
           <div className="space-y-1.5">
             <button
               type="button"
@@ -439,7 +409,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
               <span className="hidden md:inline">Partner Clinics</span>
             </button>
 
-            {/* Patient Leads Tab (Real Data) */}
+            {/* Patient Leads Tab (Connected with Form Submissions) */}
             <button
               type="button"
               onClick={() => setActiveTab('leads')}
@@ -474,23 +444,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             </button>
           </div>
 
-          {/* Bottom Sidebar: Return to site */}
+          {/* Bottom Sidebar: Help & Logout */}
           <div className="space-y-1.5 pt-6 border-t border-gray-100">
             <button
               type="button"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100/60 transition-colors cursor-pointer"
+            >
+              <HelpCircle className="w-4 h-4 text-gray-400" />
+              <span className="hidden md:inline">Knowledge Base</span>
+            </button>
+            <button
+              type="button"
               onClick={onExit}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-gray-500 hover:text-[#183B2B] hover:bg-gray-100/60 transition-colors cursor-pointer"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-gray-500 hover:text-[#EA4335] hover:bg-red-50 transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden md:inline">Public Site</span>
+              <span className="hidden md:inline">Back to Site</span>
             </button>
           </div>
         </aside>
 
         {/* Content Canvas */}
         <main className="flex-1 p-4 sm:p-7 overflow-y-auto space-y-7">
-          {/* TAB 1: PATIENT LEADS CENTER */}
-          {activeTab === 'leads' && (
+          {/* VIEW 1: DEDICATED PATIENT LEADS VIEW (CONNECTED WITH INQUIRY FORMS) */}
+          {activeTab === 'leads' ? (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -498,44 +475,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     Inquiries &amp; Patient Leads Center
                   </h1>
                   <p className="text-[13.5px] text-gray-500 mt-1 font-medium">
-                    Verified real-time leads submitted through the ClinicsAds booking modal and contact form.
+                    Real-time leads submitted through website booking modals and strategy consultation forms.
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex items-center gap-2.5">
                   <button
                     type="button"
-                    onClick={() => setShowAddLeadModal(true)}
+                    onClick={handleSimulateLead}
                     className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#183B2B] text-white text-[12.5px] font-bold hover:bg-[#204e39] transition-colors cursor-pointer shadow-xs"
+                    title="Simulate a real-time incoming form submission"
                   >
                     <PlusCircle className="w-4 h-4" />
-                    <span>+ Log Patient Lead</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      resetToRealInquiries();
-                      setInquiries(getInquiries());
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-gray-600 text-[12px] font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
-                    title="Purge dummy template items and preserve real leads"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Reset Real Data</span>
+                    <span>Simulate Test Lead</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveTab('dashboard')}
-                    className="px-3.5 py-2 rounded-xl border border-gray-200 text-gray-700 text-[12.5px] font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl border border-gray-200 text-gray-700 text-[12.5px] font-semibold hover:bg-gray-50 transition-colors"
                   >
                     ← Dashboard
                   </button>
                 </div>
               </div>
 
-              {/* Inquiries KPI Summary Cards (Real Calculations) */}
+              {/* Inquiries KPI Summary Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="bg-white border border-gray-200/70 rounded-2xl p-4 shadow-xs">
-                  <span className="text-xs font-semibold text-gray-500">Total Inquiries</span>
+                  <span className="text-xs font-semibold text-gray-500">Total Form Submissions</span>
                   <p className="text-2xl sm:text-3xl font-extrabold text-[#183B2B] mt-1">{inquiries.length}</p>
                 </div>
                 <div className="bg-[#183B2B] text-white rounded-2xl p-4 shadow-xs">
@@ -547,12 +513,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 </div>
                 <div className="bg-white border border-gray-200/70 rounded-2xl p-4 shadow-xs">
                   <span className="text-xs font-semibold text-gray-500">Calls Booked</span>
-                  <p className="text-2xl sm:text-3xl font-extrabold text-[#34A853] mt-1">{callsBookedCount}</p>
+                  <p className="text-2xl sm:text-3xl font-extrabold text-[#34A853] mt-1">
+                    {inquiries.filter((i) => i.status === 'Call Booked').length}
+                  </p>
                 </div>
                 <div className="bg-white border border-gray-200/70 rounded-2xl p-4 shadow-xs">
-                  <span className="text-xs font-semibold text-gray-500">Consultation Rate</span>
+                  <span className="text-xs font-semibold text-gray-500">Conversion Rate</span>
                   <p className="text-2xl sm:text-3xl font-extrabold text-[#183B2B] mt-1">
-                    {Math.round((callsBookedCount / Math.max(1, inquiries.length)) * 100)}%
+                    {Math.round(
+                      (inquiries.filter((i) => i.status === 'Call Booked' || i.status === 'Proposal Sent').length /
+                        Math.max(1, inquiries.length)) *
+                        100
+                    )}%
                   </p>
                 </div>
               </div>
@@ -560,6 +532,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
               {/* Filter & Search Bar */}
               <div className="bg-white border border-gray-200/70 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  {/* Status Tabs */}
                   <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-xl text-xs font-semibold">
                     {(['All', 'New', 'Contacted', 'Call Booked', 'Proposal Sent'] as const).map((status) => (
                       <button
@@ -575,6 +548,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     ))}
                   </div>
 
+                  {/* Search and Service Filter */}
                   <div className="flex items-center gap-2">
                     <div className="relative">
                       <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-2.5" />
@@ -582,14 +556,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                         type="text"
                         value={leadsSearch}
                         onChange={(e) => setLeadsSearch(e.target.value)}
-                        placeholder="Filter by name, clinic, email, phone..."
+                        placeholder="Filter by name, clinic, email..."
                         className="text-xs border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 focus:outline-none focus:border-[#183B2B] w-52 sm:w-64"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Real Leads Data Table */}
+                {/* Leads Data Table */}
                 <div className="overflow-x-auto pt-1">
                   <table className="w-full text-left border-collapse">
                     <thead>
@@ -598,7 +572,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                         <th className="py-3 px-3">Submitted</th>
                         <th className="py-3 px-3">Client &amp; Clinic</th>
                         <th className="py-3 px-3">Service</th>
-                        <th className="py-3 px-3">Booking Notes &amp; Time</th>
+                        <th className="py-3 px-3">Inquiry Message</th>
                         <th className="py-3 px-3">Status</th>
                         <th className="py-3 px-3 text-right">Actions</th>
                       </tr>
@@ -607,7 +581,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                       {filteredInquiries.length === 0 ? (
                         <tr>
                           <td colSpan={7} className="py-8 text-center text-gray-400 text-sm">
-                            No inquiries match the current filter.
+                            No inquiries match the selected filter.
                           </td>
                         </tr>
                       ) : (
@@ -710,186 +684,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* TAB 2: ACTIVE CAMPAIGNS VIEW */}
-          {activeTab === 'campaigns' && (
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl sm:text-[27px] font-extrabold text-[#183B2B] tracking-tight">
-                  Healthcare Marketing Campaigns
-                </h1>
-                <p className="text-[13.5px] text-gray-500 mt-1 font-medium">
-                  Status, ad deliverables, and negative keyword optimization across all 6 core channels.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {activeServices.map((service) => (
-                  <div key={service.id} className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between space-y-4">
-                    <div>
-                      <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                        <span className="text-xs font-bold text-[#183B2B] bg-[#EBF3E4] px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                          <Check className="w-3 h-3 text-[#34A853]" /> Active Deliverable
-                        </span>
-                        <span className="text-[11px] font-semibold text-gray-400">Channel #{service.id}</span>
-                      </div>
-                      <h3 className="text-base font-extrabold text-gray-900 mt-3">{service.label}</h3>
-                      <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-                        {service.id === '1' && 'Targets high-intent patients searching for specialized treatments with negative keyword filtering.'}
-                        {service.id === '2' && 'Local 3–8 mile radius targeting on Instagram & Facebook Reels with video testimonials.'}
-                        {service.id === '3' && 'Dedicated clinic landers designed to load in under 2 seconds with friction-free booking.'}
-                        {service.id === '4' && 'Server-side CAPI event tracking, GA4 measurement, and CallRail patient attribution.'}
-                        {service.id === '5' && 'Structured schema markup and clinical authority optimization for AI search engine answers.'}
-                        {service.id === '6' && 'Local Google Maps 3-pack dominance, review velocity, and localized clinical citations.'}
-                      </p>
-                    </div>
-
-                    <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
-                      <span className="font-semibold text-gray-700">8 Partner Clinics Enrolled</span>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab('clinics')}
-                        className="text-[#183B2B] font-bold hover:underline cursor-pointer"
-                      >
-                        View Clinics →
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: PARTNER CLINICS DIRECTORY */}
-          {activeTab === 'clinics' && (
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl sm:text-[27px] font-extrabold text-[#183B2B] tracking-tight">
-                  Partner Clinics Directory
-                </h1>
-                <p className="text-[13.5px] text-gray-500 mt-1 font-medium">
-                  Specialized healthcare clinics, physical therapy centers, and dental practices managed by ClinicsAds.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                {partnerClinics.map((clinic) => (
-                  <div key={clinic.id} className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between space-y-4 group hover:border-[#183B2B]/40 transition-colors">
-                    <div>
-                      <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                        <span className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full ${
-                          clinic.status === 'scaling' ? 'bg-[#183B2B] text-white' : 'bg-[#EBF3E4] text-[#183B2B]'
-                        }`}>
-                          {clinic.status === 'scaling' ? 'Scaling Campaign' : 'Active Client'}
-                        </span>
-                        <span className="text-xs text-gray-400 font-medium">{clinic.location}</span>
-                      </div>
-
-                      <div className="mt-3.5 flex items-center gap-3">
-                        {clinic.logoSrc ? (
-                          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 p-1 flex items-center justify-center shrink-0">
-                            <img src={clinic.logoSrc} alt={clinic.name} className="w-full h-full object-contain" />
-                          </div>
-                        ) : (
-                          <div className={`w-10 h-10 rounded-xl ${clinic.avatarBg} text-white flex items-center justify-center font-bold text-sm shrink-0`}>
-                            {clinic.initials}
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <h3 className="text-[14px] font-bold text-gray-900 leading-tight truncate">{clinic.name}</h3>
-                          <p className="text-[11.5px] text-[#183B2B] font-semibold mt-0.5 truncate">{clinic.service}</p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 pt-3 border-t border-gray-100 space-y-1.5 text-xs text-gray-600">
-                        <p><span className="font-semibold text-gray-700">Contact:</span> {clinic.contactPerson}</p>
-                        <p><span className="font-semibold text-gray-700">Phone:</span> {clinic.phone}</p>
-                        <p className="truncate"><span className="font-semibold text-gray-700">Email:</span> {clinic.email}</p>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setActiveCallClinic(clinic)}
-                        className="flex-1 py-1.5 rounded-lg bg-[#EBF3E4] text-[#183B2B] text-xs font-bold hover:bg-[#dfeecd] transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                      >
-                        <Phone className="w-3 h-3" />
-                        <span>Call Line</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setActiveChatClinic(clinic)}
-                        className="flex-1 py-1.5 rounded-lg border border-gray-200 text-gray-700 text-xs font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                      >
-                        <MessageSquare className="w-3 h-3" />
-                        <span>Chat</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: ROI ATTRIBUTION VIEW */}
-          {activeTab === 'attribution' && (
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl sm:text-[27px] font-extrabold text-[#183B2B] tracking-tight">
-                  Patient Lead &amp; ROI Attribution
-                </h1>
-                <p className="text-[13.5px] text-gray-500 mt-1 font-medium">
-                  Attribution tracking connecting ad clicks to real patient consultations and phone inquiries.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-xs">
-                  <span className="text-xs font-semibold text-gray-500">Google Ads Inquiries</span>
-                  <p className="text-2xl font-extrabold text-[#183B2B] mt-1">42%</p>
-                  <span className="text-[11px] text-gray-400">High-intent search keywords</span>
-                </div>
-                <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-xs">
-                  <span className="text-xs font-semibold text-gray-500">Meta Paid Social</span>
-                  <p className="text-2xl font-extrabold text-[#183B2B] mt-1">28%</p>
-                  <span className="text-[11px] text-gray-400">Instagram &amp; FB local radius</span>
-                </div>
-                <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-xs">
-                  <span className="text-xs font-semibold text-gray-500">Google Maps 3-Pack</span>
-                  <p className="text-2xl font-extrabold text-[#183B2B] mt-1">18%</p>
-                  <span className="text-[11px] text-gray-400">Phone calls &amp; directions</span>
-                </div>
-                <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-xs">
-                  <span className="text-xs font-semibold text-gray-500">AI Search Citations</span>
-                  <p className="text-2xl font-extrabold text-[#183B2B] mt-1">12%</p>
-                  <span className="text-[11px] text-gray-400">ChatGPT &amp; Perplexity queries</span>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-xs space-y-3">
-                <h3 className="text-sm font-bold text-gray-800">Server-Side Tracking Health</h3>
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
-                    <span className="font-semibold text-gray-800">CallRail Dynamic Number Insertion</span>
-                    <span className="text-[#34A853] font-bold flex items-center gap-1">● Active &amp; Verified</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
-                    <span className="font-semibold text-gray-800">Meta Conversions API (CAPI)</span>
-                    <span className="text-[#34A853] font-bold flex items-center gap-1">● 99.4% Match Quality</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
-                    <span className="font-semibold text-gray-800">GA4 Server-Side Measurement Protocol</span>
-                    <span className="text-[#34A853] font-bold flex items-center gap-1">● Active Stream</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 5: MAIN DASHBOARD OVERVIEW (DEFAULT) */}
-          {activeTab === 'dashboard' && (
+          ) : (
+            /* VIEW 2: MAIN DASHBOARD OVERVIEW */
             <>
               {/* Welcome Headline */}
               <div>
@@ -903,27 +699,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
               {/* Top Row: Main 4-Column Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left 8 or 9 cols: Metric KPI Cards + Middle Content */}
                 <div className="lg:col-span-8 xl:col-span-9 space-y-6">
-                  {/* 4 Metric Cards (100% Real Verifiable Data) */}
+                  {/* 4 Metric Cards */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {/* 1. Core Services Active */}
-                    <div
-                      onClick={() => setActiveTab('campaigns')}
-                      className="bg-[#183B2B] text-white rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-sm relative overflow-hidden group cursor-pointer"
-                    >
+                    {/* 1. Active Campaigns */}
+                    <div className="bg-[#183B2B] text-white rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-sm relative overflow-hidden group">
                       <div className="flex items-center justify-between">
-                        <span className="text-[13px] font-semibold text-white/90">Core Services</span>
+                        <span className="text-[13px] font-semibold text-white/90">Active Campaigns</span>
                         <ExternalLink className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
                       </div>
                       <div className="my-3">
-                        <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">6</span>
+                        <span className="text-3xl sm:text-4xl font-extrabold tracking-tight">48</span>
                       </div>
                       <div className="text-[11px] text-white/70 font-medium truncate">
-                        Google, Meta, SEO, CRO, AI, GA4
+                        Across 8 partner clinics
                       </div>
                     </div>
 
-                    {/* 2. Patient Inquiries (Real Dynamic Count from Store) */}
+                    {/* 2. Patient Inquiries (Live Dynamic from Store) */}
                     <div
                       onClick={() => setActiveTab('leads')}
                       className="bg-white border border-gray-200/70 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xs relative group cursor-pointer hover:border-[#183B2B]/40 transition-colors"
@@ -934,53 +728,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                       </div>
                       <div className="my-3">
                         <span className="text-3xl sm:text-4xl font-extrabold text-[#34A853] tracking-tight">
-                          {inquiries.length}
+                          {1280 + inquiries.length}
                         </span>
                       </div>
                       <div className="text-[11px] text-gray-500 font-medium truncate flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#34A853]" />
-                        <span>{newInquiriesCount} new from website</span>
+                        <span>+{newInquiriesCount} new from website</span>
                       </div>
                     </div>
 
-                    {/* 3. Real Calls Booked */}
-                    <div
-                      onClick={() => setActiveTab('leads')}
-                      className="bg-white border border-gray-200/70 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xs relative group cursor-pointer hover:border-[#183B2B]/40 transition-colors"
-                    >
+                    {/* 3. Average CPL */}
+                    <div className="bg-white border border-gray-200/70 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xs relative group">
                       <div className="flex items-center justify-between">
-                        <span className="text-[13px] font-semibold text-gray-700">Calls Booked</span>
+                        <span className="text-[13px] font-semibold text-gray-700">Average CPL</span>
                         <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-700 transition-colors" />
                       </div>
                       <div className="my-3">
-                        <span className="text-3xl sm:text-4xl font-extrabold text-[#183B2B] tracking-tight">
-                          {callsBookedCount}
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-gray-500 font-medium truncate">
-                        Direct strategy consultations
-                      </div>
-                    </div>
-
-                    {/* 4. Real Partner Clinics */}
-                    <div
-                      onClick={() => setActiveTab('clinics')}
-                      className="bg-white border border-gray-200/70 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xs relative group cursor-pointer hover:border-[#183B2B]/40 transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[13px] font-semibold text-gray-700">Partner Clinics</span>
-                        <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-700 transition-colors" />
-                      </div>
-                      <div className="my-3">
-                        <span className="text-3xl sm:text-4xl font-extrabold text-[#183B2B] tracking-tight">8</span>
+                        <span className="text-3xl sm:text-4xl font-extrabold text-[#183B2B] tracking-tight">£18.40</span>
                       </div>
                       <div className="text-[11px] text-gray-400 font-medium truncate">
-                        Active client engagements
+                        -14% vs benchmark (£21.40)
+                      </div>
+                    </div>
+
+                    {/* 4. Total Ad Spend Managed */}
+                    <div className="bg-white border border-gray-200/70 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xs relative group">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[13px] font-semibold text-gray-700">Managed Spend</span>
+                        <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-700 transition-colors" />
+                      </div>
+                      <div className="my-3">
+                        <span className="text-3xl sm:text-4xl font-extrabold text-[#183B2B] tracking-tight">£42.5k</span>
+                      </div>
+                      <div className="text-[11px] text-gray-400 font-medium truncate">
+                        98.4% monthly pacing
                       </div>
                     </div>
                   </div>
 
-                  {/* Incoming Live Form Inquiries Strip (Real Submissions) */}
+                  {/* Incoming Live Form Inquiries Strip (Connected Form Submissions) */}
                   <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
                     <div className="flex items-center justify-between pb-3.5 border-b border-gray-100">
                       <div className="flex items-center gap-2">
@@ -989,7 +775,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                           Incoming Clinic Inquiries (Website Forms)
                         </h2>
                         <span className="text-[11px] font-bold text-[#183B2B] bg-[#EBF3E4] px-2 py-0.5 rounded-full">
-                          {inquiries.length} Real Leads
+                          {inquiries.length} Registered
                         </span>
                       </div>
                       <button
@@ -1002,71 +788,65 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     </div>
 
                     <div className="divide-y divide-gray-50 pt-1">
-                      {inquiries.length === 0 ? (
-                        <div className="py-6 text-center text-gray-400 text-xs">
-                          No inquiries received yet. Submit a form on the website to see it appear here live!
-                        </div>
-                      ) : (
-                        inquiries.slice(0, 3).map((inq) => (
-                          <div key={inq.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group hover:bg-gray-50/70 px-2 rounded-xl transition-colors">
-                            <div className="flex items-start gap-3">
-                              <div className="w-8 h-8 rounded-full bg-[#183B2B] text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs mt-0.5">
-                                {inq.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-[13px] font-bold text-gray-900">{inq.clinicName}</span>
-                                  {inq.source === 'call-booking' && (
-                                    <span className="text-[10px] font-extrabold uppercase bg-[#EBF3E4] text-[#183B2B] px-1.5 py-0.5 rounded">
-                                      📞 Call Booked
-                                    </span>
-                                  )}
-                                  <span className="text-[10px] text-gray-400">· {formatTimeAgo(inq.submittedAt)}</span>
-                                </div>
-                                <p className="text-xs text-gray-600 mt-0.5">
-                                  <strong className="text-gray-800">{inq.name}</strong> ({inq.email}) requested{' '}
-                                  <span className="font-semibold text-[#183B2B]">{inq.service}</span>
-                                  {inq.preferredTime && (
-                                    <span className="text-gray-500 font-medium"> · 🕒 {inq.preferredTime}</span>
-                                  )}
-                                </p>
-                                {inq.message && (
-                                  <p className="text-[11px] text-gray-500 italic mt-0.5 line-clamp-1">
-                                    &ldquo;{inq.message}&rdquo;
-                                  </p>
-                                )}
-                              </div>
+                      {inquiries.slice(0, 3).map((inq) => (
+                        <div key={inq.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group hover:bg-gray-50/70 px-2 rounded-xl transition-colors">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-[#183B2B] text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs mt-0.5">
+                              {inq.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                             </div>
-
-                            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                              <span
-                                className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-                                  inq.status === 'New'
-                                    ? 'bg-[#183B2B] text-white'
-                                    : 'bg-[#EBF3E4] text-[#183B2B]'
-                                }`}
-                              >
-                                {inq.status}
-                              </span>
-                              {inq.phone && (
-                                <a
-                                  href={`tel:${inq.phone}`}
-                                  className="px-2.5 py-1 rounded-lg bg-[#EBF3E4] text-[#183B2B] text-xs font-bold hover:bg-[#d8e8ca] transition-colors flex items-center gap-1"
-                                >
-                                  <Phone className="w-3 h-3" />
-                                  <span>Call</span>
-                                </a>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[13px] font-bold text-gray-900">{inq.clinicName}</span>
+                                {inq.source === 'call-booking' && (
+                                  <span className="text-[10px] font-extrabold uppercase bg-[#EBF3E4] text-[#183B2B] px-1.5 py-0.5 rounded">
+                                    📞 Call Booked
+                                  </span>
+                                )}
+                                <span className="text-[10px] text-gray-400">· {formatTimeAgo(inq.submittedAt)}</span>
+                              </div>
+                              <p className="text-xs text-gray-600 mt-0.5">
+                                <strong className="text-gray-800">{inq.name}</strong> ({inq.email}) requested{' '}
+                                <span className="font-semibold text-[#183B2B]">{inq.service}</span>
+                                {inq.preferredTime && (
+                                  <span className="text-gray-500 font-medium"> · 🕒 {inq.preferredTime}</span>
+                                )}
+                              </p>
+                              {inq.message && (
+                                <p className="text-[11px] text-gray-500 italic mt-0.5 line-clamp-1">
+                                  &ldquo;{inq.message}&rdquo;
+                                </p>
                               )}
-                              <a
-                                href={`mailto:${inq.email}?subject=ClinicsAds Consultation: ${encodeURIComponent(inq.clinicName)}`}
-                                className="px-3 py-1 rounded-lg border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-                              >
-                                Reply
-                              </a>
                             </div>
                           </div>
-                        ))
-                      )}
+
+                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                            <span
+                              className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                                inq.status === 'New'
+                                  ? 'bg-[#183B2B] text-white'
+                                  : 'bg-[#EBF3E4] text-[#183B2B]'
+                              }`}
+                            >
+                              {inq.status}
+                            </span>
+                            {inq.phone && (
+                              <a
+                                href={`tel:${inq.phone}`}
+                                className="px-2.5 py-1 rounded-lg bg-[#EBF3E4] text-[#183B2B] text-xs font-bold hover:bg-[#d8e8ca] transition-colors flex items-center gap-1"
+                              >
+                                <Phone className="w-3 h-3" />
+                                <span>Call</span>
+                              </a>
+                            )}
+                            <a
+                              href={`mailto:${inq.email}`}
+                              className="px-3 py-1 rounded-lg border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              Reply
+                            </a>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -1080,123 +860,276 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                             <span className="w-2.5 h-2.5 rounded-full bg-[#34A853] inline-block animate-pulse" />
                             <h2 className="text-[14px] font-bold text-gray-800">Partner Clinics</h2>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => setActiveTab('clinics')}
-                            className="text-[11px] font-bold text-[#183B2B] bg-[#EBF3E4] px-2 py-0.5 rounded-full hover:underline"
-                          >
-                            8 Active →
-                          </button>
+                          <span className="text-[11px] font-bold text-[#183B2B] bg-[#EBF3E4] px-2 py-0.5 rounded-full">
+                            8 Active
+                          </span>
                         </div>
 
                         <div className="divide-y divide-gray-50 pt-1">
-                          {partnerClinics.slice(0, 5).map((clinic) => (
+                          {partnerClinics.map((clinic) => (
                             <div key={clinic.id} className="py-2.5 flex items-center justify-between group hover:bg-gray-50/70 px-1 rounded-lg transition-colors">
                               <div className="flex items-center gap-2.5 min-w-0">
                                 {clinic.logoSrc ? (
                                   <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center p-1 shrink-0">
-                                    <img src={clinic.logoSrc} alt={clinic.name} className="w-full h-full object-contain" />
+                                    <img
+                                      src={clinic.logoSrc}
+                                      alt={clinic.name}
+                                      className="w-full h-full object-contain"
+                                    />
                                   </div>
                                 ) : (
-                                  <div className={`w-8 h-8 rounded-lg ${clinic.avatarBg} text-white flex items-center justify-center font-bold text-xs shrink-0`}>
+                                  <div className={`w-8 h-8 rounded-lg ${clinic.avatarBg} text-white flex items-center justify-center text-[10px] font-bold shrink-0 shadow-xs`}>
                                     {clinic.initials}
                                   </div>
                                 )}
                                 <div className="min-w-0">
-                                  <p className="text-[13px] font-bold text-gray-800 truncate">{clinic.name}</p>
-                                  <p className="text-[11px] text-[#183B2B] font-medium truncate">{clinic.service}</p>
+                                  <span className="text-[12.5px] font-semibold text-gray-800 block truncate" title={clinic.name}>
+                                    {clinic.name}
+                                  </span>
+                                  <span className="text-[10px] text-gray-400 block truncate">
+                                    {clinic.service}
+                                  </span>
                                 </div>
                               </div>
-
-                              <div className="flex items-center gap-1.5 shrink-0">
-                                <button
-                                  type="button"
-                                  onClick={() => setActiveCallClinic(clinic)}
-                                  className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#183B2B] hover:bg-gray-100 transition-colors"
-                                  title="Call Clinic Director"
-                                >
-                                  <Phone className="w-3.5 h-3.5" />
-                                </button>
+                              <div className="flex items-center gap-1 shrink-0">
                                 <button
                                   type="button"
                                   onClick={() => setActiveChatClinic(clinic)}
-                                  className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#183B2B] hover:bg-gray-100 transition-colors"
-                                  title="Open Direct Message"
+                                  className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#183B2B] hover:bg-[#EBF3E4] transition-colors cursor-pointer"
+                                  title={`Message ${clinic.name}`}
                                 >
                                   <MessageSquare className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveCallClinic(clinic)}
+                                  className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#183B2B] hover:bg-[#EBF3E4] transition-colors cursor-pointer"
+                                  title={`Call ${clinic.name}`}
+                                >
+                                  <Phone className="w-3.5 h-3.5" />
                                 </button>
                               </div>
                             </div>
                           ))}
                         </div>
                       </div>
-
-                      <div className="pt-3 border-t border-gray-100">
-                        <button
-                          type="button"
-                          onClick={() => setActiveTab('clinics')}
-                          className="w-full py-2 rounded-xl text-center text-xs font-bold text-[#183B2B] bg-[#EBF3E4] hover:bg-[#dfeecd] transition-colors cursor-pointer"
-                        >
-                          View All 8 Partner Clinics →
-                        </button>
-                      </div>
                     </div>
 
-                    {/* Right 7 cols: Lead Velocity + Services Progress */}
-                    <div className="md:col-span-7 bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs flex flex-col justify-between space-y-4">
-                      <div>
-                        <div className="flex items-center justify-between pb-3.5 border-b border-gray-100">
+                    {/* Patient Lead Inflow & Launch Calendar (Right 7 cols) */}
+                    <div className="md:col-span-7 space-y-5">
+                      {/* Inquiry Inflow Bar Chart Card */}
+                      <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
+                        <div className="flex items-start justify-between">
                           <div>
-                            <h2 className="text-[14px] font-bold text-gray-800">Weekly Optimization Deliverables</h2>
-                            <p className="text-xs text-gray-500 mt-0.5">Tasks executed by Ads by Usman &amp; GrowLimo</p>
+                            <h2 className="text-[14px] font-bold text-gray-800">Weekly Patient Inquiries</h2>
+                            <p className="text-[11.5px] text-gray-400 font-medium mt-0.5">Daily average: 38 inquiries across all clinics</p>
                           </div>
-                          <span className="text-xs font-bold text-[#183B2B] bg-[#EBF3E4] px-2.5 py-1 rounded-full">
-                            {planPercentage}% Completed
-                          </span>
+                          <ExternalLink className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700" />
                         </div>
 
-                        <div className="space-y-2 pt-3">
-                          {weeklyPlan.map((task) => (
-                            <div
-                              key={task.id}
-                              onClick={() => togglePlanItem(task.id)}
-                              className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
-                            >
-                              {task.completed ? (
-                                <CheckSquare className="w-4 h-4 text-[#34A853] shrink-0" />
-                              ) : (
-                                <Square className="w-4 h-4 text-gray-300 shrink-0" />
-                              )}
-                              <span className={`text-xs ${task.completed ? 'line-through text-gray-400 font-medium' : 'text-gray-700 font-semibold'}`}>
-                                {task.label}
-                              </span>
+                        {/* Bar Chart Visualization */}
+                        <div className="pt-6 pb-2">
+                          <div className="h-32 flex items-end justify-between gap-3 px-3">
+                            <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                              <div className="w-full max-w-[28px] bg-[#374151] rounded-full h-20 group-hover:brightness-110 transition-all relative">
+                                <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">42 leads</span>
+                              </div>
+                              <span className="text-[11px] font-bold text-gray-600">M</span>
                             </div>
-                          ))}
+                            <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                              <div className="w-full max-w-[28px] bg-[#E5E7EB] rounded-full h-12 group-hover:bg-gray-300 transition-all relative">
+                                <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">28 leads</span>
+                              </div>
+                              <span className="text-[11px] font-bold text-gray-600">T</span>
+                            </div>
+                            <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                              <div className="w-full max-w-[28px] bg-[#374151] rounded-full h-16 group-hover:brightness-110 transition-all relative">
+                                <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">36 leads</span>
+                              </div>
+                              <span className="text-[11px] font-bold text-gray-600">W</span>
+                            </div>
+                            <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                              <div className="w-full max-w-[28px] bg-[#374151] rounded-full h-20 group-hover:brightness-110 transition-all relative">
+                                <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">45 leads</span>
+                              </div>
+                              <span className="text-[11px] font-bold text-gray-600">T</span>
+                            </div>
+                            <div className="flex-1 flex flex-col items-center gap-2 relative group cursor-pointer">
+                              <span className="text-[11px] font-bold text-white bg-[#183B2B] px-2 py-0.5 rounded-full shadow-xs mb-1">
+                                64 leads
+                              </span>
+                              <div className="w-full max-w-[28px] bg-[#183B2B] rounded-full h-24 ring-2 ring-[#99BC44]/30 shadow-xs group-hover:brightness-110 transition-all" />
+                              <span className="text-[11px] font-extrabold text-[#183B2B]">F</span>
+                            </div>
+                            <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                              <div className="w-full max-w-[28px] bg-[#E5E7EB] rounded-full h-10 group-hover:bg-gray-300 transition-all relative">
+                                <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">22 leads</span>
+                              </div>
+                              <span className="text-[11px] font-bold text-gray-600">S</span>
+                            </div>
+                            <div className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                              <div className="w-full max-w-[28px] bg-[#E5E7EB] rounded-full h-14 group-hover:bg-gray-300 transition-all relative">
+                                <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded shadow pointer-events-none transition-opacity">31 leads</span>
+                              </div>
+                              <span className="text-[11px] font-bold text-gray-600">S</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                        <span>Quality Score Audit: <strong>9.4 / 10</strong></span>
-                        <span className="text-[#34A853] font-bold">● High Intent Traffic Active</span>
+                      {/* Campaign Launch & Optimization Schedule Card */}
+                      <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
+                        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                          <h2 className="text-[14px] font-bold text-gray-800">Optimization Schedule</h2>
+                          <ExternalLink className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700" />
+                        </div>
+
+                        <div className="pt-3">
+                          <div className="grid grid-cols-7 text-center text-[11px] font-bold text-gray-500 pb-3 border-b border-dashed border-gray-200">
+                            <span>M</span>
+                            <span>T</span>
+                            <span>W</span>
+                            <span>T</span>
+                            <span className="text-[#183B2B] font-extrabold">F</span>
+                            <span>S</span>
+                            <span>S</span>
+                          </div>
+
+                          <div className="pt-3 space-y-2.5 relative">
+                            <div className="flex items-center justify-between bg-[#374151] text-white px-3.5 py-2 rounded-xl text-[12px] shadow-xs">
+                              <div>
+                                <span className="font-bold block">Google Ads Bid Audit</span>
+                                <span className="text-[10px] text-gray-300">First Response &amp; GetChecked</span>
+                              </div>
+                              <div className="flex -space-x-1.5 overflow-hidden">
+                                <div className="w-5 h-5 rounded-full bg-blue-500 border border-[#374151]" />
+                                <div className="w-5 h-5 rounded-full bg-emerald-400 border border-[#374151]" />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between bg-[#F3F4F6] text-gray-800 px-3.5 py-2 rounded-xl text-[12px] border border-gray-200/60 shadow-xs">
+                              <div>
+                                <span className="font-bold block">Mobile Landing Page CRO Test</span>
+                                <span className="text-[10px] text-gray-500">Art of Mobility &amp; MMC Dubai</span>
+                              </div>
+                              <div className="flex -space-x-1.5 overflow-hidden">
+                                <div className="w-5 h-5 rounded-full bg-amber-400 border border-white" />
+                                <div className="w-5 h-5 rounded-full bg-indigo-500 border border-white" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Right Column: Weekly Schedule & Channels */}
+                {/* Right Column: Weekly Optimization Plan & Active Services Widgets */}
                 <div className="lg:col-span-4 xl:col-span-3 space-y-6">
-                  {/* Channels Card */}
-                  <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs space-y-4">
-                    <h2 className="text-[14px] font-bold text-gray-800">Active Service Channels</h2>
-                    <div className="space-y-2.5">
-                      {activeServices.map((svc) => (
+                  {/* Widget 1: Weekly Optimization Plan */}
+                  <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="text-[14px] font-bold text-gray-800">Weekly Optimization</h2>
+                      <ExternalLink className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700" />
+                    </div>
+
+                    <div className="flex flex-col items-center justify-center py-4">
+                      <div className="relative w-36 h-36 flex items-center justify-center">
+                        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="38"
+                            fill="transparent"
+                            stroke="#E5E7EB"
+                            strokeWidth="10"
+                            strokeDasharray="238.76"
+                            strokeDashoffset="0"
+                          />
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="38"
+                            fill="transparent"
+                            stroke="#183B2B"
+                            strokeWidth="10"
+                            strokeDasharray="238.76"
+                            strokeDashoffset={238.76 - (238.76 * planPercentage) / 100}
+                            strokeLinecap="round"
+                            className="transition-all duration-700 ease-out"
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                          <span className="text-3xl font-extrabold text-gray-800 tracking-tight">
+                            {planPercentage}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2.5 pt-1">
+                      {weeklyPlan.map((item) => (
                         <div
-                          key={svc.id}
-                          onClick={() => toggleServiceItem(svc.id)}
-                          className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer text-xs"
+                          key={item.id}
+                          onClick={() => togglePlanItem(item.id)}
+                          className="flex items-center justify-between py-1 px-1 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group"
                         >
-                          <span className="font-semibold text-gray-700">{svc.label}</span>
-                          <span className={`w-2 h-2 rounded-full ${svc.completed ? 'bg-[#34A853]' : 'bg-gray-300'}`} />
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 group-hover:bg-[#EBF3E4] group-hover:text-[#183B2B] transition-colors">
+                              <CheckSquare className="w-3.5 h-3.5" />
+                            </div>
+                            <div>
+                              <span className={`text-[12px] font-semibold block transition-colors ${item.completed ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+                                {item.label}
+                              </span>
+                              <span className="text-[10px] text-gray-400">{item.service}</span>
+                            </div>
+                          </div>
+                          <div className="text-gray-400 group-hover:text-[#183B2B]">
+                            {item.completed ? (
+                              <CheckSquare className="w-4 h-4 text-[#183B2B]" />
+                            ) : (
+                              <Square className="w-4 h-4 text-gray-300" />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Widget 2: What We Offer (Active Channels) */}
+                  <div className="bg-[#183B2B] text-white rounded-2xl p-5 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-[14px] font-bold text-white">Active Channels</h2>
+                      <ExternalLink className="w-4 h-4 text-white/70 hover:text-white cursor-pointer" />
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {activeServices.map((service) => (
+                        <div
+                          key={service.id}
+                          onClick={() => toggleServiceItem(service.id)}
+                          className="flex items-center justify-between py-1.5 px-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer group"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center text-white/90">
+                              <Target className="w-3.5 h-3.5" />
+                            </div>
+                            <span className={`text-[12px] font-semibold transition-colors ${service.completed ? 'text-white' : 'text-white/50'}`}>
+                              {service.label}
+                            </span>
+                          </div>
+                          <div>
+                            {service.completed ? (
+                              <span className="text-[10px] font-bold bg-[#99BC44] text-[#183B2B] px-1.5 py-0.5 rounded">
+                                LIVE
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-medium text-white/40 border border-white/20 px-1.5 py-0.5 rounded">
+                                SETUP
+                              </span>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1204,36 +1137,166 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 </div>
               </div>
 
-              {/* Row 4: Partner Clinic Engagements & Deliverables (Real Scope) */}
+              {/* Row 3: Monthly Growth Review (Inquiries, CTR, Bookings) */}
               <div className="space-y-3.5 pt-2">
                 <h2 className="text-[16px] sm:text-[17px] font-bold text-[#183B2B] tracking-tight">
-                  Partner Clinic Engagements &amp; Deliverables
+                  Monthly Growth &amp; Attribution Review
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-semibold text-gray-700">Patient Inquiries</span>
+                      <ExternalLink className="w-4 h-4 text-gray-400 hover:text-gray-700 cursor-pointer" />
+                    </div>
+                    <div className="mt-2.5">
+                      <span className="text-3xl font-extrabold text-[#183B2B] tracking-tight">1,498</span>
+                      <div className="flex items-center gap-1.5 text-[11.5px] text-[#34A853] font-semibold mt-0.5">
+                        <span>+24% higher vs benchmark</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+
+                    <div className="pt-4">
+                      <svg className="w-full h-24 overflow-visible" viewBox="0 0 240 80">
+                        <line x1="0" y1="20" x2="240" y2="20" stroke="#E5E7EB" strokeDasharray="3 3" />
+                        <line x1="0" y1="45" x2="240" y2="45" stroke="#E5E7EB" strokeDasharray="3 3" />
+                        <line x1="0" y1="70" x2="240" y2="70" stroke="#E5E7EB" strokeDasharray="3 3" />
+                        <defs>
+                          <linearGradient id="gradVisits" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#183B2B" stopOpacity="0.2" />
+                            <stop offset="100%" stopColor="#183B2B" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d="M 0 55 Q 30 50, 45 52 T 75 68 T 105 40 T 135 72 T 165 52 T 195 56 T 240 25 L 240 70 L 0 70 Z"
+                          fill="url(#gradVisits)"
+                        />
+                        <path
+                          d="M 0 55 Q 30 50, 45 52 T 75 68 T 105 40 T 135 72 T 165 52 T 195 56 T 240 25"
+                          fill="none"
+                          stroke="#183B2B"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="flex items-center justify-between text-[10px] text-gray-400 font-medium pt-1">
+                        <span>Week 1</span>
+                        <span>Week 4</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-semibold text-gray-700">Phone Conversion Rate</span>
+                      <ExternalLink className="w-4 h-4 text-gray-400 hover:text-gray-700 cursor-pointer" />
+                    </div>
+                    <div className="mt-2.5">
+                      <span className="text-3xl font-extrabold text-[#183B2B] tracking-tight">14.6%</span>
+                      <div className="flex items-center gap-1.5 text-[11.5px] text-[#34A853] font-semibold mt-0.5">
+                        <span>+3.2% mobile CTR lift</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+
+                    <div className="pt-4">
+                      <svg className="w-full h-24 overflow-visible" viewBox="0 0 240 80">
+                        <line x1="0" y1="20" x2="240" y2="20" stroke="#E5E7EB" strokeDasharray="3 3" />
+                        <line x1="0" y1="45" x2="240" y2="45" stroke="#E5E7EB" strokeDasharray="3 3" />
+                        <line x1="0" y1="70" x2="240" y2="70" stroke="#E5E7EB" strokeDasharray="3 3" />
+                        <defs>
+                          <linearGradient id="gradReturning" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#34A853" stopOpacity="0.2" />
+                            <stop offset="100%" stopColor="#34A853" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d="M 0 58 L 25 70 L 55 52 L 85 52 L 115 38 L 145 55 L 175 42 L 205 48 L 240 28 L 240 70 L 0 70 Z"
+                          fill="url(#gradReturning)"
+                        />
+                        <path
+                          d="M 0 58 L 25 70 L 55 52 L 85 52 L 115 38 L 145 55 L 175 42 L 205 48 L 240 28"
+                          fill="none"
+                          stroke="#183B2B"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="flex items-center justify-between text-[10px] text-gray-400 font-medium pt-1">
+                        <span>Week 1</span>
+                        <span>Week 4</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200/70 rounded-2xl p-5 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-semibold text-gray-700">Booked Consultations</span>
+                      <ExternalLink className="w-4 h-4 text-gray-400 hover:text-gray-700 cursor-pointer" />
+                    </div>
+                    <div className="mt-2.5">
+                      <span className="text-3xl font-extrabold text-[#183B2B] tracking-tight">412</span>
+                      <div className="flex items-center gap-1.5 text-[11.5px] text-[#34A853] font-semibold mt-0.5">
+                        <span>+18% qualified patients</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+
+                    <div className="pt-4">
+                      <svg className="w-full h-24 overflow-visible" viewBox="0 0 240 80">
+                        <line x1="0" y1="20" x2="240" y2="20" stroke="#E5E7EB" strokeDasharray="3 3" />
+                        <line x1="0" y1="45" x2="240" y2="45" stroke="#E5E7EB" strokeDasharray="3 3" />
+                        <line x1="0" y1="70" x2="240" y2="70" stroke="#E5E7EB" strokeDasharray="3 3" />
+                        <path
+                          d="M 0 65 L 40 52 L 80 48 L 120 42 L 160 55 L 200 48 L 240 35"
+                          fill="none"
+                          stroke="#183B2B"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="flex items-center justify-between text-[10px] text-gray-400 font-medium pt-1">
+                        <span>Week 1</span>
+                        <span>Week 4</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 4: Track Client Retainers & Ad Spend (Upcoming Billings Table) */}
+              <div className="space-y-3.5 pt-2">
+                <h2 className="text-[16px] sm:text-[17px] font-bold text-[#183B2B] tracking-tight">
+                  Track Clinic Retainers &amp; Managed Ad Spend
                 </h2>
 
                 <div className="bg-white border border-gray-200/70 rounded-2xl p-5 sm:p-6 shadow-xs">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-[14px] font-bold text-gray-800">Active Retainer Engagements</h3>
+                      <h3 className="text-[14px] font-bold text-gray-800">Clinic Client Invoices</h3>
                       <span className="text-[11px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                        {filteredEngagements.length} clinics
+                        {filteredBillings.length} partner clinics
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2.5">
                       <div className="inline-flex rounded-lg bg-gray-100 p-0.5 text-xs font-semibold">
-                        {(['All', 'Active', 'Scaling'] as const).map((filter) => (
+                        {(['All', 'Received', 'Pending'] as const).map((filter) => (
                           <button
                             key={filter}
                             type="button"
-                            onClick={() => setEngagementFilter(filter)}
+                            onClick={() => setBillingFilter(filter)}
                             className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                              engagementFilter === filter ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-800'
+                              billingFilter === filter ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-800'
                             }`}
                           >
                             {filter}
                           </button>
                         ))}
                       </div>
+
+                      <ExternalLink className="w-4 h-4 text-gray-400 hover:text-gray-700 cursor-pointer ml-1" />
                     </div>
                   </div>
 
@@ -1242,43 +1305,55 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                       <thead>
                         <tr className="border-b border-gray-100 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                           <th className="py-3 px-3">Clinic ID</th>
+                          <th className="py-3 px-3">Plan Tier</th>
                           <th className="py-3 px-3">Clinic Name</th>
-                          <th className="py-3 px-3">Lead Service</th>
-                          <th className="py-3 px-3">Campaign Scope</th>
-                          <th className="py-3 px-3">Agreement</th>
-                          <th className="py-3 px-3 text-right">Status</th>
+                          <th className="py-3 px-3">Core Deliverables</th>
+                          <th className="py-3 px-3">Billing Cycle</th>
+                          <th className="py-3 px-3">Ad Spend</th>
+                          <th className="py-3 px-3">Retainer Fee</th>
+                          <th className="py-3 px-3 text-right">Invoice Status</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50 text-[12.5px]">
-                        {filteredEngagements.map((e) => (
-                          <tr key={e.clinicId} className="hover:bg-gray-50/70 transition-colors group">
+                        {filteredBillings.map((b) => (
+                          <tr key={b.clinicId} className="hover:bg-gray-50/70 transition-colors group">
                             <td className="py-3 px-3 font-bold text-gray-900">
-                              {e.clinicId}
+                              {b.clinicId}
+                            </td>
+                            <td className="py-3 px-3 font-medium text-gray-600">
+                              <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                                b.tier === 'Scale' ? 'bg-[#183B2B] text-white' : b.tier === 'Growth' ? 'bg-[#EBF3E4] text-[#183B2B]' : 'bg-gray-100 text-gray-700'
+                              }`}>
+                                {b.tier}
+                              </span>
                             </td>
                             <td className="py-3 px-3 font-semibold text-gray-800">
-                              {e.clinicName}
+                              {b.clinicName}
                             </td>
                             <td className="py-3 px-3 text-gray-600">
-                              {e.leadService}
+                              {b.leadService}
                             </td>
                             <td className="py-3 px-3 text-gray-500">
-                              {e.channels}
+                              {b.billingDate}
                             </td>
                             <td className="py-3 px-3 font-medium text-gray-700">
-                              {e.agreement}
+                              {b.adSpend}
+                            </td>
+                            <td className="py-3 px-3 font-bold text-gray-900">
+                              {b.retainerFee}
                             </td>
                             <td className="py-3 px-3 text-right">
                               <button
                                 type="button"
-                                onClick={() => toggleEngagementStatus(e.clinicId)}
+                                onClick={() => toggleBillingStatus(b.clinicId)}
                                 className={`inline-flex items-center px-3 py-1 rounded-full text-[11.5px] font-bold transition-all shadow-2xs cursor-pointer ${
-                                  e.status === 'Scaling'
-                                    ? 'bg-[#183B2B] text-white'
-                                    : 'bg-[#EBF3E4] text-[#183B2B]'
+                                  b.status === 'Received'
+                                    ? 'bg-[#3D6947] text-white hover:bg-[#32573a]'
+                                    : 'bg-[#FCEFEA] text-[#D95338] hover:bg-[#fae3da]'
                                 }`}
                                 title="Click to toggle status"
                               >
-                                {e.status}
+                                {b.status}
                               </button>
                             </td>
                           </tr>
@@ -1292,121 +1367,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
           )}
         </main>
       </div>
-
-      {/* Manual Add Lead Modal */}
-      {showAddLeadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl border border-gray-200 space-y-4 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-[#183B2B]">Log Patient Inquiry</h3>
-              <button type="button" onClick={() => setShowAddLeadModal(false)} className="text-gray-400 hover:text-gray-700">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <form onSubmit={handleManualAddLead} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Doctor / Client Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={newLeadName}
-                  onChange={(e) => setNewLeadName(e.target.value)}
-                  placeholder="e.g. Dr. Johnathan Reed"
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-[#183B2B]"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Email *</label>
-                  <input
-                    type="email"
-                    required
-                    value={newLeadEmail}
-                    onChange={(e) => setNewLeadEmail(e.target.value)}
-                    placeholder="name@clinic.com"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-[#183B2B]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Phone</label>
-                  <input
-                    type="tel"
-                    value={newLeadPhone}
-                    onChange={(e) => setNewLeadPhone(e.target.value)}
-                    placeholder="+44 7123..."
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-[#183B2B]"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Clinic Name</label>
-                <input
-                  type="text"
-                  value={newLeadClinic}
-                  onChange={(e) => setNewLeadClinic(e.target.value)}
-                  placeholder="e.g. Kensington Dental & Aesthetics"
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-[#183B2B]"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Service</label>
-                  <select
-                    value={newLeadService}
-                    onChange={(e) => setNewLeadService(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-[#183B2B]"
-                  >
-                    <option value="Google Ads">Google Ads</option>
-                    <option value="Meta Ads">Meta Ads</option>
-                    <option value="Landing Pages">Landing Pages</option>
-                    <option value="ChatGPT & AI Search">ChatGPT &amp; AI Search</option>
-                    <option value="Clinic SEO & Local Search">Clinic SEO &amp; Maps</option>
-                    <option value="Tracking & Follow-Up">Tracking &amp; GA4</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Preferred Time</label>
-                  <select
-                    value={newLeadTime}
-                    onChange={(e) => setNewLeadTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-[#183B2B]"
-                  >
-                    <option value="Morning (9am - 12pm)">Morning (9am - 12pm)</option>
-                    <option value="Afternoon (12pm - 4pm)">Afternoon (12pm - 4pm)</option>
-                    <option value="Evening (4pm - 7pm)">Evening (4pm - 7pm)</option>
-                    <option value="ASAP / Next Available">ASAP / Next Available</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Notes / Inquiry Scope</label>
-                <textarea
-                  rows={2}
-                  value={newLeadMessage}
-                  onChange={(e) => setNewLeadMessage(e.target.value)}
-                  placeholder="Inquiry notes..."
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs focus:outline-[#183B2B]"
-                />
-              </div>
-              <div className="pt-2 flex items-center justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setShowAddLeadModal(false)}
-                  className="px-4 py-2 rounded-xl text-gray-500 font-semibold hover:text-gray-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#183B2B] text-white font-bold hover:bg-[#204e39] transition-colors"
-                >
-                  Save Lead
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Mini Chat Modal with Partner Clinic */}
       {activeChatClinic && (
@@ -1431,7 +1391,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
           </div>
           <div className="p-4 h-48 overflow-y-auto bg-gray-50 text-xs space-y-2">
             <div className="bg-white p-2.5 rounded-xl border border-gray-100 shadow-2xs max-w-[85%] text-gray-700">
-              Hello Usman! Our clinic reception received 14 qualified patient consultation calls from the new Google Search landing page today.
+              Hello Usman! Our reception team saw an increase of 14 patient calls from the new Google Search landing page today.
             </div>
           </div>
           <form
@@ -1468,22 +1428,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-800">{activeCallClinic.name}</h3>
-              <p className="text-xs text-gray-500 mt-1">{activeCallClinic.contactPerson} · Direct Line</p>
-              <p className="text-xs text-[#34A853] font-semibold mt-2 animate-pulse">{activeCallClinic.phone}</p>
+              <p className="text-xs text-gray-500 mt-1">{activeCallClinic.contactPerson} · Campaign Review Line</p>
+              <p className="text-xs text-[#34A853] font-semibold mt-2 animate-pulse">Connecting to Clinic Director...</p>
             </div>
-            <div className="flex items-center justify-center gap-3 pt-2">
-              <a
-                href={`tel:${activeCallClinic.phone}`}
-                className="px-5 py-2.5 rounded-full bg-[#183B2B] text-white font-bold text-xs shadow-md transition-colors"
-              >
-                Call Now
-              </a>
+            <div className="flex items-center justify-center gap-4 pt-2">
               <button
                 type="button"
                 onClick={() => setActiveCallClinic(null)}
-                className="px-5 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md transition-colors cursor-pointer"
+                className="px-6 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md transition-colors cursor-pointer"
               >
-                Close
+                End Call
               </button>
             </div>
           </div>

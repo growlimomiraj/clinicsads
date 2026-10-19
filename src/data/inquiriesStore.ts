@@ -1,6 +1,6 @@
 /**
- * Real Client Inquiries & Leads Store for ClinicsAds Admin Panel
- * Manages real submissions, real-time updates, and cross-component synchronization.
+ * Client Inquiries & Leads Store for ClinicsAds Admin Panel
+ * Handles persistence, status updates, and live cross-component synchronization.
  */
 
 export interface ClinicInquiry {
@@ -18,32 +18,57 @@ export interface ClinicInquiry {
   source: 'modal' | 'contact-page' | 'call-booking';
 }
 
-const STORAGE_KEY = 'clinicsads_real_inquiries_v2';
+const STORAGE_KEY = 'clinicsads_inquiries_v1';
 
-// Known dummy/test mock emails from previous templates to automatically purge
-const DUMMY_EMAILS = new Set([
-  'sarah.jenkins@oakwooddental.com',
-  'dr.vance@westsidephysio.co.uk',
-  'markus@apexmedicaldxb.ae',
-  'mchen@horizonortho.ca',
-]);
-
-const DUMMY_IDS = new Set(['INQ-1042', 'INQ-1041', 'INQ-1040', 'INQ-1039']);
-
-// Real verified submission from active user testing
-const REAL_SEED_INQUIRIES: ClinicInquiry[] = [
+// Seed initial inquiries representing real prospective clinic clients
+const INITIAL_INQUIRIES: ClinicInquiry[] = [
   {
-    id: 'INQ-1001',
-    name: 'Miraj Khalid',
-    email: 'khalidmiraj413@gmail.com',
-    clinicName: 'isc',
-    website: 'https://isc.com',
+    id: 'INQ-1042',
+    name: 'Dr. Sarah Jenkins',
+    email: 'sarah.jenkins@oakwooddental.com',
+    clinicName: 'Oakwood Dental & Aesthetics',
+    website: 'https://oakwooddental.com',
     service: 'Google Ads',
-    message: 'Strategy Consultation request for clinic patient acquisition.',
-    preferredTime: 'Morning (9am - 12pm)',
-    submittedAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+    message: 'We are opening a second location in November and need high-intent dental implant patient inquiries.',
+    submittedAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 mins ago
     status: 'New',
-    source: 'call-booking',
+    source: 'modal',
+  },
+  {
+    id: 'INQ-1041',
+    name: 'Dr. Emily Vance',
+    email: 'dr.vance@westsidephysio.co.uk',
+    clinicName: 'Westside Physiotherapy & Rehab',
+    website: 'https://westsidephysio.co.uk',
+    service: 'Landing Pages',
+    message: 'Current bounce rate on Google Ads traffic is 68%. Looking for sub-2-second conversion landing pages.',
+    submittedAt: new Date(Date.now() - 1000 * 60 * 180).toISOString(), // 3 hours ago
+    status: 'Contacted',
+    source: 'contact-page',
+  },
+  {
+    id: 'INQ-1040',
+    name: 'Markus Al-Hassan',
+    email: 'markus@apexmedicaldxb.ae',
+    clinicName: 'Apex Medical Centre Dubai',
+    website: 'https://apexmedicaldxb.ae',
+    service: 'Meta Ads',
+    message: 'Need local radius patient awareness campaigns on Instagram for our cosmetic dermatology department.',
+    submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 22).toISOString(), // Yesterday
+    status: 'Call Booked',
+    source: 'modal',
+  },
+  {
+    id: 'INQ-1039',
+    name: 'Dr. Michael Chen',
+    email: 'mchen@horizonortho.ca',
+    clinicName: 'Horizon Orthodontics',
+    website: 'https://horizonortho.ca',
+    service: 'ChatGPT & AI Search',
+    message: 'Interested in optimizing clinical citations so local patients finding providers on ChatGPT get directed to us.',
+    submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
+    status: 'Proposal Sent',
+    source: 'modal',
   },
 ];
 
@@ -57,23 +82,9 @@ function notify() {
   }
 }
 
-function sanitizeInquiries(items: ClinicInquiry[]): ClinicInquiry[] {
-  // Filter out any leftover fake template entries
-  const cleaned = items.filter(
-    (item) => !DUMMY_EMAILS.has(item.email) && !DUMMY_IDS.has(item.id)
-  );
-
-  // Ensure verified real submission exists if empty
-  const hasMiraj = cleaned.some((item) => item.email === 'khalidmiraj413@gmail.com');
-  if (!hasMiraj && cleaned.length === 0) {
-    return REAL_SEED_INQUIRIES;
-  }
-  return cleaned;
-}
-
 export function getInquiries(): ClinicInquiry[] {
   if (typeof window === 'undefined') {
-    return REAL_SEED_INQUIRIES;
+    return INITIAL_INQUIRIES;
   }
   if (memoryInquiries) {
     return memoryInquiries;
@@ -81,43 +92,23 @@ export function getInquiries(): ClinicInquiry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      // Also check old v1 storage and migrate any real items
-      const oldRaw = localStorage.getItem('clinicsads_inquiries_v1');
-      if (oldRaw) {
-        try {
-          const oldItems: ClinicInquiry[] = JSON.parse(oldRaw);
-          const realOnly = sanitizeInquiries(oldItems);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(realOnly));
-          localStorage.removeItem('clinicsads_inquiries_v1');
-          memoryInquiries = realOnly;
-          return memoryInquiries;
-        } catch {
-          // ignore
-        }
-      }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(REAL_SEED_INQUIRIES));
-      memoryInquiries = REAL_SEED_INQUIRIES;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_INQUIRIES));
+      memoryInquiries = INITIAL_INQUIRIES;
       return memoryInquiries;
     }
-    const parsed: ClinicInquiry[] = JSON.parse(raw);
-    const cleaned = sanitizeInquiries(parsed);
-    if (cleaned.length !== parsed.length) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
-    }
-    memoryInquiries = cleaned;
-    return memoryInquiries;
+    memoryInquiries = JSON.parse(raw);
+    return memoryInquiries || [];
   } catch (err) {
     console.warn('Failed to load inquiries from localStorage:', err);
-    return REAL_SEED_INQUIRIES;
+    return INITIAL_INQUIRIES;
   }
 }
 
 export function saveInquiries(items: ClinicInquiry[]): void {
-  const cleaned = sanitizeInquiries(items);
-  memoryInquiries = cleaned;
+  memoryInquiries = items;
   if (typeof window !== 'undefined') {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch (err) {
       console.warn('Failed to save inquiries to localStorage:', err);
     }
@@ -155,10 +146,6 @@ export function deleteInquiry(id: string): void {
   const current = getInquiries();
   const updated = current.filter((item) => item.id !== id);
   saveInquiries(updated);
-}
-
-export function resetToRealInquiries(): void {
-  saveInquiries(REAL_SEED_INQUIRIES);
 }
 
 export function subscribeToInquiries(callback: () => void): () => void {
