@@ -1052,7 +1052,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                           type="submit"
                           className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_6px_20px_rgba(249,115,22,0.35)] cursor-pointer"
                         >
-                          Submit Consultation Request →
+                          Submit
                         </button>
                       </div>
                     </form>

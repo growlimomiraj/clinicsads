@@ -84,22 +84,21 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
           <>
             <div className="mb-4 pr-8">
               <span className="text-[12px] font-bold text-[#7A9A2E] tracking-wide inline-flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#99BC44]" />
-                ClinicsAds · Direct Strategy Intake
+                ClinicsAds · GrowLimo &amp; Ads by Usman
               </span>
               <h2
                 id="inquiry-modal-title"
-                className="text-[23px] font-extrabold text-[#183B2B] mt-0.5 tracking-tight"
+                className="text-[24px] font-extrabold text-[#183B2B] mt-0.5 tracking-tight"
               >
-                Book a Growth Strategy Call
+                Book a Strategy Consultation
               </h2>
-              <p className="text-[13px] text-[#59665D] mt-1">
-                Your booking request is routed directly to our Admin Dashboard for instant review. No email client needed.
+              <p className="text-[13.5px] text-[#59665D] mt-1">
+                Tell us about your clinic and the services you want to grow. Flexible month-to-month agreements.
               </p>
             </div>
 
-            {/* Direct Contact Strip */}
-            <div className="mb-4 px-3.5 py-2 rounded-xl bg-[#F9FCF4] border border-[#E7F0D8] flex flex-wrap items-center justify-between gap-2 text-[12px] text-[#183B2B]">
+            {/* Direct Contact Strip matching user screenshot */}
+            <div className="mb-4 px-3.5 py-2.5 rounded-xl bg-[#F9FCF4] border border-[#E7F0D8] flex flex-wrap items-center justify-between gap-2 text-[12.5px] text-[#183B2B]">
               <a
                 href={SITE_CONFIG.contact.phoneHref}
                 className="inline-flex items-center gap-1.5 font-semibold hover:text-[#7A9A2E] transition-colors"
@@ -107,8 +106,13 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                 <Phone className="w-3.5 h-3.5 text-[#99BC44]" />
                 <span>{SITE_CONFIG.contact.phoneDisplay}</span>
               </a>
-              <span className="text-gray-400">·</span>
-              <span className="text-gray-600 font-medium">Direct routing to Admin Dashboard</span>
+              <a
+                href={SITE_CONFIG.contact.emailHref}
+                className="inline-flex items-center gap-1.5 font-semibold hover:text-[#7A9A2E] transition-colors"
+              >
+                <Mail className="w-3.5 h-3.5 text-[#99BC44]" />
+                <span>{SITE_CONFIG.contact.email}</span>
+              </a>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3.5">
@@ -276,9 +280,9 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-7 py-3 rounded-full bg-[#F97316] text-white text-[13.5px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_4px_14px_rgba(249,115,22,0.3)] cursor-pointer"
+                  className="px-8 py-3 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_4px_14px_rgba(249,115,22,0.3)] cursor-pointer"
                 >
-                  Confirm Strategy Call Booking →
+                  Submit
                 </button>
               </div>
             </form>
