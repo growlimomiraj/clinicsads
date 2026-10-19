@@ -60,9 +60,20 @@ export default function App() {
     const handleHashChange = () => {
       setCurrentPage(getRouteFromHash());
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        setCurrentPage((prev) => (prev === 'admin' ? 'home' : 'admin'));
+        window.location.hash = currentPage === 'admin' ? '' : 'admin';
+      }
+    };
     window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentPage]);
 
   const handleNavigate = (route: PageRoute) => {
     setCurrentPage(route);

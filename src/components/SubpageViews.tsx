@@ -894,7 +894,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                     <div className="mb-6 p-3.5 rounded-xl bg-[#F3F8E9] border border-[#DFECC8] flex items-center gap-2 text-[12.5px] text-[#183B2B]">
                       <CheckCircle2 className="w-4 h-4 text-[#99BC44] shrink-0" />
                       <span>
-                        <strong>Direct Clinic Intake:</strong> Your consultation request is routed immediately to our Admin Dashboard for review.
+                        <strong>Direct Clinic Intake:</strong> Your consultation request is routed immediately to our senior growth team for review.
                       </span>
                     </div>
 
@@ -1066,8 +1066,7 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                       Consultation Request Received!
                     </h3>
                     <p className="text-[14px] text-[#59665D] mb-5">
-                      Your inquiry has been directly registered in the{' '}
-                      <strong className="text-[#183B2B]">ClinicsAds Admin Portal</strong>. Our healthcare growth team will review your clinic's objectives and reach out shortly.
+                      Your inquiry has been received. Our healthcare growth team will review your clinic's objectives and reach out shortly.
                     </p>
                     <div className="rounded-xl bg-[#F3F8E9] p-5 space-y-2 text-[13.5px] text-[#183B2B] mb-6 border border-[#DFECC8]">
                       <div>
@@ -1101,18 +1100,8 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                     <div className="flex flex-wrap gap-3">
                       <button
                         type="button"
-                        onClick={() => {
-                          setContactSubmitted(false);
-                          onNavigate('admin');
-                        }}
-                        className="px-6 py-2.5 rounded-full bg-[#183B2B] text-white text-[13px] font-bold hover:bg-[#23503b] transition-colors cursor-pointer shadow-xs"
-                      >
-                        View in Admin Portal →
-                      </button>
-                      <button
-                        type="button"
                         onClick={() => setContactSubmitted(false)}
-                        className="px-5 py-2.5 rounded-full bg-[#F97316] text-white text-[13px] font-bold hover:bg-[#EA580C] cursor-pointer"
+                        className="px-6 py-2.5 rounded-full bg-[#F97316] text-white text-[13px] font-bold hover:bg-[#EA580C] cursor-pointer shadow-xs transition-colors"
                       >
                         Submit Another Request
                       </button>
