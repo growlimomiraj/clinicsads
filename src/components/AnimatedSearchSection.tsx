@@ -4,7 +4,8 @@ import {
   MapPin,
   Calendar,
   Building2,
-  HeartPulse
+  HeartPulse,
+  ArrowRight
 } from 'lucide-react';
 
 // Search phrases for typewriter animation in the search bar
@@ -21,7 +22,11 @@ const HOLD_DURATION_MS = 1800;
 const ERASING_SPEED_MS = 40;
 const PAUSE_BEFORE_NEXT_MS = 300;
 
-export const AnimatedSearchSection: React.FC = () => {
+export interface AnimatedSearchSectionProps {
+  onOpenInquiry?: (serviceTitle?: string) => void;
+}
+
+export const AnimatedSearchSection: React.FC<AnimatedSearchSectionProps> = ({ onOpenInquiry }) => {
   const [displayText, setDisplayText] = useState('');
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
@@ -228,6 +233,20 @@ export const AnimatedSearchSection: React.FC = () => {
         <p className="mt-4 sm:mt-5 text-[15px] sm:text-[16px] md:text-[17.5px] font-medium text-[#59665D] leading-relaxed max-w-[680px] mx-auto text-balance">
           We help you get found in Google, Bing, ChatGPT, and more.
         </p>
+
+        {/* 5. Book a Call CTA Button */}
+        <div className="mt-7 sm:mt-8 md:mt-9 flex justify-center">
+          <button
+            type="button"
+            onClick={() => onOpenInquiry?.('Google Ads')}
+            aria-label="Book a Call"
+            className="group inline-flex items-center gap-2.5 px-8 sm:px-10 py-3.5 sm:py-4 rounded-full bg-[#F97316] hover:bg-[#EA580C] text-white font-bold text-[15px] sm:text-[16px] tracking-wide shadow-[0_12px_28px_rgba(249,115,22,0.28)] hover:shadow-[0_16px_36px_rgba(249,115,22,0.38)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
+          >
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-white/90" />
+            <span>Book a Call</span>
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover:translate-x-1" />
+          </button>
+        </div>
 
       </div>
 

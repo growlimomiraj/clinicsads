@@ -111,7 +111,7 @@ export default function App() {
               showBottomWave={false}
             />
             {/* Animated Search Section ("Someone Near You Just Searched:") */}
-            <AnimatedSearchSection />
+            <AnimatedSearchSection onOpenInquiry={handleOpenInquiry} />
           </>
         )}
       </div>
