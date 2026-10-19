@@ -78,15 +78,6 @@ export const Header: React.FC<HeaderProps> = ({
             })}
           </nav>
 
-          <button
-            type="button"
-            onClick={() => handleRouteSelect('admin')}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-[#183B2B]/20 text-[#183B2B] text-[13px] font-bold hover:bg-[#183B2B] hover:text-white transition-all whitespace-nowrap shrink-0 cursor-pointer shadow-2xs"
-            title="Open ClinicsAds Admin Panel"
-          >
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            <span>Admin Panel</span>
-          </button>
 
           <button
             type="button"
@@ -143,14 +134,6 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               );
             })}
-            <button
-              type="button"
-              onClick={() => handleRouteSelect('admin')}
-              className="flex items-center gap-2 text-left text-[15px] font-bold text-[#183B2B] py-2 border-b border-[#C7DCA5]/30 cursor-pointer"
-            >
-              <LayoutDashboard className="w-4 h-4 text-[#183B2B]" />
-              <span>Admin Panel</span>
-            </button>
             <div className="pt-2">
               <button
                 type="button"
