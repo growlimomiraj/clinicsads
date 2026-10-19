@@ -77,7 +77,7 @@ export const ClinicsScaledSection: React.FC = () => {
         rel="noopener noreferrer"
         aria-hidden={isDuplicate ? 'true' : undefined}
         tabIndex={isDuplicate ? -1 : 0}
-        className="group shrink-0 flex items-center justify-center h-[52px] sm:h-[60px] px-4 py-1.5 rounded-xl transition-all duration-200 outline-none hover:bg-[#F3F8E9]/70 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-[#99BC44] cursor-pointer"
+        className="group shrink-0 flex items-center justify-center h-[50px] sm:h-[58px] px-2 sm:px-2.5 py-1.5 rounded-xl transition-all duration-200 outline-none hover:bg-[#F3F8E9]/70 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-[#99BC44] cursor-pointer"
         title={`Visit ${clinic.name} website`}
       >
         {hasLogo ? (
@@ -116,7 +116,7 @@ export const ClinicsScaledSection: React.FC = () => {
         .clinics-marquee-track-continuous {
           display: flex !important;
           width: max-content !important;
-          animation: clinicsScrollContinuous 32s linear infinite !important;
+          animation: clinicsScrollContinuous 28s linear infinite !important;
           will-change: transform;
         }
 
@@ -130,15 +130,15 @@ export const ClinicsScaledSection: React.FC = () => {
         .clinics-marquee-set {
           display: flex;
           align-items: center;
-          gap: 2.5rem;
-          padding-right: 2.5rem;
+          gap: 1.25rem;
+          padding-right: 1.25rem;
           flex-shrink: 0;
         }
 
         @media (min-width: 640px) {
           .clinics-marquee-set {
-            gap: 3.5rem;
-            padding-right: 3.5rem;
+            gap: 1.75rem;
+            padding-right: 1.75rem;
           }
         }
       `}</style>
