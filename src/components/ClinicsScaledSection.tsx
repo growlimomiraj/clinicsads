@@ -77,19 +77,19 @@ export const ClinicsScaledSection: React.FC = () => {
         rel="noopener noreferrer"
         aria-hidden={isDuplicate ? 'true' : undefined}
         tabIndex={isDuplicate ? -1 : 0}
-        className="group shrink-0 flex items-center justify-center h-[50px] sm:h-[58px] px-2 sm:px-2.5 py-1.5 rounded-xl transition-all duration-200 outline-none hover:bg-[#F3F8E9]/70 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-[#99BC44] cursor-pointer"
+        className="group shrink-0 flex items-center justify-center w-[125px] sm:w-[150px] h-[50px] sm:h-[58px] px-2 py-1 rounded-xl transition-all duration-200 outline-none hover:bg-[#F3F8E9]/70 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-[#99BC44] cursor-pointer"
         title={`Visit ${clinic.name} website`}
       >
         {hasLogo ? (
           <img
             src={clinic.logoSrc}
             alt={isDuplicate ? '' : `${clinic.name} logo`}
-            className="max-h-[38px] sm:max-h-[44px] max-w-[135px] sm:max-w-[165px] w-auto h-auto object-contain transition-opacity duration-200 pointer-events-none select-none"
+            className="max-h-[38px] sm:max-h-[44px] max-w-[115px] sm:max-w-[138px] w-auto h-auto object-contain transition-opacity duration-200 pointer-events-none select-none"
             loading="eager"
             onError={() => handleImageError(clinic.name)}
           />
         ) : (
-          <span className="text-center text-[13px] sm:text-[14px] font-semibold text-[#183B2B]/80 group-hover:text-[#183B2B] leading-tight tracking-tight whitespace-nowrap px-2 transition-colors select-none">
+          <span className="text-center text-[13px] sm:text-[14px] font-semibold text-[#183B2B]/80 group-hover:text-[#183B2B] leading-tight tracking-tight whitespace-nowrap px-1 transition-colors select-none">
             {clinic.name}
           </span>
         )}
@@ -130,8 +130,8 @@ export const ClinicsScaledSection: React.FC = () => {
         .clinics-marquee-set {
           display: flex;
           align-items: center;
-          gap: 1.25rem;
-          padding-right: 1.25rem;
+          gap: 1.5rem;
+          padding-right: 1.5rem;
           flex-shrink: 0;
         }
 
