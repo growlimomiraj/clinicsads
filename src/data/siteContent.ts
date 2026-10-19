@@ -11,7 +11,8 @@ export type PageRoute =
   | 'service-gpt'
   | 'service-seo'
   | 'solution-clinic-landing-pages'
-  | 'solution-chatgpt-ads-ai-search';
+  | 'solution-chatgpt-ads-ai-search'
+  | 'admin';
 
 export interface NavItem {
   label: string;

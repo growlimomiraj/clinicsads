@@ -20,6 +20,7 @@ import { Footer } from './components/Footer';
 import { InquiryModal } from './components/InquiryModal';
 import { DetailPanelModal } from './components/DetailPanelModal';
 import { SubpageViews } from './components/SubpageViews';
+import { AdminDashboard } from './components/AdminDashboard';
 
 const VALID_ROUTES: PageRoute[] = [
   'home',
@@ -35,6 +36,7 @@ const VALID_ROUTES: PageRoute[] = [
   'service-seo',
   'solution-clinic-landing-pages',
   'solution-chatgpt-ads-ai-search',
+  'admin',
 ];
 
 function getRouteFromHash(): PageRoute {
@@ -75,6 +77,10 @@ export default function App() {
     }
     setInquiryModalOpen(true);
   };
+
+  if (currentPage === 'admin') {
+    return <AdminDashboard onExit={() => handleNavigate('home')} />;
+  }
 
   return (
     <div id="top" className="min-h-screen flex flex-col bg-white text-[#59665D]">
