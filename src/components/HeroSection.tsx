@@ -6,14 +6,16 @@ import { ResilientPortrait } from './ResilientPortrait';
 interface HeroSectionProps {
   onOpenInquiry: (defaultService?: string) => void;
   onNavigate: (route: PageRoute) => void;
+  showBottomWave?: boolean;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onOpenInquiry,
   onNavigate,
+  showBottomWave = false,
 }) => {
   return (
-    <section className="relative pt-6 pb-24 lg:pt-12 lg:pb-32 overflow-hidden">
+    <section className={`relative pt-6 overflow-hidden ${showBottomWave ? 'pb-24 lg:pb-32' : 'pb-8 sm:pb-10 lg:pb-12'}`}>
       {/* Subtle organic background shapes in top-left and behind hero composition */}
       <div
         className="pointer-events-none select-none absolute -top-28 -left-24 w-[420px] h-[420px] rounded-full border-[45px] border-[#E4F0D0]/60 opacity-70"
@@ -220,21 +222,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
       </div>
 
-      {/* Smooth Curved Wave Transition at the bottom of the Hero Section */}
-      <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none pointer-events-none">
-        <svg
-          viewBox="0 0 1440 110"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-[55px] sm:h-[85px] lg:h-[105px] preserve-3d"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M0 25C280 115 640 110 980 50C1190 13 1340 20 1440 45V110H0V25Z"
-            fill="#FFFFFF"
-          />
-        </svg>
-      </div>
+      {/* Smooth Curved Wave Transition at the bottom of the Hero Section (rendered if standalone) */}
+      {showBottomWave && (
+        <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none pointer-events-none">
+          <svg
+            viewBox="0 0 1440 110"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-[55px] sm:h-[85px] lg:h-[105px] preserve-3d"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0 25C280 115 640 110 980 50C1190 13 1340 20 1440 45V110H0V25Z"
+              fill="#FFFFFF"
+            />
+          </svg>
+        </div>
+      )}
     </section>
   );
 };

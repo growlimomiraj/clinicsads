@@ -96,7 +96,7 @@ export default function App() {
 
   return (
     <div id="top" className="min-h-screen flex flex-col bg-white text-[#59665D]">
-      {/* Header wrapped in pale green #F3F8E9 canvas */}
+      {/* Header, Hero, and Search wrapped in continuous pale green #F3F8E9 canvas */}
       <div className="bg-[#F3F8E9]">
         <Header
           currentPage={currentPage}
@@ -104,10 +104,15 @@ export default function App() {
           onOpenInquiry={handleOpenInquiry}
         />
         {currentPage === 'home' && (
-          <HeroSection
-            onOpenInquiry={handleOpenInquiry}
-            onNavigate={handleNavigate}
-          />
+          <>
+            <HeroSection
+              onOpenInquiry={handleOpenInquiry}
+              onNavigate={handleNavigate}
+              showBottomWave={false}
+            />
+            {/* Animated Search Section ("Someone Near You Just Searched:") */}
+            <AnimatedSearchSection />
+          </>
         )}
       </div>
 
@@ -115,9 +120,6 @@ export default function App() {
       <main className="flex-1">
         {currentPage === 'home' ? (
           <>
-            {/* Animated Search Section ("Someone Near You Just Searched:") */}
-            <AnimatedSearchSection />
-
             {/* Clinics We've Scaled */}
             <ClinicsScaledSection />
 

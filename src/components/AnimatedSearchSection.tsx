@@ -91,7 +91,7 @@ export const AnimatedSearchSection: React.FC = () => {
     <section
       id="local-patient-search"
       aria-labelledby="animated-search-heading"
-      className="relative w-full overflow-hidden bg-[#F3F8E9] py-[60px] sm:py-[80px] lg:py-[104px] text-[#183B2B] border-y border-[#183B2B]/6 selection:bg-[#99BC44]/30 selection:text-[#183B2B]"
+      className="relative w-full overflow-hidden bg-[#F3F8E9] pt-[50px] sm:pt-[65px] lg:pt-[76px] pb-[115px] sm:pb-[145px] lg:pb-[170px] text-[#183B2B] selection:bg-[#99BC44]/30 selection:text-[#183B2B]"
     >
       {/* ========================================================================= */}
       {/* FAINT DECORATIVE BACKGROUND SHAPES & OUTLINE ICONS MATCHING HERO/SERVICES */}
@@ -142,12 +142,12 @@ export const AnimatedSearchSection: React.FC = () => {
         </div>
 
         {/* Floating Outline Icon: Calendar (Bottom Left) */}
-        <div className="absolute bottom-[16%] left-[8%] sm:left-[14%] text-[#183B2B] opacity-[0.05]">
+        <div className="absolute bottom-[24%] left-[8%] sm:left-[14%] text-[#183B2B] opacity-[0.05]">
           <Calendar className="w-14 h-14 sm:w-18 sm:h-18 stroke-[1.4]" />
         </div>
 
         {/* Floating Outline Icon: Clinic Building (Bottom Right) */}
-        <div className="absolute bottom-[14%] right-[7%] sm:right-[11%] text-[#183B2B] opacity-[0.06]">
+        <div className="absolute bottom-[22%] right-[7%] sm:right-[11%] text-[#183B2B] opacity-[0.06]">
           <Building2 className="w-16 h-16 sm:w-20 sm:h-20 stroke-[1.4]" />
         </div>
 
@@ -225,6 +225,24 @@ export const AnimatedSearchSection: React.FC = () => {
           Help more patients discover your clinic when they search for care nearby.
         </p>
 
+      </div>
+
+      {/* ========================================================================= */}
+      {/* SMOOTH CURVED WAVE TRANSITION AT BOTTOM MATCHING ABOVE SECTION BORDER     */}
+      {/* ========================================================================= */}
+      <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none pointer-events-none">
+        <svg
+          viewBox="0 0 1440 110"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full h-[55px] sm:h-[85px] lg:h-[105px] preserve-3d"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0 25C280 115 640 110 980 50C1190 13 1340 20 1440 45V110H0V25Z"
+            fill="#FFFFFF"
+          />
+        </svg>
       </div>
     </section>
   );
