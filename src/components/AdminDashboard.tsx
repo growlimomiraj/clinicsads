@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   LayoutDashboard,
   Building2,
@@ -16,7 +16,14 @@ import {
   Check,
   DollarSign,
   X,
-  Plus
+  Plus,
+  Eye,
+  Calendar,
+  AlertTriangle,
+  ExternalLink,
+  ChevronRight,
+  Shield,
+  Activity
 } from 'lucide-react';
 import {
   ClinicInquiry,
@@ -175,6 +182,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedLeadId, setCopiedLeadId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimeoutRef = useRef<number | null>(null);
+
+  // Detail Modal & Delete Confirmation State
+  const [selectedLeadForDetail, setSelectedLeadForDetail] = useState<ClinicInquiry | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'inquiry' | 'clinic'; id: string; name: string } | null>(null);
 
   // Live Connected Inquiries Store
   const [inquiries, setInquiries] = useState<ClinicInquiry[]>(getInquiries);
@@ -189,12 +201,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     return inquiries.filter((i) => i.status === 'New').length;
   }, [inquiries]);
 
-  // Toast Helper
+  // Robust Toast Notification System
   const showToast = (msg: string) => {
+    if (toastTimeoutRef.current) {
+      window.clearTimeout(toastTimeoutRef.current);
+    }
     setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage((current) => (current === msg ? null : current));
-    }, 4000);
+    toastTimeoutRef.current = window.setTimeout(() => {
+      setToastMessage(null);
+      toastTimeoutRef.current = null;
+    }, 3800);
   };
 
   // Leads Filter State
@@ -202,7 +218,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
   const [leadsServiceFilter, setLeadsServiceFilter] = useState<string>('All');
   const [leadsSearch, setLeadsSearch] = useState('');
 
-  // Verified Partner Clinics Roster (Persisted locally so added partners stay saved)
+  // Verified Partner Clinics Roster (Persisted locally)
   const [partnerClinics, setPartnerClinics] = useState<PartnerClinicItem[]>(() => {
     try {
       const stored = localStorage.getItem('clinicsads_partner_clinics');
@@ -213,7 +229,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
         }
       }
     } catch {
-      // Fallback
+      // Fallback to default
     }
     return DEFAULT_PARTNER_CLINICS;
   });
@@ -223,19 +239,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     try {
       localStorage.setItem('clinicsads_partner_clinics', JSON.stringify(partnerClinics));
     } catch {
-      // Ignore storage errors
+      // Ignore
     }
   }, [partnerClinics]);
 
-  // Check if a clinic is already connected in the Partner Clinics directory
+  // Robust connection detection
   const isClinicConnected = (clinicName?: string, email?: string) => {
-    if (!clinicName) return false;
-    const cleanName = clinicName.trim().toLowerCase();
-    const cleanEmail = email ? email.trim().toLowerCase() : '';
+    if (!clinicName && !email) return false;
+    const cleanName = (clinicName || '').trim().toLowerCase();
+    const cleanEmail = (email || '').trim().toLowerCase();
+
     return partnerClinics.some((c) => {
       const cName = c.name.trim().toLowerCase();
       const cEmail = c.email ? c.email.trim().toLowerCase() : '';
-      return cName === cleanName || (cleanEmail && cEmail && cEmail === cleanEmail);
+      return (
+        (cleanName && cName === cleanName) ||
+        (cleanName && (cName.includes(cleanName) || cleanName.includes(cName))) ||
+        (cleanEmail && cEmail === cleanEmail)
+      );
     });
   };
 
@@ -266,21 +287,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     return { projectedInquiries, bookedPatients, projectedRevenue, roas };
   }, [calcBudget, calcTreatmentValue, calcEstimatedCpl]);
 
-  // Filtered Inquiries for Leads View
+  // Filtered Inquiries for Leads View & Search
   const filteredInquiries = useMemo(() => {
     return inquiries.filter((inq) => {
       const matchesStatus = leadsStatusFilter === 'All' || inq.status === leadsStatusFilter;
       const matchesService = leadsServiceFilter === 'All' || inq.service === leadsServiceFilter;
-      const q = (leadsSearch || searchQuery).toLowerCase();
+      const effectiveSearch = (leadsSearch || searchQuery).trim().toLowerCase();
       const matchesSearch =
-        inq.name.toLowerCase().includes(q) ||
-        inq.clinicName.toLowerCase().includes(q) ||
-        inq.email.toLowerCase().includes(q) ||
-        (inq.phone && inq.phone.includes(q)) ||
-        (inq.message && inq.message.toLowerCase().includes(q));
+        !effectiveSearch ||
+        inq.name.toLowerCase().includes(effectiveSearch) ||
+        inq.clinicName.toLowerCase().includes(effectiveSearch) ||
+        inq.email.toLowerCase().includes(effectiveSearch) ||
+        (inq.phone && inq.phone.includes(effectiveSearch)) ||
+        (inq.message && inq.message.toLowerCase().includes(effectiveSearch));
       return matchesStatus && matchesService && matchesSearch;
     });
   }, [inquiries, leadsStatusFilter, leadsServiceFilter, leadsSearch, searchQuery]);
+
+  // Filtered Partner Clinics for Search
+  const filteredPartnerClinics = useMemo(() => {
+    if (!searchQuery.trim()) return partnerClinics;
+    const q = searchQuery.toLowerCase().trim();
+    return partnerClinics.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.city.toLowerCase().includes(q) ||
+        c.contactPerson.toLowerCase().includes(q) ||
+        c.vertical.toLowerCase().includes(q) ||
+        c.service.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q)
+    );
+  }, [partnerClinics, searchQuery]);
 
   // ACTION: Add an Inbound Lead directly to Partner Clinics Directory
   const handleAddLeadToPartnerClinics = (inq: ClinicInquiry) => {
@@ -356,10 +393,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     showToast(`✓ Connected: "${created.name}" added to Partner Clinics!`);
   };
 
-  // ACTION: Delete Partner Clinic
-  const handleDeletePartnerClinic = (id: string, name: string) => {
-    setPartnerClinics((prev) => prev.filter((c) => c.id !== id));
-    showToast(`Removed "${name}" from Partner Clinics.`);
+  // Execute Confirmed Deletion
+  const handleExecuteDelete = () => {
+    if (!deleteTarget) return;
+    if (deleteTarget.type === 'inquiry') {
+      deleteInquiry(deleteTarget.id);
+      if (selectedLeadForDetail?.id === deleteTarget.id) {
+        setSelectedLeadForDetail(null);
+      }
+      showToast(`Deleted lead ${deleteTarget.id}`);
+    } else {
+      setPartnerClinics((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+      showToast(`Removed "${deleteTarget.name}" from Partner Clinics.`);
+    }
+    setDeleteTarget(null);
   };
 
   // Export Inquiries to CSV
@@ -400,9 +447,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
   return (
     <div className="min-h-screen bg-[#F8FAF6] text-[#1E293B] font-sans flex flex-col selection:bg-[#183B2B] selection:text-white relative">
-      {/* Dynamic Toast Banner */}
+      {/* Dynamic Toast Notification Banner */}
       {toastMessage && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 bg-[#183B2B] text-white rounded-xl shadow-xl text-xs font-bold border border-emerald-500/40 animate-in fade-in slide-in-from-top-2">
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 bg-[#183B2B] text-white rounded-xl shadow-2xl text-xs font-bold border border-emerald-500/40 animate-in fade-in slide-in-from-top-2">
           <CheckCircle2 className="w-4 h-4 text-[#99BC44] shrink-0" />
           <span>{toastMessage}</span>
           <button
@@ -438,7 +485,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
           </div>
         </div>
 
-        {/* Global Search Bar */}
+        {/* Global Live Search Bar */}
         <div className="hidden md:flex flex-1 max-w-[420px] mx-4 relative items-center">
           <Search className="w-4 h-4 text-gray-400 absolute left-3.5 pointer-events-none" />
           <input
@@ -446,8 +493,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search leads, doctor names, or clinics..."
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2 text-[13px] text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#183B2B] focus:bg-white transition-all"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-9 py-2 text-[13px] text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#183B2B] focus:bg-white transition-all"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 text-gray-400 hover:text-gray-600 p-0.5 rounded cursor-pointer"
+              title="Clear search"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         {/* Right Header Navigation & Strategist Profile */}
@@ -725,6 +782,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
+                          {/* Quick Inspect Details Button */}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedLeadForDetail(inq)}
+                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors cursor-pointer"
+                            title="Inspect Lead Details"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+
                           {/* Connected button or Add to Partner Clinics */}
                           {isConnected ? (
                             <button
@@ -828,7 +895,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     <select
                       value={leadsServiceFilter}
                       onChange={(e) => setLeadsServiceFilter(e.target.value)}
-                      className="px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-semibold bg-white text-gray-700 focus:outline-none"
+                      className="px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-semibold bg-white text-gray-700 focus:outline-none cursor-pointer"
                     >
                       <option value="All">All Specialties</option>
                       <option value="Google Ads">Google Ads</option>
@@ -878,14 +945,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                           return (
                             <tr key={inq.id} className="hover:bg-gray-50/70 transition-colors">
                               <td className="py-3 px-3 font-mono font-bold text-gray-900 whitespace-nowrap">
-                                {inq.id}
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedLeadForDetail(inq)}
+                                  className="hover:underline text-[#183B2B] cursor-pointer"
+                                  title="View full lead details"
+                                >
+                                  {inq.id}
+                                </button>
                               </td>
                               <td className="py-3 px-3 text-gray-500 whitespace-nowrap">
                                 {new Date(inq.submittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                               </td>
                               <td className="py-3 px-3 font-medium">
                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                  <span className="font-bold text-gray-900">{inq.clinicName}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedLeadForDetail(inq)}
+                                    className="font-bold text-gray-900 hover:text-[#183B2B] text-left cursor-pointer"
+                                  >
+                                    {inq.clinicName}
+                                  </button>
                                   {isConnected && (
                                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black uppercase tracking-wider shadow-2xs">
                                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -893,7 +973,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                                     </span>
                                   )}
                                 </div>
-                                <span className="text-[11px] text-gray-500">{inq.name}</span>
+                                <span className="text-[11px] text-gray-500 block">{inq.name}</span>
                               </td>
                               <td className="py-3 px-3 whitespace-nowrap">
                                 <span className="text-gray-800 block font-medium">{inq.email}</span>
@@ -947,6 +1027,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                                     </button>
                                   )}
 
+                                  {/* View Details Modal Trigger */}
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedLeadForDetail(inq)}
+                                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                                    title="View Full Details"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                  </button>
+
                                   <button
                                     type="button"
                                     onClick={() => handleCopyLead(inq)}
@@ -973,10 +1063,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                                   </a>
                                   <button
                                     type="button"
-                                    onClick={() => {
-                                      deleteInquiry(inq.id);
-                                      showToast(`Deleted lead ${inq.id}`);
-                                    }}
+                                    onClick={() => setDeleteTarget({ type: 'inquiry', id: inq.id, name: inq.clinicName })}
                                     className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                                     title="Delete Lead"
                                   >
@@ -1022,84 +1109,99 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {partnerClinics.map((clinic) => (
-                  <div key={clinic.id} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs space-y-4 flex flex-col justify-between hover:shadow-md transition-shadow">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                          {clinic.id}
+              {filteredPartnerClinics.length === 0 ? (
+                <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center space-y-3">
+                  <Building2 className="w-8 h-8 text-gray-400 mx-auto" />
+                  <h3 className="text-sm font-bold text-gray-900">No partner clinics found matching your search.</h3>
+                  <p className="text-xs text-gray-500">Try searching for a different clinic name, city, or specialty.</p>
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 cursor-pointer"
+                  >
+                    Clear Search Filter
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredPartnerClinics.map((clinic) => (
+                    <div key={clinic.id} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs space-y-4 flex flex-col justify-between hover:shadow-md transition-shadow">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                            {clinic.id}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            {/* Connected indicator badge */}
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              Connected
+                            </span>
+                            <span className={`px-2 py-0.5 rounded-full text-[10.5px] font-bold ${
+                              clinic.status === 'Scaling'
+                                ? 'bg-blue-100 text-blue-900 border border-blue-200'
+                                : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                            }`}>
+                              {clinic.status}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget({ type: 'clinic', id: clinic.id, name: clinic.name })}
+                              className="p-1 text-gray-300 hover:text-red-500 rounded transition-colors cursor-pointer"
+                              title="Remove Partner Clinic"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          {clinic.logoSrc ? (
+                            <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center p-1.5 shrink-0">
+                              <img src={clinic.logoSrc} alt={clinic.name} className="w-full h-full object-contain" />
+                            </div>
+                          ) : (
+                            <div className={`w-10 h-10 rounded-xl ${clinic.avatarBg} text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs`}>
+                              {clinic.initials}
+                            </div>
+                          )}
+                          <div>
+                            <h3 className="text-sm font-black text-gray-900 leading-snug">{clinic.name}</h3>
+                            <span className="text-xs text-gray-500 font-medium">{clinic.city}</span>
+                          </div>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-gray-50 border border-gray-200/80 space-y-1.5 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-500 font-medium">Vertical:</span>
+                            <span className="font-bold text-gray-800">{clinic.vertical}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-500 font-medium">Channel:</span>
+                            <span className="font-bold text-[#183B2B]">{clinic.service}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-500 font-medium">Monthly Retainer:</span>
+                            <span className="font-bold text-emerald-700 font-mono">{clinic.monthlySpend}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
+                        <span className="text-gray-500 font-medium truncate max-w-[170px]">
+                          Director: {clinic.contactPerson}
                         </span>
-                        <div className="flex items-center gap-2">
-                          {/* Connected indicator badge */}
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            Connected
-                          </span>
-                          <span className={`px-2 py-0.5 rounded-full text-[10.5px] font-bold ${
-                            clinic.status === 'Scaling'
-                              ? 'bg-blue-100 text-blue-900 border border-blue-200'
-                              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                          }`}>
-                            {clinic.status}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleDeletePartnerClinic(clinic.id, clinic.name)}
-                            className="p-1 text-gray-300 hover:text-red-500 rounded transition-colors cursor-pointer"
-                            title="Remove Partner Clinic"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        {clinic.logoSrc ? (
-                          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center p-1.5 shrink-0">
-                            <img src={clinic.logoSrc} alt={clinic.name} className="w-full h-full object-contain" />
-                          </div>
-                        ) : (
-                          <div className={`w-10 h-10 rounded-xl ${clinic.avatarBg} text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs`}>
-                            {clinic.initials}
-                          </div>
-                        )}
-                        <div>
-                          <h3 className="text-sm font-black text-gray-900 leading-snug">{clinic.name}</h3>
-                          <span className="text-xs text-gray-500 font-medium">{clinic.city}</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3 rounded-xl bg-gray-50 border border-gray-200/80 space-y-1.5 text-xs">
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-500 font-medium">Vertical:</span>
-                          <span className="font-bold text-gray-800">{clinic.vertical}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-500 font-medium">Channel:</span>
-                          <span className="font-bold text-[#183B2B]">{clinic.service}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-500 font-medium">Monthly Retainer:</span>
-                          <span className="font-bold text-emerald-700 font-mono">{clinic.monthlySpend}</span>
-                        </div>
+                        <a
+                          href={`mailto:${clinic.email}`}
+                          className="text-[#183B2B] font-bold hover:underline shrink-0"
+                        >
+                          Contact →
+                        </a>
                       </div>
                     </div>
-
-                    <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
-                      <span className="text-gray-500 font-medium truncate max-w-[170px]">
-                        Director: {clinic.contactPerson}
-                      </span>
-                      <a
-                        href={`mailto:${clinic.email}`}
-                        className="text-[#183B2B] font-bold hover:underline shrink-0"
-                      >
-                        Contact →
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -1124,62 +1226,94 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     Campaign Inputs
                   </h2>
 
+                  {/* Monthly Ad Spend */}
                   <div>
                     <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1.5">
                       <span>Monthly Ad Spend</span>
-                      <span className="font-mono text-[#183B2B]">£{calcBudget.toLocaleString()}</span>
+                      <span className="font-mono text-[#183B2B] text-sm">£{calcBudget.toLocaleString()}</span>
                     </div>
                     <input
                       type="range"
                       min={1000}
                       max={50000}
-                      step={500}
+                      step={250}
                       value={calcBudget}
                       onChange={(e) => setCalcBudget(Number(e.target.value))}
                       className="w-full accent-[#183B2B] cursor-pointer"
                     />
-                    <div className="flex justify-between text-[10px] text-gray-400 mt-1">
-                      <span>£1,000</span>
-                      <span>£50,000</span>
+                    <div className="flex gap-1.5 mt-2">
+                      {[2500, 5000, 10000, 25000].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setCalcBudget(preset)}
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                            calcBudget === preset
+                              ? 'bg-[#183B2B] text-white'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          £{(preset / 1000).toFixed(preset % 1000 === 0 ? 0 : 1)}k
+                        </button>
+                      ))}
                     </div>
                   </div>
 
+                  {/* Average Patient Treatment Value */}
                   <div>
                     <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1.5">
                       <span>Average Patient Treatment Value</span>
-                      <span className="font-mono text-[#183B2B]">£{calcTreatmentValue.toLocaleString()}</span>
+                      <span className="font-mono text-[#183B2B] text-sm">£{calcTreatmentValue.toLocaleString()}</span>
                     </div>
                     <input
                       type="range"
                       min={150}
                       max={15000}
-                      step={150}
+                      step={50}
                       value={calcTreatmentValue}
                       onChange={(e) => setCalcTreatmentValue(Number(e.target.value))}
                       className="w-full accent-[#183B2B] cursor-pointer"
                     />
-                    <div className="flex justify-between text-[10px] text-gray-400 mt-1">
-                      <span>£150 (Physio/GP)</span>
-                      <span>£15,000 (Surgery/Implants)</span>
+                    <div className="flex gap-1.5 mt-2">
+                      {[
+                        { label: 'Physio (£250)', val: 250 },
+                        { label: 'Dental (£1.8k)', val: 1800 },
+                        { label: 'Surgery (£6.5k)', val: 6500 },
+                      ].map((preset) => (
+                        <button
+                          key={preset.val}
+                          type="button"
+                          onClick={() => setCalcTreatmentValue(preset.val)}
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                            calcTreatmentValue === preset.val
+                              ? 'bg-[#183B2B] text-white'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
+                  {/* Estimated Cost Per Lead */}
                   <div>
                     <div className="flex items-center justify-between text-xs font-bold text-gray-700 mb-1.5">
                       <span>Estimated Cost Per Lead (CPL)</span>
-                      <span className="font-mono text-[#183B2B]">£{calcEstimatedCpl}</span>
+                      <span className="font-mono text-[#183B2B] text-sm">£{calcEstimatedCpl}</span>
                     </div>
                     <input
                       type="range"
                       min={10}
                       max={120}
-                      step={2}
+                      step={1}
                       value={calcEstimatedCpl}
                       onChange={(e) => setCalcEstimatedCpl(Number(e.target.value))}
                       className="w-full accent-[#183B2B] cursor-pointer"
                     />
                     <div className="flex justify-between text-[10px] text-gray-400 mt-1">
                       <span>£10 (Diagnostics)</span>
+                      <span>£45 (Dental)</span>
                       <span>£120 (Cosmetic Surgery)</span>
                     </div>
                   </div>
@@ -1234,7 +1368,121 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       </div>
 
       {/* ========================================================= */}
-      {/* MODAL: ADD PARTNER CLINIC                                 */}
+      {/* MODAL 1: VIEW LEAD FULL DETAILS                          */}
+      {/* ========================================================= */}
+      {selectedLeadForDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                  {selectedLeadForDetail.id}
+                </span>
+                <h3 className="text-base font-black text-gray-900">{selectedLeadForDetail.clinicName}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedLeadForDetail(null)}
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3.5 text-xs text-gray-700">
+              <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-gray-50 border border-gray-200/80">
+                <div>
+                  <span className="text-gray-400 font-medium block">Contact Name</span>
+                  <span className="font-bold text-gray-900 text-[13px]">{selectedLeadForDetail.name}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-medium block">Submitted Time</span>
+                  <span className="font-bold text-gray-900">
+                    {new Date(selectedLeadForDetail.submittedAt).toLocaleString()}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-medium block">Email Address</span>
+                  <a href={`mailto:${selectedLeadForDetail.email}`} className="font-bold text-[#183B2B] hover:underline">
+                    {selectedLeadForDetail.email}
+                  </a>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-medium block">Phone Number</span>
+                  <span className="font-bold text-gray-900">
+                    {selectedLeadForDetail.phone || 'None provided'}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-gray-400 font-medium block mb-1">Consultation Message / Growth Requirements</span>
+                <div className="p-3 rounded-xl bg-gray-50 border border-gray-200/80 font-medium text-gray-800 leading-relaxed whitespace-pre-wrap">
+                  {selectedLeadForDetail.message || 'No specific notes entered with inquiry.'}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-200/80">
+                <div>
+                  <span className="text-gray-400 font-medium block">Lead Status</span>
+                  <span className="font-bold text-gray-900">{selectedLeadForDetail.status}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-medium block">Specialty Focus</span>
+                  <span className="font-bold text-[#183B2B]">{selectedLeadForDetail.service}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400 font-medium block">Partner Status</span>
+                  {isClinicConnected(selectedLeadForDetail.clinicName, selectedLeadForDetail.email) ? (
+                    <span className="inline-flex items-center gap-1 font-black text-emerald-700">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Connected
+                    </span>
+                  ) : (
+                    <span className="font-bold text-gray-500">Not Connected</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteTarget({ type: 'inquiry', id: selectedLeadForDetail.id, name: selectedLeadForDetail.clinicName });
+                }}
+                className="px-3 py-1.5 rounded-xl text-red-600 hover:bg-red-50 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Delete Lead
+              </button>
+
+              <div className="flex items-center gap-2">
+                {!isClinicConnected(selectedLeadForDetail.clinicName, selectedLeadForDetail.email) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleAddLeadToPartnerClinics(selectedLeadForDetail);
+                      setSelectedLeadForDetail(null);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                  >
+                    + Add to Partner Clinics
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setSelectedLeadForDetail(null)}
+                  className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL 2: ADD PARTNER CLINIC                               */}
       {/* ========================================================= */}
       {isAddClinicModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
@@ -1351,6 +1599,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* MODAL 3: CONFIRM DELETE                                   */}
+      {/* ========================================================= */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-gray-200 space-y-4">
+            <div className="flex items-center gap-3 text-red-600">
+              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-gray-900">
+                  Confirm Deletion
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Are you sure you want to delete {deleteTarget.type === 'inquiry' ? 'lead' : 'partner clinic'} &ldquo;{deleteTarget.name}&rdquo;?
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="px-4 py-2 rounded-xl text-gray-600 hover:bg-gray-100 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleExecuteDelete}
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
