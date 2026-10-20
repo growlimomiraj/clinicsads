@@ -371,12 +371,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
   const [calcEstimatedCpl, setCalcEstimatedCpl] = useState<number>(25);
 
   const calcResults = useMemo(() => {
-    const projectedInquiries = Math.round(calcBudget / Math.max(1, calcEstimatedCpl));
+    const budget = Math.max(100, Number(calcBudget) || 5000);
+    const treatmentVal = Math.max(50, Number(calcTreatmentValue) || 1800);
+    const cpl = Math.max(5, Number(calcEstimatedCpl) || 25);
+    const projectedInquiries = Math.round(budget / cpl);
     const bookedPatients = Math.round(projectedInquiries * 0.28); // 28% consultation conversion benchmark
-    const projectedRevenue = bookedPatients * calcTreatmentValue;
-    const roas = (projectedRevenue / Math.max(1, calcBudget)).toFixed(1);
+    const projectedRevenue = bookedPatients * treatmentVal;
+    const roas = (projectedRevenue / budget).toFixed(1);
     return { projectedInquiries, bookedPatients, projectedRevenue, roas };
   }, [calcBudget, calcTreatmentValue, calcEstimatedCpl]);
+
+  // Modal dismiss on Escape key listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (selectedLeadForDetail) {
+          setSelectedLeadForDetail(null);
+        } else if (deleteTarget) {
+          setDeleteTarget(null);
+        } else if (isAddClinicModalOpen) {
+          setIsAddClinicModalOpen(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedLeadForDetail, deleteTarget, isAddClinicModalOpen]);
 
   // Filtered Inquiries for Leads View & Search
   const filteredInquiries = useMemo(() => {
@@ -411,7 +431,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
   }, [partnerClinics, searchQuery]);
 
   // ACTION: Add an Inbound Lead directly to Partner Clinics Directory
-  const handleAddLeadToPartnerClinics = (inq: ClinicInquiry) => {
+  const handleAddLeadToPartnerClinics = async (inq: ClinicInquiry) => {
     if (isClinicConnected(inq.clinicName, inq.email)) {
       showToast(`✓ "${inq.clinicName}" is already connected to Partner Clinics!`);
       setActiveTab('clinics');
@@ -440,13 +460,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
     const updatedPartners = [newPartner, ...partnerClinics];
     setPartnerClinics(updatedPartners);
-    pushPartnerClinicsToCloud(updatedPartners);
     updateInquiryStatus(inq.id, 'Proposal Sent');
     showToast(`✓ Connected: "${inq.clinicName}" is now active in Partner Clinics!`);
+    await pushPartnerClinicsToCloud(updatedPartners);
   };
 
   // ACTION: Handle Manual Partner Clinic Creation
-  const handleCreatePartnerClinic = (e: React.FormEvent) => {
+  const handleCreatePartnerClinic = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clinicForm.name.trim()) return;
 
@@ -472,7 +492,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
     const updatedPartners = [created, ...partnerClinics];
     setPartnerClinics(updatedPartners);
-    pushPartnerClinicsToCloud(updatedPartners);
     setIsAddClinicModalOpen(false);
     setClinicForm({
       name: '',
@@ -486,6 +505,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       status: 'Active'
     });
     showToast(`✓ Connected: "${created.name}" added to Partner Clinics!`);
+    await pushPartnerClinicsToCloud(updatedPartners);
   };
 
   // Execute Confirmed Permanent Deletion
@@ -502,46 +522,82 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     } else {
       const updated = partnerClinics.filter((c) => c.id !== deleteTarget.id);
       setPartnerClinics(updated);
-      pushPartnerClinicsToCloud(updated);
       showToast(`Removed "${deleteTarget.name}" from Partner Clinics.`);
+      await pushPartnerClinicsToCloud(updated);
     }
     setDeleteTarget(null);
   };
 
-  // Export Inquiries to CSV
+  // Export Inquiries to CSV with clean UTF-8 BOM, multiline escaping, and Blob download
   const handleExportCSV = () => {
-    if (inquiries.length === 0) return;
+    if (inquiries.length === 0) {
+      showToast('No leads available to export.');
+      return;
+    }
     const headers = ['Inquiry ID', 'Submitted Date', 'Client Name', 'Clinic Name', 'Email', 'Phone', 'Service', 'Preferred Time', 'Status', 'Notes'];
     const rows = inquiries.map((i) => [
       i.id,
       new Date(i.submittedAt).toLocaleDateString(),
-      `"${i.name.replace(/"/g, '""')}"`,
-      `"${i.clinicName.replace(/"/g, '""')}"`,
-      i.email,
+      `"${(i.name || '').replace(/"/g, '""').replace(/[\r\n]+/g, ' ')}"`,
+      `"${(i.clinicName || '').replace(/"/g, '""').replace(/[\r\n]+/g, ' ')}"`,
+      i.email || '',
       i.phone || '',
-      `"${i.service}"`,
-      `"${i.preferredTime || ''}"`,
-      i.status,
-      `"${(i.message || '').replace(/"/g, '""')}"`
+      `"${(i.service || '').replace(/"/g, '""')}"`,
+      `"${(i.preferredTime || '').replace(/"/g, '""')}"`,
+      i.status || 'New',
+      `"${(i.message || '').replace(/"/g, '""').replace(/[\r\n]+/g, ' ')}"`
     ]);
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
+    link.setAttribute('href', url);
     link.setAttribute('download', `clinicsads_leads_export_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast('Exported leads database to CSV.');
+    URL.revokeObjectURL(url);
+    showToast('✓ Exported leads database cleanly to CSV.');
   };
 
-  const handleCopyLead = (inq: ClinicInquiry) => {
+  // Safe multi-platform clipboard copy helper
+  const copyTextToClipboard = async (text: string): Promise<boolean> => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        // Fallback to execCommand below
+      }
+    }
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      textArea.style.top = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return successful;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleCopyLead = async (inq: ClinicInquiry) => {
     const text = `Lead ${inq.id}: ${inq.name} (${inq.clinicName})\nEmail: ${inq.email}\nPhone: ${inq.phone || 'N/A'}\nService: ${inq.service}\nPreferred Time: ${inq.preferredTime || 'N/A'}\nNotes: ${inq.message || 'N/A'}`;
-    navigator.clipboard.writeText(text);
-    setCopiedLeadId(inq.id);
-    showToast(`Lead ${inq.id} contact details copied to clipboard.`);
-    setTimeout(() => setCopiedLeadId(null), 2000);
+    const success = await copyTextToClipboard(text);
+    if (success) {
+      setCopiedLeadId(inq.id);
+      showToast(`✓ Lead ${inq.id} contact details copied to clipboard.`);
+      setTimeout(() => setCopiedLeadId(null), 2000);
+    } else {
+      showToast(`Could not auto-copy lead ${inq.id}.`);
+    }
   };
 
   if (!isAuthenticated) {
@@ -1592,7 +1648,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       {/* MODAL 1: VIEW LEAD FULL DETAILS                          */}
       {/* ========================================================= */}
       {selectedLeadForDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setSelectedLeadForDetail(null); }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in"
+        >
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <div className="flex items-center gap-2">
@@ -1706,7 +1765,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       {/* MODAL 2: ADD PARTNER CLINIC                               */}
       {/* ========================================================= */}
       {isAddClinicModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setIsAddClinicModalOpen(false); }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in"
+        >
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <div className="flex items-center gap-2">
@@ -1828,7 +1890,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       {/* MODAL 3: CONFIRM DELETE                                   */}
       {/* ========================================================= */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setDeleteTarget(null); }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in"
+        >
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-gray-200 space-y-4">
             <div className="flex items-center gap-3 text-red-600">
               <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">

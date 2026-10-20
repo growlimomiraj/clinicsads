@@ -1,6 +1,7 @@
 import http from 'http';
 import inquiriesHandler from './api/inquiries.ts';
 import authHandler from './api/auth.ts';
+import clinicsHandler from './api/clinics.ts';
 
 async function runTests() {
   console.log('--- STARTING VERIFICATION TEST SUITE ---');
@@ -12,6 +13,8 @@ async function runTests() {
       await inquiriesHandler(req, res);
     } else if (url.startsWith('/api/auth')) {
       await authHandler(req, res);
+    } else if (url.startsWith('/api/clinics')) {
+      await clinicsHandler(req, res);
     } else {
       res.statusCode = 404;
       res.end();
@@ -50,7 +53,7 @@ async function runTests() {
     const goodAuthRes = await fetch(`${baseUrl}/api/auth`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ passcode: 'clinicsads-admin-secure-2026' }),
+      body: JSON.stringify({ passcode: 'Pakistan@2026clinicsads' }),
     });
     const goodAuthData = await goodAuthRes.json();
     if (!goodAuthData.authenticated || !goodAuthData.token) {
@@ -169,6 +172,18 @@ async function runTests() {
       throw new Error('Persistence failed to retain inquiry updates!');
     }
     console.log('✓ Cloud Persistence Verified: Inquiry', leadAId, 'persisted with status', persistedA.status);
+
+    // TEST 10: Partner Clinics Cloud API Verification
+    console.log('\n[TEST 10] Testing Partner Clinics API (/api/clinics)...');
+    const clinicsRes = await fetch(`${baseUrl}/api/clinics`);
+    if (clinicsRes.status !== 200) {
+      throw new Error(`Expected 200 for GET /api/clinics, got ${clinicsRes.status}`);
+    }
+    const clinicsData = await clinicsRes.json();
+    if (!clinicsData.success || !Array.isArray(clinicsData.clinics)) {
+      throw new Error('Expected success: true and array of clinics');
+    }
+    console.log(`✓ Partner Clinics API Verified: Loaded ${clinicsData.clinics.length} partner clinics from cloud store.`);
 
     // Clean up test items
     console.log('\n[CLEANUP] Cleaning test inquiries...');

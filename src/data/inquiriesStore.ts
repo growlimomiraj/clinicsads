@@ -61,7 +61,7 @@ const INITIAL_INQUIRIES: ClinicInquiry[] = [
     name: 'Umair Ali',
     email: 'umair.alics@hotmail.com',
     phone: '+923105615306',
-    clinicName: 'growlimo',
+    clinicName: 'Apex Dental Care',
     service: 'Google Ads',
     preferredTime: 'Morning (9am - 12pm)',
     message: 'Requested Strategy Call for Google Ads',
@@ -102,7 +102,7 @@ const INITIAL_INQUIRIES: ClinicInquiry[] = [
     name: 'Umair Ali',
     email: 'umair.alics@hotmail.com',
     phone: '+923105615306',
-    clinicName: 'growlimo',
+    clinicName: 'NovaCare Aesthetics',
     service: 'Google Ads',
     preferredTime: 'Morning (9am - 12pm)',
     message: 'Requested Strategy Call for Google Ads',
@@ -681,11 +681,35 @@ export function subscribeToInquiries(callback: () => void): () => void {
 }
 
 /**
- * Partner Clinics persistence helpers
+ * Partner Clinics cloud persistence helpers
  */
 const PARTNER_CLINICS_STORAGE_KEY = 'clinicsads_partner_clinics';
 
 export async function getPartnerClinicsFromCloud(): Promise<any[] | null> {
+  // 1. Try fetching from cloud backend
+  try {
+    const res = await fetch(`/api/clinics?_t=${Date.now()}`, {
+      headers: {
+        'Accept': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.clinics) && data.clinics.length > 0) {
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(PARTNER_CLINICS_STORAGE_KEY, JSON.stringify(data.clinics));
+          } catch {}
+        }
+        return data.clinics;
+      }
+    }
+  } catch (err) {
+    console.warn('Network error fetching partner clinics from cloud, checking cache:', err);
+  }
+
+  // 2. Fallback to localStorage cache
   if (typeof window !== 'undefined') {
     try {
       const stored = localStorage.getItem(PARTNER_CLINICS_STORAGE_KEY);
@@ -699,11 +723,29 @@ export async function getPartnerClinicsFromCloud(): Promise<any[] | null> {
 }
 
 export async function pushPartnerClinicsToCloud(clinics: any[]): Promise<boolean> {
+  // 1. Instantly save to local cache
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(PARTNER_CLINICS_STORAGE_KEY, JSON.stringify(clinics));
-      return true;
     } catch {}
   }
-  return false;
+
+  // 2. Persist to authoritative backend
+  const token = getAdminToken();
+  try {
+    const res = await fetch('/api/clinics', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'x-admin-key': token,
+      },
+      body: JSON.stringify({ clinics }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('Network error saving partner clinics to cloud:', err);
+    return false;
+  }
 }
