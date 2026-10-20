@@ -488,15 +488,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     showToast(`✓ Connected: "${created.name}" added to Partner Clinics!`);
   };
 
-  // Execute Confirmed Deletion
-  const handleExecuteDelete = () => {
+  // Execute Confirmed Permanent Deletion
+  const handleExecuteDelete = async () => {
     if (!deleteTarget) return;
     if (deleteTarget.type === 'inquiry') {
-      deleteInquiry(deleteTarget.id);
-      if (selectedLeadForDetail?.id === deleteTarget.id) {
+      const targetId = deleteTarget.id;
+      setInquiries((prev) => prev.filter((i) => i.id !== targetId));
+      if (selectedLeadForDetail?.id === targetId) {
         setSelectedLeadForDetail(null);
       }
-      showToast(`Deleted lead ${deleteTarget.id}`);
+      showToast(`✓ Permanently deleted lead ${targetId}`);
+      await deleteInquiry(targetId);
     } else {
       const updated = partnerClinics.filter((c) => c.id !== deleteTarget.id);
       setPartnerClinics(updated);
@@ -1834,10 +1836,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
               </div>
               <div>
                 <h3 className="text-sm font-black text-gray-900">
-                  Confirm Deletion
+                  Permanently Delete {deleteTarget.type === 'inquiry' ? 'Inquiry Lead' : 'Partner Clinic'}
                 </h3>
                 <p className="text-xs text-gray-500">
-                  Are you sure you want to delete {deleteTarget.type === 'inquiry' ? 'lead' : 'partner clinic'} &ldquo;{deleteTarget.name}&rdquo;?
+                  Are you sure you want to permanently delete {deleteTarget.type === 'inquiry' ? 'inquiry lead' : 'partner clinic'} &ldquo;{deleteTarget.name}&rdquo;? This will erase it permanently from all devices and the cloud database.
                 </p>
               </div>
             </div>
@@ -1855,7 +1857,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 onClick={handleExecuteDelete}
                 className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
               >
-                Delete
+                Permanently Delete
               </button>
             </div>
           </div>

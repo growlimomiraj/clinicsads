@@ -22,8 +22,37 @@ export interface ClinicInquiry {
 }
 
 const STORAGE_KEY = 'clinicsads_inquiries_cache_v2';
+const DELETED_IDS_KEY = 'clinicsads_deleted_inquiry_ids';
 const ADMIN_TOKEN_KEY = 'clinicsads_admin_session_token';
 const DEFAULT_OWNER_KEY = 'clinicsads-admin-secure-2026';
+
+let memoryDeletedIds: Set<string> = new Set();
+
+export function getDeletedIds(): Set<string> {
+  if (memoryDeletedIds.size > 0) return memoryDeletedIds;
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(DELETED_IDS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          memoryDeletedIds = new Set(parsed);
+          return memoryDeletedIds;
+        }
+      }
+    } catch {}
+  }
+  return memoryDeletedIds;
+}
+
+export function recordDeletedId(id: string): void {
+  memoryDeletedIds.add(id);
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(DELETED_IDS_KEY, JSON.stringify(Array.from(memoryDeletedIds)));
+    } catch {}
+  }
+}
 
 // Historical fallback seeds
 const INITIAL_INQUIRIES: ClinicInquiry[] = [
@@ -239,20 +268,22 @@ export async function verifyAdminPasscode(passcode: string): Promise<boolean> {
 
 /**
  * Synchronous read from cache for zero-lag initial paint
+ * Permanently filters out any deleted inquiry
  */
 export function getInquiries(): ClinicInquiry[] {
+  const deleted = getDeletedIds();
   if (typeof window === 'undefined') {
-    return INITIAL_INQUIRIES;
+    return INITIAL_INQUIRIES.filter((i) => !deleted.has(i.id));
   }
   if (memoryInquiries && memoryInquiries.length > 0) {
-    return memoryInquiries;
+    return memoryInquiries.filter((i) => !deleted.has(i.id));
   }
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        memoryInquiries = parsed;
+        memoryInquiries = parsed.filter((i: ClinicInquiry) => !deleted.has(i.id));
         setTimeout(() => syncInquiriesWithCloud(), 20);
         return memoryInquiries;
       }
@@ -261,9 +292,9 @@ export function getInquiries(): ClinicInquiry[] {
     if (legacyRaw) {
       const parsedLegacy = JSON.parse(legacyRaw);
       if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
-        memoryInquiries = parsedLegacy;
+        memoryInquiries = parsedLegacy.filter((i: ClinicInquiry) => !deleted.has(i.id));
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedLegacy));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(memoryInquiries));
         } catch {}
         setTimeout(() => syncInquiriesWithCloud(), 20);
         return memoryInquiries;
@@ -273,7 +304,7 @@ export function getInquiries(): ClinicInquiry[] {
     console.warn('Failed reading inquiries cache:', err);
   }
 
-  memoryInquiries = INITIAL_INQUIRIES;
+  memoryInquiries = INITIAL_INQUIRIES.filter((i) => !deleted.has(i.id));
   setTimeout(() => syncInquiriesWithCloud(), 20);
   return memoryInquiries;
 }
@@ -282,14 +313,16 @@ export function getInquiries(): ClinicInquiry[] {
  * Save locally to memory & storage cache with cross-tab broadcast
  */
 export function saveInquiries(items: ClinicInquiry[]): void {
-  memoryInquiries = items;
+  const deleted = getDeletedIds();
+  const cleanItems = items.filter((i) => !deleted.has(i.id));
+  memoryInquiries = cleanItems;
   if (typeof window !== 'undefined') {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanItems));
       if ('BroadcastChannel' in window) {
         try {
           const bc = new BroadcastChannel('clinicsads_sync_channel');
-          bc.postMessage({ type: 'inquiry_updated', count: items.length });
+          bc.postMessage({ type: 'inquiry_updated', count: cleanItems.length });
           bc.close();
         } catch {}
       }
@@ -302,7 +335,7 @@ export function saveInquiries(items: ClinicInquiry[]): void {
 
 /**
  * Fetch and synchronize all inquiries from the authoritative backend
- * Uses merge logic to ensure pending local inquiries are never wiped out
+ * Enforces permanent deletion and ensures deleted leads are never resurrected
  */
 export async function syncInquiriesWithCloud(): Promise<ClinicInquiry[]> {
   if (isSyncing) return memoryInquiries || INITIAL_INQUIRIES;
@@ -325,18 +358,35 @@ export async function syncInquiriesWithCloud(): Promise<ClinicInquiry[]> {
     if (res.ok) {
       const data = await res.json();
       if (data.success && Array.isArray(data.inquiries)) {
-        const serverInquiries: ClinicInquiry[] = data.inquiries;
-        const currentLocal = memoryInquiries || [];
+        // Ingest any server-known deleted IDs into local tombstones
+        if (Array.isArray(data.deletedIds)) {
+          data.deletedIds.forEach((id: string) => memoryDeletedIds.add(id));
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem(DELETED_IDS_KEY, JSON.stringify(Array.from(memoryDeletedIds)));
+            } catch {}
+          }
+        }
+
+        const deleted = getDeletedIds();
+        const serverInquiries: ClinicInquiry[] = data.inquiries.filter((i: ClinicInquiry) => !deleted.has(i.id));
+        const currentLocal = (memoryInquiries || []).filter((i: ClinicInquiry) => !deleted.has(i.id));
         const serverIds = new Set(serverInquiries.map((i) => i.id));
 
-        // Keep any pending local inquiries not yet registered on server
-        const localPending = currentLocal.filter((i) => !serverIds.has(i.id));
+        // A lead is only treated as "pending upload" if it was submitted within the last 2 minutes and not deleted
+        const nowMs = Date.now();
+        const localPending = currentLocal.filter((i) => {
+          if (serverIds.has(i.id) || deleted.has(i.id)) return false;
+          const subMs = new Date(i.submittedAt).getTime();
+          return !isNaN(subMs) && (nowMs - subMs) < 120000;
+        });
+
         const merged = localPending.length > 0 ? [...localPending, ...serverInquiries] : serverInquiries;
 
         saveInquiries(merged);
         setConnectionStatus('connected');
 
-        // Automatically push local-only inquiries to server
+        // Automatically push genuine fresh local submissions to server
         if (localPending.length > 0) {
           localPending.forEach((pending) => {
             fetch('/api/inquiries', {
@@ -365,7 +415,8 @@ export async function syncInquiriesWithCloud(): Promise<ClinicInquiry[]> {
     isSyncing = false;
   }
 
-  return memoryInquiries || INITIAL_INQUIRIES;
+  const finalDeleted = getDeletedIds();
+  return (memoryInquiries || INITIAL_INQUIRIES).filter((i) => !finalDeleted.has(i.id));
 }
 
 /**
@@ -505,13 +556,27 @@ export async function markInquiryAsRead(id: string, read: boolean): Promise<bool
 }
 
 /**
- * Delete inquiry: deletes from backend and local cache
+ * Delete inquiry: permanently deletes from backend and local cache, tombstoning the ID
  */
 export async function deleteInquiry(id: string): Promise<boolean> {
+  // 1. Immediately record in permanent deleted tombstones
+  recordDeletedId(id);
+
+  // 2. Filter from memory and local storage cache
   const current = getInquiries();
   const updated = current.filter((item) => item.id !== id);
   saveInquiries(updated);
 
+  // 3. Broadcast across tabs
+  if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+    try {
+      const bc = new BroadcastChannel('clinicsads_sync_channel');
+      bc.postMessage({ type: 'inquiry_deleted', id });
+      bc.close();
+    } catch {}
+  }
+
+  // 4. Send permanent DELETE to cloud backend
   const token = getAdminToken();
   try {
     const res = await fetch(`/api/inquiries?id=${encodeURIComponent(id)}`, {
@@ -521,6 +586,17 @@ export async function deleteInquiry(id: string): Promise<boolean> {
         'x-admin-key': token,
       },
     });
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      if (data && Array.isArray(data.deletedIds)) {
+        data.deletedIds.forEach((did: string) => memoryDeletedIds.add(did));
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(DELETED_IDS_KEY, JSON.stringify(Array.from(memoryDeletedIds)));
+          } catch {}
+        }
+      }
+    }
     return res.ok;
   } catch (err) {
     console.warn('Failed to delete inquiry on server:', err);
@@ -543,7 +619,7 @@ export function subscribeToInquiries(callback: () => void): () => void {
 
     // Cross-tab storage event handler
     const storageHandler = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY || e.key === 'clinicsads_inquiries_v1') {
+      if (e.key === STORAGE_KEY || e.key === 'clinicsads_inquiries_v1' || e.key === DELETED_IDS_KEY) {
         memoryInquiries = null;
         callback();
       }
@@ -555,7 +631,10 @@ export function subscribeToInquiries(callback: () => void): () => void {
     if ('BroadcastChannel' in window) {
       try {
         bc = new BroadcastChannel('clinicsads_sync_channel');
-        bc.onmessage = () => {
+        bc.onmessage = (event: MessageEvent) => {
+          if (event.data?.type === 'inquiry_deleted' && event.data.id) {
+            recordDeletedId(event.data.id);
+          }
           memoryInquiries = null;
           callback();
         };

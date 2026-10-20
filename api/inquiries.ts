@@ -38,6 +38,7 @@ function getAdminKey(): string {
 
 // In-memory cache for fast sub-millisecond responses
 let memoryInquiries: ClinicInquiry[] | null = null;
+let memoryDeletedIds: Set<string> = new Set();
 let lastFetchTime = 0;
 const CACHE_TTL_MS = 3000; // 3 seconds cache
 
@@ -155,7 +156,7 @@ const FALLBACK_INQUIRIES: ClinicInquiry[] = [
 async function fetchFromCloudStore(): Promise<ClinicInquiry[]> {
   const now = Date.now();
   if (memoryInquiries && now - lastFetchTime < CACHE_TTL_MS) {
-    return memoryInquiries;
+    return memoryInquiries.filter((i) => !memoryDeletedIds.has(i.id));
   }
 
   try {
@@ -177,12 +178,24 @@ async function fetchFromCloudStore(): Promise<ClinicInquiry[]> {
     if (res.ok) {
       const data = await res.json();
       const content = data.files?.['inquiries.json']?.content;
+      const deletedContent = data.files?.['deleted_ids.json']?.content;
+
+      if (deletedContent) {
+        try {
+          const parsedDeleted = JSON.parse(deletedContent);
+          if (Array.isArray(parsedDeleted)) {
+            parsedDeleted.forEach((id: string) => memoryDeletedIds.add(id));
+          }
+        } catch {}
+      }
+
       if (content) {
         const parsed = JSON.parse(content);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          memoryInquiries = parsed;
+        if (Array.isArray(parsed)) {
+          const sanitized = parsed.filter((i) => !memoryDeletedIds.has(i.id));
+          memoryInquiries = sanitized;
           lastFetchTime = now;
-          return parsed;
+          return sanitized;
         }
       }
     } else {
@@ -194,30 +207,52 @@ async function fetchFromCloudStore(): Promise<ClinicInquiry[]> {
 
   // Attempt reading from /tmp cache if present
   try {
+    const tmpDeleted = path.resolve('/tmp/clinicsads_deleted_ids.json');
+    if (fs.existsSync(tmpDeleted)) {
+      const raw = fs.readFileSync(tmpDeleted, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        parsed.forEach((id: string) => memoryDeletedIds.add(id));
+      }
+    }
     const tmpPath = path.resolve('/tmp/clinicsads_inquiries.json');
     if (fs.existsSync(tmpPath)) {
       const raw = fs.readFileSync(tmpPath, 'utf-8');
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        memoryInquiries = parsed;
-        return memoryInquiries;
+        const sanitized = parsed.filter((i) => !memoryDeletedIds.has(i.id));
+        memoryInquiries = sanitized;
+        return sanitized;
       }
     }
   } catch {}
 
   if (!memoryInquiries) {
-    memoryInquiries = FALLBACK_INQUIRIES;
+    memoryInquiries = FALLBACK_INQUIRIES.filter((i) => !memoryDeletedIds.has(i.id));
   }
   return memoryInquiries;
 }
 
-async function saveToCloudStore(items: ClinicInquiry[]): Promise<boolean> {
-  memoryInquiries = items;
+async function saveToCloudStore(items: ClinicInquiry[], deletedIdToAdd?: string): Promise<boolean> {
+  if (deletedIdToAdd) {
+    memoryDeletedIds.add(deletedIdToAdd);
+  }
+  const cleanItems = items.filter((i) => !memoryDeletedIds.has(i.id));
+  memoryInquiries = cleanItems;
   lastFetchTime = Date.now();
 
   const token = getCloudToken();
   if (token) {
     try {
+      const filesPayload: Record<string, any> = {
+        'inquiries.json': {
+          content: JSON.stringify(cleanItems, null, 2),
+        },
+        'deleted_ids.json': {
+          content: JSON.stringify(Array.from(memoryDeletedIds), null, 2),
+        },
+      };
+
       const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
         method: 'PATCH',
         headers: {
@@ -226,13 +261,7 @@ async function saveToCloudStore(items: ClinicInquiry[]): Promise<boolean> {
           Accept: 'application/vnd.github.v3+json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          files: {
-            'inquiries.json': {
-              content: JSON.stringify(items, null, 2),
-            },
-          },
-        }),
+        body: JSON.stringify({ files: filesPayload }),
       });
       if (res.ok) return true;
       const errText = await res.text().catch(() => '');
@@ -245,7 +274,9 @@ async function saveToCloudStore(items: ClinicInquiry[]): Promise<boolean> {
   // Fallback to local /tmp storage
   try {
     const tmpPath = path.resolve('/tmp/clinicsads_inquiries.json');
-    fs.writeFileSync(tmpPath, JSON.stringify(items, null, 2), 'utf-8');
+    fs.writeFileSync(tmpPath, JSON.stringify(cleanItems, null, 2), 'utf-8');
+    const tmpDeletedPath = path.resolve('/tmp/clinicsads_deleted_ids.json');
+    fs.writeFileSync(tmpDeletedPath, JSON.stringify(Array.from(memoryDeletedIds), null, 2), 'utf-8');
   } catch {}
 
   return true;
@@ -353,6 +384,10 @@ export default async function handler(req: any, res: any) {
         return sendResponse(res, 400, { error: 'Clinic name is required.' });
       }
 
+      if (body.id && typeof body.id === 'string' && memoryDeletedIds.has(body.id)) {
+        return sendResponse(res, 400, { error: 'This inquiry was permanently deleted.' });
+      }
+
       const current = await fetchFromCloudStore();
       const newInquiry: ClinicInquiry = {
         id: (body.id && typeof body.id === 'string' && body.id.startsWith('INQ-'))
@@ -400,6 +435,7 @@ export default async function handler(req: any, res: any) {
         success: true,
         count: inquiries.length,
         inquiries,
+        deletedIds: Array.from(memoryDeletedIds),
       });
     }
 
@@ -432,7 +468,7 @@ export default async function handler(req: any, res: any) {
       return sendResponse(res, 200, { success: true, inquiry: target });
     }
 
-    // 4. ADMIN ONLY: Delete inquiry (DELETE)
+    // 4. ADMIN ONLY: Delete inquiry (DELETE) - Permanently deletes and tombstones
     if (method === 'DELETE') {
       if (!verifyAdminAuth(req)) {
         return sendResponse(res, 401, { error: 'Unauthorized' });
@@ -455,8 +491,14 @@ export default async function handler(req: any, res: any) {
 
       const current = await fetchFromCloudStore();
       const filtered = current.filter((i) => i.id !== id);
-      await saveToCloudStore(filtered);
-      return sendResponse(res, 200, { success: true, message: `Inquiry ${id} deleted` });
+      await saveToCloudStore(filtered, id);
+      return sendResponse(res, 200, {
+        success: true,
+        message: `Inquiry ${id} permanently deleted.`,
+        count: filtered.length,
+        deletedId: id,
+        deletedIds: Array.from(memoryDeletedIds),
+      });
     }
 
     return sendResponse(res, 405, { error: `Method ${method} Not Allowed` });
