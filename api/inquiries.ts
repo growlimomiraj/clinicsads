@@ -30,7 +30,7 @@ function getCloudToken(): string {
   }
 }
 
-const DEFAULT_ADMIN_KEY = 'clinicsads-admin-secure-2026';
+const DEFAULT_ADMIN_KEY = 'Pakistan@2026clinicsads';
 
 function getAdminKey(): string {
   return process.env.ADMIN_KEY || process.env.ADMIN_SECRET || DEFAULT_ADMIN_KEY;

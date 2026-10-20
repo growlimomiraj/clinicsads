@@ -234,7 +234,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
         const latest = await syncInquiriesWithCloud();
         setInquiries(latest);
       } else {
-        setPasscodeError('Incorrect passcode. Please check your credentials or Vercel ADMIN_KEY setting.');
+        setPasscodeError('Incorrect passcode. Please check your passcode and try again.');
       }
     } catch {
       setPasscodeError('Network error verifying credentials.');

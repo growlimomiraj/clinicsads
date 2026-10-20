@@ -24,7 +24,7 @@ export interface ClinicInquiry {
 const STORAGE_KEY = 'clinicsads_inquiries_cache_v2';
 const DELETED_IDS_KEY = 'clinicsads_deleted_inquiry_ids';
 const ADMIN_TOKEN_KEY = 'clinicsads_admin_session_token';
-const DEFAULT_OWNER_KEY = 'clinicsads-admin-secure-2026';
+const DEFAULT_OWNER_KEY = 'Pakistan@2026clinicsads';
 
 let memoryDeletedIds: Set<string> = new Set();
 
@@ -215,16 +215,22 @@ function notify() {
  * Admin Authentication token management
  */
 export function getAdminToken(): string {
-  if (typeof window === 'undefined') return DEFAULT_OWNER_KEY;
+  if (typeof window === 'undefined') return '';
   try {
     const session = sessionStorage.getItem(ADMIN_TOKEN_KEY);
-    if (session) return session;
+    if (session) {
+      if (session === DEFAULT_OWNER_KEY) return session;
+      sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+    }
     const local = localStorage.getItem(ADMIN_TOKEN_KEY);
-    if (local) return local;
+    if (local) {
+      if (local === DEFAULT_OWNER_KEY) return local;
+      localStorage.removeItem(ADMIN_TOKEN_KEY);
+    }
   } catch {
     // fallback
   }
-  return DEFAULT_OWNER_KEY;
+  return '';
 }
 
 export function setAdminToken(token: string | null) {
@@ -339,10 +345,13 @@ export function saveInquiries(items: ClinicInquiry[]): void {
  */
 export async function syncInquiriesWithCloud(): Promise<ClinicInquiry[]> {
   if (isSyncing) return memoryInquiries || INITIAL_INQUIRIES;
+  const token = getAdminToken();
+  if (!token) {
+    const deleted = getDeletedIds();
+    return (memoryInquiries || INITIAL_INQUIRIES).filter((i) => !deleted.has(i.id));
+  }
   isSyncing = true;
   setConnectionStatus('syncing');
-
-  const token = getAdminToken();
 
   try {
     const res = await fetch(`/api/inquiries?_t=${Date.now()}`, {
