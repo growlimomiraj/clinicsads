@@ -244,7 +244,7 @@ export function getInquiries(): ClinicInquiry[] {
   if (typeof window === 'undefined') {
     return INITIAL_INQUIRIES;
   }
-  if (memoryInquiries) {
+  if (memoryInquiries && memoryInquiries.length > 0) {
     return memoryInquiries;
   }
   try {
@@ -253,6 +253,18 @@ export function getInquiries(): ClinicInquiry[] {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
         memoryInquiries = parsed;
+        setTimeout(() => syncInquiriesWithCloud(), 20);
+        return memoryInquiries;
+      }
+    }
+    const legacyRaw = localStorage.getItem('clinicsads_inquiries_v1');
+    if (legacyRaw) {
+      const parsedLegacy = JSON.parse(legacyRaw);
+      if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
+        memoryInquiries = parsedLegacy;
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedLegacy));
+        } catch {}
         setTimeout(() => syncInquiriesWithCloud(), 20);
         return memoryInquiries;
       }
@@ -267,13 +279,20 @@ export function getInquiries(): ClinicInquiry[] {
 }
 
 /**
- * Save locally to memory & storage cache
+ * Save locally to memory & storage cache with cross-tab broadcast
  */
 export function saveInquiries(items: ClinicInquiry[]): void {
   memoryInquiries = items;
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      if ('BroadcastChannel' in window) {
+        try {
+          const bc = new BroadcastChannel('clinicsads_sync_channel');
+          bc.postMessage({ type: 'inquiry_updated', count: items.length });
+          bc.close();
+        } catch {}
+      }
     } catch (err) {
       console.warn('Failed saving cache:', err);
     }
@@ -283,6 +302,7 @@ export function saveInquiries(items: ClinicInquiry[]): void {
 
 /**
  * Fetch and synchronize all inquiries from the authoritative backend
+ * Uses merge logic to ensure pending local inquiries are never wiped out
  */
 export async function syncInquiriesWithCloud(): Promise<ClinicInquiry[]> {
   if (isSyncing) return memoryInquiries || INITIAL_INQUIRIES;
@@ -305,12 +325,34 @@ export async function syncInquiriesWithCloud(): Promise<ClinicInquiry[]> {
     if (res.ok) {
       const data = await res.json();
       if (data.success && Array.isArray(data.inquiries)) {
-        saveInquiries(data.inquiries);
+        const serverInquiries: ClinicInquiry[] = data.inquiries;
+        const currentLocal = memoryInquiries || [];
+        const serverIds = new Set(serverInquiries.map((i) => i.id));
+
+        // Keep any pending local inquiries not yet registered on server
+        const localPending = currentLocal.filter((i) => !serverIds.has(i.id));
+        const merged = localPending.length > 0 ? [...localPending, ...serverInquiries] : serverInquiries;
+
+        saveInquiries(merged);
         setConnectionStatus('connected');
-        return data.inquiries;
+
+        // Automatically push local-only inquiries to server
+        if (localPending.length > 0) {
+          localPending.forEach((pending) => {
+            fetch('/api/inquiries', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              body: JSON.stringify(pending),
+            }).catch(() => {});
+          });
+        }
+
+        return merged;
       }
     } else if (res.status === 401) {
-      // Admin auth failed
       console.warn('Unauthorized fetch from /api/inquiries');
       setConnectionStatus('error');
     } else {
@@ -327,23 +369,27 @@ export async function syncInquiriesWithCloud(): Promise<ClinicInquiry[]> {
 }
 
 /**
- * Submit inquiry: Persists to authoritative backend, with resilient offline/fail-safe caching
+ * Submit inquiry: Instant local persistence (count updates in 0ms) + authoritative server sync
  */
 export async function submitInquiry(
-  data: Omit<ClinicInquiry, 'id' | 'submittedAt' | 'status'>
+  data: Omit<ClinicInquiry, 'id' | 'submittedAt' | 'status'> & Partial<Pick<ClinicInquiry, 'id' | 'submittedAt' | 'status'>>
 ): Promise<ClinicInquiry> {
   setConnectionStatus('syncing');
 
   const newInquiry: ClinicInquiry = {
     ...data,
-    id: `INQ-${Math.floor(1000 + Math.random() * 9000)}`,
-    submittedAt: new Date().toISOString(),
-    status: 'New',
+    id: data.id || `INQ-${Math.floor(1000 + Math.random() * 9000)}`,
+    submittedAt: data.submittedAt || new Date().toISOString(),
+    status: data.status || 'New',
     read: false,
   };
 
-  let serverSaved = false;
+  // 1. Immediately store in memory & localStorage so dashboard counter increments instantly
+  const current = getInquiries();
+  const updated = [newInquiry, ...current.filter((i) => i.id !== newInquiry.id)];
+  saveInquiries(updated);
 
+  // 2. Persist to authoritative server
   try {
     const res = await fetch('/api/inquiries', {
       method: 'POST',
@@ -351,7 +397,7 @@ export async function submitInquiry(
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(newInquiry),
     });
 
     if (res.ok) {
@@ -359,20 +405,16 @@ export async function submitInquiry(
       if (json && json.inquiry) {
         newInquiry.id = json.inquiry.id || newInquiry.id;
         newInquiry.submittedAt = json.inquiry.submittedAt || newInquiry.submittedAt;
-        serverSaved = true;
+        const latestCurrent = getInquiries();
+        saveInquiries([newInquiry, ...latestCurrent.filter((i) => i.id !== newInquiry.id)]);
       }
+      setConnectionStatus('connected');
     } else {
       console.warn('Backend API non-200 response, using resilient fallback:', res.status);
     }
   } catch (err) {
-    console.warn('Network error reaching backend API, using resilient local save:', err);
+    console.warn('Network error reaching backend API, stored in local cache for background sync:', err);
   }
-
-  // Always update memory and localStorage so visitor inquiry is NEVER lost
-  const current = getInquiries();
-  const updated = [newInquiry, ...current.filter((i) => i.id !== newInquiry.id)];
-  saveInquiries(updated);
-  setConnectionStatus('connected');
 
   return newInquiry;
 }
@@ -393,7 +435,7 @@ export function addInquiry(
   };
 
   const current = getInquiries();
-  saveInquiries([optimistic, ...current]);
+  saveInquiries([optimistic, ...current.filter((i) => i.id !== optimistic.id)]);
 
   // Submit to server asynchronously
   submitInquiry(data).catch((err) => {
@@ -487,7 +529,7 @@ export async function deleteInquiry(id: string): Promise<boolean> {
 }
 
 /**
- * Real-time Subscription with 5-second Background Polling
+ * Real-time Subscription with Cross-Tab Broadcast and 5-second Background Polling
  */
 export function subscribeToInquiries(callback: () => void): () => void {
   listeners.add(callback);
@@ -498,6 +540,27 @@ export function subscribeToInquiries(callback: () => void): () => void {
   if (typeof window !== 'undefined') {
     const handler = () => callback();
     window.addEventListener('clinicsads_inquiry_update', handler);
+
+    // Cross-tab storage event handler
+    const storageHandler = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY || e.key === 'clinicsads_inquiries_v1') {
+        memoryInquiries = null;
+        callback();
+      }
+    };
+    window.addEventListener('storage', storageHandler);
+
+    // Cross-tab BroadcastChannel listener
+    let bc: any = null;
+    if ('BroadcastChannel' in window) {
+      try {
+        bc = new BroadcastChannel('clinicsads_sync_channel');
+        bc.onmessage = () => {
+          memoryInquiries = null;
+          callback();
+        };
+      } catch {}
+    }
 
     // Reliable background polling
     if (!pollingIntervalId) {
@@ -511,6 +574,12 @@ export function subscribeToInquiries(callback: () => void): () => void {
     return () => {
       listeners.delete(callback);
       window.removeEventListener('clinicsads_inquiry_update', handler);
+      window.removeEventListener('storage', storageHandler);
+      if (bc) {
+        try {
+          bc.close();
+        } catch {}
+      }
       if (listeners.size === 0 && pollingIntervalId) {
         window.clearInterval(pollingIntervalId);
         pollingIntervalId = null;
