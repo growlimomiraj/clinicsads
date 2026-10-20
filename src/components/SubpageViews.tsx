@@ -29,7 +29,7 @@ import {
   Bot,
   TrendingUp,
 } from 'lucide-react';
-import { addInquiry } from '../data/inquiriesStore';
+import { submitInquiry } from '../data/inquiriesStore';
 import {
   ADDITIONAL_SOLUTIONS_CONTENT,
   PageRoute,
@@ -67,6 +67,8 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
   const [contactSubmitted, setContactSubmitted] = useState(false);
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactError, setContactError] = useState<string | null>(null);
 
   const goHome = () => {
     onNavigate('home');
@@ -897,19 +899,27 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                     </div>
 
                     <form
-                      onSubmit={(e) => {
+                      onSubmit={async (e) => {
                         e.preventDefault();
-                        addInquiry({
-                          name,
-                          email,
-                          phone: phone || undefined,
-                          clinicName: clinicName || 'Clinic Practice',
-                          website: website || undefined,
-                          service,
-                          message: notes || `Direct consultation request for ${service}`,
-                          source: 'contact-page',
-                        });
-                        setContactSubmitted(true);
+                        setContactSubmitting(true);
+                        setContactError(null);
+                        try {
+                          await submitInquiry({
+                            name,
+                            email,
+                            phone: phone || undefined,
+                            clinicName: clinicName || 'Clinic Practice',
+                            website: website || undefined,
+                            service,
+                            message: notes || `Direct consultation request for ${service}`,
+                            source: 'contact-page',
+                          });
+                          setContactSubmitted(true);
+                        } catch (err: any) {
+                          setContactError(err?.message || 'Failed to submit consultation request. Please try again or call us directly.');
+                        } finally {
+                          setContactSubmitting(false);
+                        }
                       }}
                       className="space-y-4"
                     >
@@ -1045,12 +1055,26 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                         />
                       </div>
 
+                      {contactError && (
+                        <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+                          {contactError}
+                        </div>
+                      )}
+
                       <div className="pt-2">
                         <button
                           type="submit"
-                          className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_6px_20px_rgba(249,115,22,0.35)] cursor-pointer"
+                          disabled={contactSubmitting}
+                          className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_6px_20px_rgba(249,115,22,0.35)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                          Submit
+                          {contactSubmitting ? (
+                            <>
+                              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              <span>Submitting...</span>
+                            </>
+                          ) : (
+                            <span>Submit</span>
+                          )}
                         </button>
                       </div>
                     </form>

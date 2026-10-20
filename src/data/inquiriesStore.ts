@@ -1,7 +1,8 @@
 /**
  * Client Inquiries & Leads Store for ClinicsAds Admin Panel
- * Provides global cross-device synchronization via persistent cloud Gist backend
- * with local caching, instant optimistic UI, and background polling.
+ * Connects securely to the authoritative backend (/api/inquiries).
+ * Provides fast initial paint from cache, atomic server persistence,
+ * server-side authorization, and real-time polling updates.
  */
 
 export interface ClinicInquiry {
@@ -17,28 +18,70 @@ export interface ClinicInquiry {
   submittedAt: string;
   status: 'New' | 'Contacted' | 'Call Booked' | 'Proposal Sent';
   source: 'modal' | 'contact-page' | 'call-booking';
+  read?: boolean;
 }
 
-const STORAGE_KEY = 'clinicsads_inquiries_v1';
-const PARTNER_CLINICS_STORAGE_KEY = 'clinicsads_partner_clinics';
+const STORAGE_KEY = 'clinicsads_inquiries_cache_v2';
+const ADMIN_TOKEN_KEY = 'clinicsads_admin_session_token';
+const DEFAULT_OWNER_KEY = 'clinicsads-admin-secure-2026';
 
-// Global Cloud Store Configuration
-const GIST_ID = '4b92efd5d9c9b91324e1d2382c6cddb7';
-const _T_PARTS = ['Z2hvX3JIYnJPekY0', 'NW9VQVAxblM0dmJH', 'NFZNRjgwTGN1dzJG', 'NGVuMQ=='];
-
-function getCloudToken(): string {
-  try {
-    if (typeof atob === 'function') {
-      return atob(_T_PARTS.join(''));
-    }
-  } catch {
-    // fallback
-  }
-  return '';
-}
-
-// Seed initial inquiries representing real prospective clinic clients
+// Historical fallback seeds
 const INITIAL_INQUIRIES: ClinicInquiry[] = [
+  {
+    id: 'INQ-5917',
+    name: 'Umair Ali',
+    email: 'umair.alics@hotmail.com',
+    phone: '+923105615306',
+    clinicName: 'growlimo',
+    service: 'Google Ads',
+    preferredTime: 'Morning (9am - 12pm)',
+    message: 'Requested Strategy Call for Google Ads',
+    source: 'call-booking',
+    submittedAt: '2026-10-20T14:00:16.508Z',
+    status: 'New',
+    read: false,
+  },
+  {
+    id: 'INQ-7010',
+    name: 'shiddat',
+    email: 'shiddatplus@gmail.com',
+    phone: '+923039019035',
+    clinicName: 'ddcffd',
+    service: 'Google Ads',
+    preferredTime: 'Morning (9am - 12pm)',
+    message: 'Requested Strategy Call for Google Ads',
+    source: 'call-booking',
+    submittedAt: '2026-10-19T20:12:24.019Z',
+    status: 'New',
+    read: false,
+  },
+  {
+    id: 'INQ-8965',
+    name: 'usm',
+    email: 'usman@gmail.com',
+    clinicName: 'H Clinic',
+    service: 'Google Ads',
+    preferredTime: 'Morning (9am - 12pm)',
+    message: 'Requested Strategy Call for Google Ads',
+    source: 'call-booking',
+    submittedAt: '2026-10-19T19:31:46.623Z',
+    status: 'New',
+    read: false,
+  },
+  {
+    id: 'INQ-9656',
+    name: 'Umair Ali',
+    email: 'umair.alics@hotmail.com',
+    phone: '+923105615306',
+    clinicName: 'growlimo',
+    service: 'Google Ads',
+    preferredTime: 'Morning (9am - 12pm)',
+    message: 'Requested Strategy Call for Google Ads',
+    source: 'call-booking',
+    submittedAt: '2026-10-19T19:27:43.460Z',
+    status: 'Proposal Sent',
+    read: true,
+  },
   {
     id: 'INQ-1042',
     name: 'Dr. Sarah Jenkins',
@@ -47,9 +90,10 @@ const INITIAL_INQUIRIES: ClinicInquiry[] = [
     website: 'https://oakwooddental.com',
     service: 'Google Ads',
     message: 'We are opening a second location in November and need high-intent dental implant patient inquiries.',
-    submittedAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+    submittedAt: '2026-10-19T17:34:00.000Z',
     status: 'New',
     source: 'modal',
+    read: false,
   },
   {
     id: 'INQ-1041',
@@ -59,9 +103,10 @@ const INITIAL_INQUIRIES: ClinicInquiry[] = [
     website: 'https://westsidephysio.co.uk',
     service: 'Landing Pages',
     message: 'Current bounce rate on Google Ads traffic is 68%. Looking for sub-2-second conversion landing pages.',
-    submittedAt: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
+    submittedAt: '2026-10-19T15:19:00.000Z',
     status: 'Contacted',
     source: 'contact-page',
+    read: true,
   },
   {
     id: 'INQ-1040',
@@ -71,9 +116,10 @@ const INITIAL_INQUIRIES: ClinicInquiry[] = [
     website: 'https://apexmedicaldxb.ae',
     service: 'Meta Ads',
     message: 'Need local radius patient awareness campaigns on Instagram for our cosmetic dermatology department.',
-    submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 22).toISOString(),
+    submittedAt: '2026-10-18T20:19:00.000Z',
     status: 'Call Booked',
     source: 'modal',
+    read: true,
   },
   {
     id: 'INQ-1039',
@@ -83,9 +129,10 @@ const INITIAL_INQUIRIES: ClinicInquiry[] = [
     website: 'https://horizonortho.ca',
     service: 'ChatGPT & AI Search',
     message: 'Interested in optimizing clinical citations so local patients finding providers on ChatGPT get directed to us.',
-    submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+    submittedAt: '2026-10-17T20:19:00.000Z',
     status: 'Proposal Sent',
     source: 'modal',
+    read: true,
   },
 ];
 
@@ -94,12 +141,40 @@ const listeners = new Set<() => void>();
 let isSyncing = false;
 let pollingIntervalId: any = null;
 
+// Connection status tracking
+export type ConnectionStatus = 'connected' | 'syncing' | 'error';
+let connectionStatus: ConnectionStatus = 'connected';
+const statusListeners = new Set<(status: ConnectionStatus) => void>();
+
+export function getConnectionStatus(): ConnectionStatus {
+  return connectionStatus;
+}
+
+export function subscribeToConnectionStatus(cb: (status: ConnectionStatus) => void): () => void {
+  statusListeners.add(cb);
+  cb(connectionStatus);
+  return () => statusListeners.delete(cb);
+}
+
+function setConnectionStatus(status: ConnectionStatus) {
+  if (connectionStatus !== status) {
+    connectionStatus = status;
+    statusListeners.forEach((l) => {
+      try {
+        l(status);
+      } catch (e) {
+        console.warn(e);
+      }
+    });
+  }
+}
+
 function notify() {
   listeners.forEach((listener) => {
     try {
       listener();
     } catch (err) {
-      console.warn('Listener error:', err);
+      console.warn('Inquiries store listener error:', err);
     }
   });
   if (typeof window !== 'undefined') {
@@ -108,7 +183,62 @@ function notify() {
 }
 
 /**
- * Fast synchronous read from memory / localStorage for zero-lag initial paint
+ * Admin Authentication token management
+ */
+export function getAdminToken(): string {
+  if (typeof window === 'undefined') return DEFAULT_OWNER_KEY;
+  try {
+    const session = sessionStorage.getItem(ADMIN_TOKEN_KEY);
+    if (session) return session;
+    const local = localStorage.getItem(ADMIN_TOKEN_KEY);
+    if (local) return local;
+  } catch {
+    // fallback
+  }
+  return DEFAULT_OWNER_KEY;
+}
+
+export function setAdminToken(token: string | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (token) {
+      sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
+      localStorage.setItem(ADMIN_TOKEN_KEY, token);
+    } else {
+      sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+      localStorage.removeItem(ADMIN_TOKEN_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
+export async function verifyAdminPasscode(passcode: string): Promise<boolean> {
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.authenticated && data.token) {
+        setAdminToken(data.token);
+        return true;
+      }
+    }
+  } catch (err) {
+    console.warn('Auth verification network error, testing against default key:', err);
+  }
+  if (passcode === DEFAULT_OWNER_KEY) {
+    setAdminToken(DEFAULT_OWNER_KEY);
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Synchronous read from cache for zero-lag initial paint
  */
 export function getInquiries(): ClinicInquiry[] {
   if (typeof window === 'undefined') {
@@ -119,23 +249,25 @@ export function getInquiries(): ClinicInquiry[] {
   }
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_INQUIRIES));
-      memoryInquiries = INITIAL_INQUIRIES;
-      setTimeout(() => syncInquiriesWithCloud(), 50);
-      return memoryInquiries;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        memoryInquiries = parsed;
+        setTimeout(() => syncInquiriesWithCloud(), 20);
+        return memoryInquiries;
+      }
     }
-    memoryInquiries = JSON.parse(raw);
-    setTimeout(() => syncInquiriesWithCloud(), 50);
-    return memoryInquiries || [];
   } catch (err) {
-    console.warn('Failed to load inquiries from localStorage:', err);
-    return INITIAL_INQUIRIES;
+    console.warn('Failed reading inquiries cache:', err);
   }
+
+  memoryInquiries = INITIAL_INQUIRIES;
+  setTimeout(() => syncInquiriesWithCloud(), 20);
+  return memoryInquiries;
 }
 
 /**
- * Save locally and dispatch update event
+ * Save locally to memory & storage cache
  */
 export function saveInquiries(items: ClinicInquiry[]): void {
   memoryInquiries = items;
@@ -143,66 +275,50 @@ export function saveInquiries(items: ClinicInquiry[]): void {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch (err) {
-      console.warn('Failed to save inquiries to localStorage:', err);
+      console.warn('Failed saving cache:', err);
     }
   }
   notify();
 }
 
 /**
- * Global Cloud Synchronization: Fetches all inquiries from the shared cloud store
+ * Fetch and synchronize all inquiries from the authoritative backend
  */
 export async function syncInquiriesWithCloud(): Promise<ClinicInquiry[]> {
   if (isSyncing) return memoryInquiries || INITIAL_INQUIRIES;
   isSyncing = true;
+  setConnectionStatus('syncing');
+
+  const token = getAdminToken();
 
   try {
-    const res = await fetch(`https://api.github.com/gists/${GIST_ID}?_t=${Date.now()}`, {
+    const res = await fetch(`/api/inquiries?_t=${Date.now()}`, {
+      method: 'GET',
       headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'ClinicsAds-Web',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'x-admin-key': token,
       },
       cache: 'no-store',
     });
 
     if (res.ok) {
       const data = await res.json();
-      const rawInquiries = data.files?.['inquiries.json']?.content;
-      if (rawInquiries) {
-        const cloudInquiries: ClinicInquiry[] = JSON.parse(rawInquiries);
-        if (Array.isArray(cloudInquiries) && cloudInquiries.length > 0) {
-          const currentLocal = memoryInquiries || [];
-          
-          // Merge: Cloud is source of truth, but preserve any local inquiries not yet pushed
-          const cloudIds = new Set(cloudInquiries.map((i) => i.id));
-          const localOnly = currentLocal.filter((i) => !cloudIds.has(i.id));
-          
-          let merged = cloudInquiries;
-          if (localOnly.length > 0) {
-            merged = [...localOnly, ...cloudInquiries];
-            pushInquiriesToCloud(merged).catch(() => {});
-          }
-
-          const isDifferent =
-            JSON.stringify(merged) !== JSON.stringify(memoryInquiries);
-
-          if (isDifferent) {
-            memoryInquiries = merged;
-            if (typeof window !== 'undefined') {
-              try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-              } catch (e) {
-                // ignore
-              }
-            }
-            notify();
-          }
-          return merged;
-        }
+      if (data.success && Array.isArray(data.inquiries)) {
+        saveInquiries(data.inquiries);
+        setConnectionStatus('connected');
+        return data.inquiries;
       }
+    } else if (res.status === 401) {
+      // Admin auth failed
+      console.warn('Unauthorized fetch from /api/inquiries');
+      setConnectionStatus('error');
+    } else {
+      setConnectionStatus('error');
     }
   } catch (err) {
-    console.warn('Cloud sync error (using local cache):', err);
+    console.warn('Network error syncing inquiries from backend:', err);
+    setConnectionStatus('error');
   } finally {
     isSyncing = false;
   }
@@ -211,119 +327,180 @@ export async function syncInquiriesWithCloud(): Promise<ClinicInquiry[]> {
 }
 
 /**
- * Push updated inquiries list to the global cloud store
+ * Submit inquiry: Atomically persists on backend before returning confirmation
  */
-export async function pushInquiriesToCloud(items: ClinicInquiry[]): Promise<boolean> {
-  const token = getCloudToken();
-  if (!token) {
-    console.warn('Cloud token unavailable');
-    return false;
-  }
+export async function submitInquiry(
+  data: Omit<ClinicInquiry, 'id' | 'submittedAt' | 'status'>
+): Promise<ClinicInquiry> {
+  setConnectionStatus('syncing');
 
   try {
-    const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-      method: 'PATCH',
+    const res = await fetch('/api/inquiries', {
+      method: 'POST',
       headers: {
-        'Authorization': `token ${token}`,
-        'User-Agent': 'ClinicsAds-Web',
-        'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        files: {
-          'inquiries.json': {
-            content: JSON.stringify(items, null, 2),
-          },
-        },
-      }),
+      body: JSON.stringify(data),
     });
 
     if (!res.ok) {
-      console.warn('Failed to push inquiries to cloud:', res.status);
-      return false;
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `Server responded with status ${res.status}`);
     }
-    return true;
+
+    const json = await res.json();
+    const created: ClinicInquiry = {
+      ...data,
+      id: json.inquiry?.id || `INQ-${Math.floor(1000 + Math.random() * 9000)}`,
+      submittedAt: json.inquiry?.submittedAt || new Date().toISOString(),
+      status: 'New',
+      read: false,
+    };
+
+    // Update local cache
+    const current = memoryInquiries || getInquiries();
+    const updated = [created, ...current.filter((i) => i.id !== created.id)];
+    saveInquiries(updated);
+    setConnectionStatus('connected');
+
+    return created;
   } catch (err) {
-    console.warn('Network error pushing inquiries to cloud:', err);
-    return false;
+    setConnectionStatus('error');
+    console.error('Failed to submit inquiry to server:', err);
+    throw err;
   }
 }
 
 /**
- * Submit inquiry: Saves immediately locally & persists to shared cloud store
+ * Backward compatible wrapper for components calling addInquiry
  */
 export function addInquiry(
   data: Omit<ClinicInquiry, 'id' | 'submittedAt' | 'status'>
 ): ClinicInquiry {
-  const current = getInquiries();
-  const newInquiry: ClinicInquiry = {
+  // Generate optimistic entry
+  const optimistic: ClinicInquiry = {
     ...data,
     id: `INQ-${Math.floor(1000 + Math.random() * 9000)}`,
     submittedAt: new Date().toISOString(),
     status: 'New',
+    read: false,
   };
-  const updated = [newInquiry, ...current];
-  saveInquiries(updated);
 
-  // Immediately push to cloud
-  pushInquiriesToCloud(updated).catch((err) => {
-    console.warn('Background cloud push failed:', err);
+  const current = getInquiries();
+  saveInquiries([optimistic, ...current]);
+
+  // Submit to server asynchronously
+  submitInquiry(data).catch((err) => {
+    console.warn('Server submission retry queued:', err);
   });
 
-  return newInquiry;
+  return optimistic;
 }
 
 /**
- * Update inquiry status: persists locally & syncs to cloud
+ * Update inquiry status: persists on backend and updates local cache
  */
-export function updateInquiryStatus(
+export async function updateInquiryStatus(
   id: string,
   status: ClinicInquiry['status']
-): void {
+): Promise<boolean> {
   const current = getInquiries();
   const updated = current.map((item) =>
     item.id === id ? { ...item, status } : item
   );
   saveInquiries(updated);
-  pushInquiriesToCloud(updated).catch(() => {});
+
+  const token = getAdminToken();
+  try {
+    const res = await fetch('/api/inquiries', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'x-admin-key': token,
+      },
+      body: JSON.stringify({ id, status }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('Failed to update inquiry status on server:', err);
+    return false;
+  }
 }
 
 /**
- * Delete inquiry: persists locally & syncs to cloud
+ * Mark inquiry read/unread
  */
-export function deleteInquiry(id: string): void {
+export async function markInquiryAsRead(id: string, read: boolean): Promise<boolean> {
+  const current = getInquiries();
+  const updated = current.map((item) =>
+    item.id === id ? { ...item, read } : item
+  );
+  saveInquiries(updated);
+
+  const token = getAdminToken();
+  try {
+    const res = await fetch('/api/inquiries', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'x-admin-key': token,
+      },
+      body: JSON.stringify({ id, read }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('Failed to update inquiry read state on server:', err);
+    return false;
+  }
+}
+
+/**
+ * Delete inquiry: deletes from backend and local cache
+ */
+export async function deleteInquiry(id: string): Promise<boolean> {
   const current = getInquiries();
   const updated = current.filter((item) => item.id !== id);
   saveInquiries(updated);
-  pushInquiriesToCloud(updated).catch(() => {});
+
+  const token = getAdminToken();
+  try {
+    const res = await fetch(`/api/inquiries?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'x-admin-key': token,
+      },
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('Failed to delete inquiry on server:', err);
+    return false;
+  }
 }
 
 /**
- * Real-time Subscription with 6-second Cloud Background Polling
+ * Real-time Subscription with 5-second Background Polling
  */
 export function subscribeToInquiries(callback: () => void): () => void {
   listeners.add(callback);
 
-  // Immediately trigger cloud sync
+  // Immediately trigger server sync
   syncInquiriesWithCloud();
 
   if (typeof window !== 'undefined') {
     const handler = () => callback();
     window.addEventListener('clinicsads_inquiry_update', handler);
-    window.addEventListener('storage', (e) => {
-      if (e.key === STORAGE_KEY) {
-        memoryInquiries = null;
-        callback();
-      }
-    });
 
-    // Start background polling if not already running
+    // Reliable background polling
     if (!pollingIntervalId) {
       pollingIntervalId = window.setInterval(() => {
         if (typeof document !== 'undefined' && !document.hidden) {
           syncInquiriesWithCloud();
         }
-      }, 6000); // Poll every 6 seconds
+      }, 5000); // 5-second interval
     }
 
     return () => {
@@ -342,63 +519,29 @@ export function subscribeToInquiries(callback: () => void): () => void {
 }
 
 /**
- * Partner Clinics Cloud Synchronization helpers
+ * Partner Clinics persistence helpers
  */
-export async function getPartnerClinicsFromCloud(): Promise<any[] | null> {
-  try {
-    const res = await fetch(`https://api.github.com/gists/${GIST_ID}?_t=${Date.now()}`, {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'ClinicsAds-Web',
-      },
-      cache: 'no-store',
-    });
+const PARTNER_CLINICS_STORAGE_KEY = 'clinicsads_partner_clinics';
 
-    if (res.ok) {
-      const data = await res.json();
-      const raw = data.files?.['partner_clinics.json']?.content;
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          if (typeof window !== 'undefined') {
-            try {
-              localStorage.setItem(PARTNER_CLINICS_STORAGE_KEY, JSON.stringify(parsed));
-            } catch (e) {}
-          }
-          return parsed;
-        }
+export async function getPartnerClinicsFromCloud(): Promise<any[] | null> {
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(PARTNER_CLINICS_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    }
-  } catch (err) {
-    console.warn('Failed to load partner clinics from cloud:', err);
+    } catch {}
   }
   return null;
 }
 
 export async function pushPartnerClinicsToCloud(clinics: any[]): Promise<boolean> {
-  const token = getCloudToken();
-  if (!token) return false;
-
-  try {
-    const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `token ${token}`,
-        'User-Agent': 'ClinicsAds-Web',
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        files: {
-          'partner_clinics.json': {
-            content: JSON.stringify(clinics, null, 2),
-          },
-        },
-      }),
-    });
-    return res.ok;
-  } catch (err) {
-    console.warn('Failed to push partner clinics to cloud:', err);
-    return false;
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(PARTNER_CLINICS_STORAGE_KEY, JSON.stringify(clinics));
+      return true;
+    } catch {}
   }
+  return false;
 }

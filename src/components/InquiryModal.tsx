@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, CheckCircle2, Phone, Mail, Calendar, Clock, Sparkles } from 'lucide-react';
 import { SITE_CONFIG } from '../data/siteContent';
-import { addInquiry } from '../data/inquiriesStore';
+import { submitInquiry } from '../data/inquiriesStore';
 
 interface InquiryModalProps {
   isOpen: boolean;
@@ -23,6 +23,8 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
   const [preferredTime, setPreferredTime] = useState('Morning (9am - 12pm)');
   const [notes, setNotes] = useState('');
   const [submittedDemo, setSubmittedDemo] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (defaultService) {
@@ -42,24 +44,34 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    addInquiry({
-      name,
-      email,
-      phone: phone || undefined,
-      clinicName: clinicName || 'Clinic Practice',
-      website: website || undefined,
-      service,
-      preferredTime,
-      message: notes || `Requested Strategy Call for ${service}`,
-      source: 'call-booking',
-    });
-    setSubmittedDemo(true);
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      await submitInquiry({
+        name,
+        email,
+        phone: phone || undefined,
+        clinicName: clinicName || 'Clinic Practice',
+        website: website || undefined,
+        service,
+        preferredTime,
+        message: notes || `Requested Strategy Call for ${service}`,
+        source: 'call-booking',
+      });
+      setSubmittedDemo(true);
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Failed to submit inquiry. Please try again or call us directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleResetAndClose = () => {
     setSubmittedDemo(false);
+    setErrorMessage(null);
     onClose();
   };
 
@@ -270,19 +282,34 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
                 />
               </div>
 
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+                  {errorMessage}
+                </div>
+              )}
+
               <div className="pt-2 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={handleResetAndClose}
-                  className="px-5 py-2.5 rounded-full text-[13px] font-semibold text-[#59665D] hover:text-[#183B2B] cursor-pointer"
+                  disabled={isSubmitting}
+                  className="px-5 py-2.5 rounded-full text-[13px] font-semibold text-[#59665D] hover:text-[#183B2B] cursor-pointer disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-8 py-3 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_4px_14px_rgba(249,115,22,0.3)] cursor-pointer"
+                  disabled={isSubmitting}
+                  className="px-8 py-3 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-colors shadow-[0_4px_14px_rgba(249,115,22,0.3)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  Submit
+                  {isSubmitting ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <span>Submit</span>
+                  )}
                 </button>
               </div>
             </form>

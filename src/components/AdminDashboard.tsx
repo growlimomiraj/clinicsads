@@ -18,23 +18,31 @@ import {
   X,
   Plus,
   Eye,
+  EyeOff,
   Calendar,
   AlertTriangle,
   ExternalLink,
   ChevronRight,
   Shield,
   Activity,
-  RefreshCw
+  RefreshCw,
+  Lock
 } from 'lucide-react';
 import {
   ClinicInquiry,
   getInquiries,
   subscribeToInquiries,
   updateInquiryStatus,
+  markInquiryAsRead,
   deleteInquiry,
   getPartnerClinicsFromCloud,
   pushPartnerClinicsToCloud,
-  syncInquiriesWithCloud
+  syncInquiriesWithCloud,
+  verifyAdminPasscode,
+  getAdminToken,
+  setAdminToken,
+  subscribeToConnectionStatus,
+  ConnectionStatus
 } from '../data/inquiriesStore';
 
 interface AdminDashboardProps {
@@ -191,6 +199,56 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
   // Detail Modal & Delete Confirmation State
   const [selectedLeadForDetail, setSelectedLeadForDetail] = useState<ClinicInquiry | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'inquiry' | 'clinic'; id: string; name: string } | null>(null);
+
+  // Authentication State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const token = getAdminToken();
+    return !!token;
+  });
+  const [passcodeInput, setPasscodeInput] = useState('');
+  const [passcodeError, setPasscodeError] = useState<string | null>(null);
+  const [isVerifyingPasscode, setIsVerifyingPasscode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Connection State
+  const [connStatus, setConnStatus] = useState<ConnectionStatus>('connected');
+
+  useEffect(() => {
+    return subscribeToConnectionStatus((st) => setConnStatus(st));
+  }, []);
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passcodeInput.trim()) {
+      setPasscodeError('Please enter the administrator passcode.');
+      return;
+    }
+    setIsVerifyingPasscode(true);
+    setPasscodeError(null);
+    try {
+      const ok = await verifyAdminPasscode(passcodeInput.trim());
+      if (ok) {
+        setIsAuthenticated(true);
+        showToast('✓ Access granted: Operations Hub live synchronized.');
+        const latest = await syncInquiriesWithCloud();
+        setInquiries(latest);
+      } else {
+        setPasscodeError('Incorrect passcode. Please check your credentials or Vercel ADMIN_KEY setting.');
+      }
+    } catch {
+      setPasscodeError('Network error verifying credentials.');
+    } finally {
+      setIsVerifyingPasscode(false);
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setAdminToken(null);
+    setIsAuthenticated(false);
+    setPasscodeInput('');
+    showToast('Admin session locked.');
+  };
 
   // Live Connected Inquiries Store
   const [inquiries, setInquiries] = useState<ClinicInquiry[]>(getInquiries);
@@ -484,6 +542,91 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     setTimeout(() => setCopiedLeadId(null), 2000);
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#F3F8E9] flex items-center justify-center p-4 font-sans text-[#183B2B]">
+        <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl border border-[#DFECC8] space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 rounded-2xl bg-[#183B2B] text-white flex items-center justify-center mx-auto shadow-md">
+              <Shield className="w-7 h-7 text-[#99BC44]" />
+            </div>
+            <h1 className="text-2xl font-black text-[#183B2B] tracking-tight">
+              ClinicsAds™ Command Hub
+            </h1>
+            <p className="text-xs text-[#59665D]">
+              Private Operations &amp; Client Inquiries Portal. Authorized owner access only.
+            </p>
+          </div>
+
+          <form onSubmit={handleAdminLogin} className="space-y-4">
+            <div>
+              <label htmlFor="admin-passcode" className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
+                Admin Access Passcode
+              </label>
+              <div className="relative">
+                <input
+                  id="admin-passcode"
+                  type={showPassword ? 'text' : 'password'}
+                  value={passcodeInput}
+                  onChange={(e) => {
+                    setPasscodeInput(e.target.value);
+                    if (passcodeError) setPasscodeError(null);
+                  }}
+                  placeholder="Enter administrator passcode"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-medium focus:outline-none focus:border-[#183B2B] pr-10"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
+                  title={showPassword ? 'Hide passcode' : 'Show passcode'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {passcodeError && (
+                <p className="text-xs text-red-600 font-semibold mt-1.5 flex items-center gap-1">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{passcodeError}</span>
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isVerifyingPasscode}
+              className="w-full py-3 rounded-xl bg-[#183B2B] text-white text-sm font-bold hover:bg-[#204e39] transition-colors shadow-xs cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {isVerifyingPasscode ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin text-[#99BC44]" />
+                  <span>Verifying Passcode...</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4 text-[#99BC44]" />
+                  <span>Authenticate &amp; Enter Portal</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-xs">
+            <span className="text-gray-400 font-medium">ClinicsAds Security</span>
+            <button
+              type="button"
+              onClick={onExit}
+              className="font-bold text-[#183B2B] hover:underline cursor-pointer"
+            >
+              ← Back to Website
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F8FAF6] text-[#1E293B] font-sans flex flex-col selection:bg-[#183B2B] selection:text-white relative">
       {/* Dynamic Toast Notification Banner */}
@@ -548,16 +691,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
         {/* Right Header Navigation & Strategist Profile */}
         <div className="flex items-center gap-2.5">
-          {/* Global Cloud Sync Status & Trigger */}
+          {/* Global Backend Sync Status & Trigger */}
           <button
             type="button"
             onClick={handleManualCloudSync}
             disabled={isSyncingCloud}
-            title="Synchronize all inbound leads and partner clinics with global cloud"
+            title="Synchronize all inbound leads with authoritative server"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200/90 transition-all cursor-pointer shadow-2xs"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 ${isSyncingCloud ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">{isSyncingCloud ? 'Syncing...' : 'Cloud Synced'}</span>
+            <span className="hidden sm:inline">
+              {isSyncingCloud ? 'Syncing...' : connStatus === 'connected' ? 'Live Connected' : 'Sync Server'}
+            </span>
           </button>
 
           {/* Real Unread Leads Counter */}
@@ -682,11 +827,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
             </div>
             <button
               type="button"
-              onClick={onExit}
+              onClick={handleAdminLogout}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+              title="Lock Admin Portal and clear session"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden md:inline">Exit Portal</span>
+              <span className="hidden md:inline">Lock / Log Out</span>
             </button>
           </div>
         </aside>
@@ -996,14 +1142,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                           return (
                             <tr key={inq.id} className="hover:bg-gray-50/70 transition-colors">
                               <td className="py-3 px-3 font-mono font-bold text-gray-900 whitespace-nowrap">
-                                <button
-                                  type="button"
-                                  onClick={() => setSelectedLeadForDetail(inq)}
-                                  className="hover:underline text-[#183B2B] cursor-pointer"
-                                  title="View full lead details"
-                                >
-                                  {inq.id}
-                                </button>
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedLeadForDetail(inq)}
+                                    className="hover:underline text-[#183B2B] cursor-pointer"
+                                    title="View full lead details"
+                                  >
+                                    {inq.id}
+                                  </button>
+                                  {inq.read === false && (
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="New unread inquiry" />
+                                  )}
+                                </div>
                               </td>
                               <td className="py-3 px-3 text-gray-500 whitespace-nowrap">
                                 {new Date(inq.submittedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
@@ -1052,6 +1203,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                               </td>
                               <td className="py-3 px-3 text-right whitespace-nowrap">
                                 <div className="flex items-center justify-end gap-1.5">
+                                  {/* Read / Unread toggle */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      markInquiryAsRead(inq.id, !inq.read);
+                                      showToast(`Marked ${inq.id} as ${inq.read ? 'Unread' : 'Read'}`);
+                                    }}
+                                    className={`p-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                                      inq.read
+                                        ? 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                                        : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200'
+                                    }`}
+                                    title={inq.read ? 'Mark as Unread' : 'Mark as Read'}
+                                  >
+                                    {inq.read ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                  </button>
+
                                   {/* Displays "Connected" badge button once added to Partner Clinics */}
                                   {isConnected ? (
                                     <button
