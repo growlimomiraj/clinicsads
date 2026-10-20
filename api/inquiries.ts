@@ -196,6 +196,16 @@ async function fetchFromCloudStore(): Promise<ClinicInquiry[]> {
           memoryInquiries = sanitized;
           lastFetchTime = now;
           return sanitized;
+        } else if (parsed && typeof parsed === 'object') {
+          if (Array.isArray(parsed.deletedIds)) {
+            parsed.deletedIds.forEach((id: string) => memoryDeletedIds.add(id));
+          }
+          if (Array.isArray(parsed.inquiries)) {
+            const sanitized = parsed.inquiries.filter((i: ClinicInquiry) => !memoryDeletedIds.has(i.id));
+            memoryInquiries = sanitized;
+            lastFetchTime = now;
+            return sanitized;
+          }
         }
       }
     } else {
@@ -207,22 +217,23 @@ async function fetchFromCloudStore(): Promise<ClinicInquiry[]> {
 
   // Attempt reading from /tmp cache if present
   try {
-    const tmpDeleted = path.resolve('/tmp/clinicsads_deleted_ids.json');
-    if (fs.existsSync(tmpDeleted)) {
-      const raw = fs.readFileSync(tmpDeleted, 'utf-8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        parsed.forEach((id: string) => memoryDeletedIds.add(id));
-      }
-    }
     const tmpPath = path.resolve('/tmp/clinicsads_inquiries.json');
     if (fs.existsSync(tmpPath)) {
       const raw = fs.readFileSync(tmpPath, 'utf-8');
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         const sanitized = parsed.filter((i) => !memoryDeletedIds.has(i.id));
         memoryInquiries = sanitized;
         return sanitized;
+      } else if (parsed && typeof parsed === 'object') {
+        if (Array.isArray(parsed.deletedIds)) {
+          parsed.deletedIds.forEach((id: string) => memoryDeletedIds.add(id));
+        }
+        if (Array.isArray(parsed.inquiries)) {
+          const sanitized = parsed.inquiries.filter((i: ClinicInquiry) => !memoryDeletedIds.has(i.id));
+          memoryInquiries = sanitized;
+          return sanitized;
+        }
       }
     }
   } catch {}
@@ -244,13 +255,9 @@ async function saveToCloudStore(items: ClinicInquiry[], deletedIdToAdd?: string)
   const token = getCloudToken();
   if (token) {
     try {
-      const filesPayload: Record<string, any> = {
-        'inquiries.json': {
-          content: JSON.stringify(cleanItems, null, 2),
-        },
-        'deleted_ids.json': {
-          content: JSON.stringify(Array.from(memoryDeletedIds), null, 2),
-        },
+      const payload = {
+        inquiries: cleanItems,
+        deletedIds: Array.from(memoryDeletedIds),
       };
 
       const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
@@ -261,7 +268,13 @@ async function saveToCloudStore(items: ClinicInquiry[], deletedIdToAdd?: string)
           Accept: 'application/vnd.github.v3+json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ files: filesPayload }),
+        body: JSON.stringify({
+          files: {
+            'inquiries.json': {
+              content: JSON.stringify(payload, null, 2),
+            },
+          },
+        }),
       });
       if (res.ok) return true;
       const errText = await res.text().catch(() => '');
@@ -274,9 +287,10 @@ async function saveToCloudStore(items: ClinicInquiry[], deletedIdToAdd?: string)
   // Fallback to local /tmp storage
   try {
     const tmpPath = path.resolve('/tmp/clinicsads_inquiries.json');
-    fs.writeFileSync(tmpPath, JSON.stringify(cleanItems, null, 2), 'utf-8');
-    const tmpDeletedPath = path.resolve('/tmp/clinicsads_deleted_ids.json');
-    fs.writeFileSync(tmpDeletedPath, JSON.stringify(Array.from(memoryDeletedIds), null, 2), 'utf-8');
+    fs.writeFileSync(tmpPath, JSON.stringify({
+      inquiries: cleanItems,
+      deletedIds: Array.from(memoryDeletedIds),
+    }, null, 2), 'utf-8');
   } catch {}
 
   return true;
