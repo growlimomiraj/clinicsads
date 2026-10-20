@@ -63,7 +63,17 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
       });
       setSubmittedDemo(true);
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to submit inquiry. Please try again or call us directly.');
+      let msg = 'Failed to submit inquiry. Please try again or call us directly.';
+      if (err) {
+        if (typeof err === 'string') {
+          msg = err;
+        } else if (typeof err.message === 'string') {
+          msg = err.message;
+        } else if (err.error) {
+          msg = typeof err.error === 'string' ? err.error : (err.error?.message || JSON.stringify(err.error));
+        }
+      }
+      setErrorMessage(msg);
     } finally {
       setIsSubmitting(false);
     }

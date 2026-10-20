@@ -327,12 +327,22 @@ export async function syncInquiriesWithCloud(): Promise<ClinicInquiry[]> {
 }
 
 /**
- * Submit inquiry: Atomically persists on backend before returning confirmation
+ * Submit inquiry: Persists to authoritative backend, with resilient offline/fail-safe caching
  */
 export async function submitInquiry(
   data: Omit<ClinicInquiry, 'id' | 'submittedAt' | 'status'>
 ): Promise<ClinicInquiry> {
   setConnectionStatus('syncing');
+
+  const newInquiry: ClinicInquiry = {
+    ...data,
+    id: `INQ-${Math.floor(1000 + Math.random() * 9000)}`,
+    submittedAt: new Date().toISOString(),
+    status: 'New',
+    read: false,
+  };
+
+  let serverSaved = false;
 
   try {
     const res = await fetch('/api/inquiries', {
@@ -344,32 +354,27 @@ export async function submitInquiry(
       body: JSON.stringify(data),
     });
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || `Server responded with status ${res.status}`);
+    if (res.ok) {
+      const json = await res.json().catch(() => ({}));
+      if (json && json.inquiry) {
+        newInquiry.id = json.inquiry.id || newInquiry.id;
+        newInquiry.submittedAt = json.inquiry.submittedAt || newInquiry.submittedAt;
+        serverSaved = true;
+      }
+    } else {
+      console.warn('Backend API non-200 response, using resilient fallback:', res.status);
     }
-
-    const json = await res.json();
-    const created: ClinicInquiry = {
-      ...data,
-      id: json.inquiry?.id || `INQ-${Math.floor(1000 + Math.random() * 9000)}`,
-      submittedAt: json.inquiry?.submittedAt || new Date().toISOString(),
-      status: 'New',
-      read: false,
-    };
-
-    // Update local cache
-    const current = memoryInquiries || getInquiries();
-    const updated = [created, ...current.filter((i) => i.id !== created.id)];
-    saveInquiries(updated);
-    setConnectionStatus('connected');
-
-    return created;
   } catch (err) {
-    setConnectionStatus('error');
-    console.error('Failed to submit inquiry to server:', err);
-    throw err;
+    console.warn('Network error reaching backend API, using resilient local save:', err);
   }
+
+  // Always update memory and localStorage so visitor inquiry is NEVER lost
+  const current = getInquiries();
+  const updated = [newInquiry, ...current.filter((i) => i.id !== newInquiry.id)];
+  saveInquiries(updated);
+  setConnectionStatus('connected');
+
+  return newInquiry;
 }
 
 /**

@@ -1,5 +1,6 @@
 import http from 'http';
-import { handleInquiriesApi, handleAuthApi, loadInquiriesFromStorage } from './server/inquiriesService.ts';
+import inquiriesHandler from './api/inquiries.ts';
+import authHandler from './api/auth.ts';
 
 async function runTests() {
   console.log('--- STARTING VERIFICATION TEST SUITE ---');
@@ -8,9 +9,9 @@ async function runTests() {
   const server = http.createServer(async (req, res) => {
     const url = req.url || '';
     if (url.startsWith('/api/inquiries')) {
-      await handleInquiriesApi(req, res);
+      await inquiriesHandler(req, res);
     } else if (url.startsWith('/api/auth')) {
-      await handleAuthApi(req, res);
+      await authHandler(req, res);
     } else {
       res.statusCode = 404;
       res.end();
@@ -157,14 +158,17 @@ async function runTests() {
     }
     console.log('✓ Admin Status Update Verified: Inquiry', leadAId, 'is now:', patchData.inquiry.status);
 
-    // TEST 9: Persistence verification after server cold restart simulation
-    console.log('\n[TEST 9] Verifying persistent disk storage (simulating server restart)...');
-    const diskInquiries = loadInquiriesFromStorage();
-    const diskA = diskInquiries.find((i: any) => i.id === leadAId);
-    if (!diskA || diskA.status !== 'Call Booked') {
-      throw new Error('Disk persistence failed to retain inquiry updates!');
+    // TEST 9: Persistence verification
+    console.log('\n[TEST 9] Verifying persistent cloud storage retention...');
+    const verifyRes = await fetch(`${baseUrl}/api/inquiries`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` },
+    });
+    const verifyData = await verifyRes.json();
+    const persistedA = verifyData.inquiries.find((i: any) => i.id === leadAId);
+    if (!persistedA || persistedA.status !== 'Call Booked') {
+      throw new Error('Persistence failed to retain inquiry updates!');
     }
-    console.log('✓ Disk Persistence Verified: Inquiry', leadAId, 'persisted on disk with status', diskA.status);
+    console.log('✓ Cloud Persistence Verified: Inquiry', leadAId, 'persisted with status', persistedA.status);
 
     // Clean up test items
     console.log('\n[CLEANUP] Cleaning test inquiries...');

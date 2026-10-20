@@ -916,7 +916,17 @@ export const SubpageViews: React.FC<SubpageViewsProps> = ({
                           });
                           setContactSubmitted(true);
                         } catch (err: any) {
-                          setContactError(err?.message || 'Failed to submit consultation request. Please try again or call us directly.');
+                          let msg = 'Failed to submit consultation request. Please try again or call us directly.';
+                          if (err) {
+                            if (typeof err === 'string') {
+                              msg = err;
+                            } else if (typeof err.message === 'string') {
+                              msg = err.message;
+                            } else if (err.error) {
+                              msg = typeof err.error === 'string' ? err.error : (err.error?.message || JSON.stringify(err.error));
+                            }
+                          }
+                          setContactError(msg);
                         } finally {
                           setContactSubmitting(false);
                         }

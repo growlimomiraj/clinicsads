@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { defineConfig, Plugin } from 'vite';
-import { handleInquiriesApi, handleAuthApi } from './server/inquiriesService.ts';
+import inquiriesHandler from './api/inquiries.ts';
+import authHandler from './api/auth.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,7 +17,7 @@ function apiServerPlugin(): Plugin {
         const url = req.url || '';
         if (url.startsWith('/api/inquiries')) {
           try {
-            await handleInquiriesApi(req, res);
+            await inquiriesHandler(req, res);
           } catch (err) {
             console.error('API Error in /api/inquiries:', err);
             res.statusCode = 500;
@@ -24,7 +25,7 @@ function apiServerPlugin(): Plugin {
           }
         } else if (url.startsWith('/api/auth')) {
           try {
-            await handleAuthApi(req, res);
+            await authHandler(req, res);
           } catch (err) {
             console.error('API Error in /api/auth:', err);
             res.statusCode = 500;
