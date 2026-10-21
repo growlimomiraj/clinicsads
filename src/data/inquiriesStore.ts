@@ -24,146 +24,36 @@ export interface ClinicInquiry {
 const STORAGE_KEY = 'clinicsads_inquiries_cache_v2';
 const DELETED_IDS_KEY = 'clinicsads_deleted_inquiry_ids';
 const ADMIN_TOKEN_KEY = 'clinicsads_admin_session_token';
-const DEFAULT_OWNER_KEY = 'Pakistan@2026clinicsads';
+const INITIAL_INQUIRIES: ClinicInquiry[] = [];
 
-let memoryDeletedIds: Set<string> = new Set();
+let memoryDeletedIds = new Set<string>();
 
 export function getDeletedIds(): Set<string> {
-  if (memoryDeletedIds.size > 0) return memoryDeletedIds;
-  if (typeof window !== 'undefined') {
-    try {
-      const raw = localStorage.getItem(DELETED_IDS_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          memoryDeletedIds = new Set(parsed);
-          return memoryDeletedIds;
-        }
+  if (typeof window === 'undefined') return memoryDeletedIds;
+  try {
+    const raw = localStorage.getItem(DELETED_IDS_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        memoryDeletedIds = new Set(arr);
       }
-    } catch {}
+    }
+  } catch {
+    // ignore
   }
   return memoryDeletedIds;
 }
 
-export function recordDeletedId(id: string): void {
+export function recordDeletedId(id: string) {
   memoryDeletedIds.add(id);
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(DELETED_IDS_KEY, JSON.stringify(Array.from(memoryDeletedIds)));
-    } catch {}
+    } catch {
+      // ignore
+    }
   }
 }
-
-// Historical fallback seeds
-const INITIAL_INQUIRIES: ClinicInquiry[] = [
-  {
-    id: 'INQ-5917',
-    name: 'Umair Ali',
-    email: 'umair.alics@hotmail.com',
-    phone: '+923105615306',
-    clinicName: 'Apex Dental Care',
-    service: 'Google Ads',
-    preferredTime: 'Morning (9am - 12pm)',
-    message: 'Requested Strategy Call for Google Ads',
-    source: 'call-booking',
-    submittedAt: '2026-10-20T14:00:16.508Z',
-    status: 'New',
-    read: false,
-  },
-  {
-    id: 'INQ-7010',
-    name: 'shiddat',
-    email: 'shiddatplus@gmail.com',
-    phone: '+923039019035',
-    clinicName: 'ddcffd',
-    service: 'Google Ads',
-    preferredTime: 'Morning (9am - 12pm)',
-    message: 'Requested Strategy Call for Google Ads',
-    source: 'call-booking',
-    submittedAt: '2026-10-19T20:12:24.019Z',
-    status: 'New',
-    read: false,
-  },
-  {
-    id: 'INQ-8965',
-    name: 'usm',
-    email: 'usman@gmail.com',
-    clinicName: 'H Clinic',
-    service: 'Google Ads',
-    preferredTime: 'Morning (9am - 12pm)',
-    message: 'Requested Strategy Call for Google Ads',
-    source: 'call-booking',
-    submittedAt: '2026-10-19T19:31:46.623Z',
-    status: 'New',
-    read: false,
-  },
-  {
-    id: 'INQ-9656',
-    name: 'Umair Ali',
-    email: 'umair.alics@hotmail.com',
-    phone: '+923105615306',
-    clinicName: 'NovaCare Aesthetics',
-    service: 'Google Ads',
-    preferredTime: 'Morning (9am - 12pm)',
-    message: 'Requested Strategy Call for Google Ads',
-    source: 'call-booking',
-    submittedAt: '2026-10-19T19:27:43.460Z',
-    status: 'Proposal Sent',
-    read: true,
-  },
-  {
-    id: 'INQ-1042',
-    name: 'Dr. Sarah Jenkins',
-    email: 'sarah.jenkins@oakwooddental.com',
-    clinicName: 'Oakwood Dental & Aesthetics',
-    website: 'https://oakwooddental.com',
-    service: 'Google Ads',
-    message: 'We are opening a second location in November and need high-intent dental implant patient inquiries.',
-    submittedAt: '2026-10-19T17:34:00.000Z',
-    status: 'New',
-    source: 'modal',
-    read: false,
-  },
-  {
-    id: 'INQ-1041',
-    name: 'Dr. Emily Vance',
-    email: 'dr.vance@westsidephysio.co.uk',
-    clinicName: 'Westside Physiotherapy & Rehab',
-    website: 'https://westsidephysio.co.uk',
-    service: 'Landing Pages',
-    message: 'Current bounce rate on Google Ads traffic is 68%. Looking for sub-2-second conversion landing pages.',
-    submittedAt: '2026-10-19T15:19:00.000Z',
-    status: 'Contacted',
-    source: 'contact-page',
-    read: true,
-  },
-  {
-    id: 'INQ-1040',
-    name: 'Markus Al-Hassan',
-    email: 'markus@apexmedicaldxb.ae',
-    clinicName: 'Apex Medical Centre Dubai',
-    website: 'https://apexmedicaldxb.ae',
-    service: 'Meta Ads',
-    message: 'Need local radius patient awareness campaigns on Instagram for our cosmetic dermatology department.',
-    submittedAt: '2026-10-18T20:19:00.000Z',
-    status: 'Call Booked',
-    source: 'modal',
-    read: true,
-  },
-  {
-    id: 'INQ-1039',
-    name: 'Dr. Michael Chen',
-    email: 'mchen@horizonortho.ca',
-    clinicName: 'Horizon Orthodontics',
-    website: 'https://horizonortho.ca',
-    service: 'ChatGPT & AI Search',
-    message: 'Interested in optimizing clinical citations so local patients finding providers on ChatGPT get directed to us.',
-    submittedAt: '2026-10-17T20:19:00.000Z',
-    status: 'Proposal Sent',
-    source: 'modal',
-    read: true,
-  },
-];
 
 let memoryInquiries: ClinicInquiry[] | null = null;
 const listeners = new Set<() => void>();
@@ -218,15 +108,9 @@ export function getAdminToken(): string {
   if (typeof window === 'undefined') return '';
   try {
     const session = sessionStorage.getItem(ADMIN_TOKEN_KEY);
-    if (session) {
-      if (session === DEFAULT_OWNER_KEY) return session;
-      sessionStorage.removeItem(ADMIN_TOKEN_KEY);
-    }
+    if (session) return session;
     const local = localStorage.getItem(ADMIN_TOKEN_KEY);
-    if (local) {
-      if (local === DEFAULT_OWNER_KEY) return local;
-      localStorage.removeItem(ADMIN_TOKEN_KEY);
-    }
+    if (local) return local;
   } catch {
     // fallback
   }
@@ -263,11 +147,7 @@ export async function verifyAdminPasscode(passcode: string): Promise<boolean> {
       }
     }
   } catch (err) {
-    console.warn('Auth verification network error, testing against default key:', err);
-  }
-  if (passcode === DEFAULT_OWNER_KEY) {
-    setAdminToken(DEFAULT_OWNER_KEY);
-    return true;
+    console.warn('Auth verification network error:', err);
   }
   return false;
 }
@@ -429,54 +309,72 @@ export async function syncInquiriesWithCloud(): Promise<ClinicInquiry[]> {
 }
 
 /**
- * Submit inquiry: Instant local persistence (count updates in 0ms) + authoritative server sync
+ * Submit inquiry: Enforces authoritative server acceptance before resolving success
  */
 export async function submitInquiry(
-  data: Omit<ClinicInquiry, 'id' | 'submittedAt' | 'status'> & Partial<Pick<ClinicInquiry, 'id' | 'submittedAt' | 'status'>>
+  data: Omit<ClinicInquiry, 'id' | 'submittedAt' | 'status'> &
+    Partial<Pick<ClinicInquiry, 'id' | 'submittedAt' | 'status'>> & {
+      _hp_website?: string;
+      _hp_company?: string;
+    }
 ): Promise<ClinicInquiry> {
   setConnectionStatus('syncing');
 
   const newInquiry: ClinicInquiry = {
-    ...data,
+    name: (data.name || '').trim(),
+    email: (data.email || '').trim(),
+    phone: (data.phone || '').trim() || undefined,
+    clinicName: (data.clinicName || '').trim(),
+    website: (data.website || '').trim() || undefined,
+    service: data.service || 'Google Ads',
+    preferredTime: data.preferredTime || 'Morning (9am - 12pm)',
+    message: (data.message || '').trim() || `Requested Strategy Call for ${data.service}`,
+    source: data.source || 'call-booking',
     id: data.id || `INQ-${Math.floor(1000 + Math.random() * 9000)}`,
     submittedAt: data.submittedAt || new Date().toISOString(),
     status: data.status || 'New',
     read: false,
   };
 
-  // 1. Immediately store in memory & localStorage so dashboard counter increments instantly
-  const current = getInquiries();
-  const updated = [newInquiry, ...current.filter((i) => i.id !== newInquiry.id)];
-  saveInquiries(updated);
-
-  // 2. Persist to authoritative server
+  let res: Response;
   try {
-    const res = await fetch('/api/inquiries', {
+    res = await fetch('/api/inquiries', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify(newInquiry),
+      body: JSON.stringify({
+        ...newInquiry,
+        _hp_website: data._hp_website || '',
+        _hp_company: data._hp_company || '',
+      }),
     });
-
-    if (res.ok) {
-      const json = await res.json().catch(() => ({}));
-      if (json && json.inquiry) {
-        newInquiry.id = json.inquiry.id || newInquiry.id;
-        newInquiry.submittedAt = json.inquiry.submittedAt || newInquiry.submittedAt;
-        const latestCurrent = getInquiries();
-        saveInquiries([newInquiry, ...latestCurrent.filter((i) => i.id !== newInquiry.id)]);
-      }
-      setConnectionStatus('connected');
-    } else {
-      console.warn('Backend API non-200 response, using resilient fallback:', res.status);
-    }
-  } catch (err) {
-    console.warn('Network error reaching backend API, stored in local cache for background sync:', err);
+  } catch (netErr: any) {
+    setConnectionStatus('error');
+    throw new Error(
+      'Network connection issue: Unable to reach our server. Please try again or reach out directly to info@clinicsads.com or +1 (667) 347-4729.'
+    );
   }
 
-  return newInquiry;
+  if (!res.ok) {
+    setConnectionStatus('error');
+    const errJson = await res.json().catch(() => ({}));
+    const message =
+      errJson.error ||
+      `Server could not accept your inquiry (Status ${res.status}). Please try again or call us at +1 (667) 347-4729.`;
+    throw new Error(message);
+  }
+
+  const json = await res.json().catch(() => ({}));
+  const savedInquiry: ClinicInquiry = json && json.inquiry ? json.inquiry : newInquiry;
+
+  // Persist locally ONLY after confirmed server response
+  const current = getInquiries();
+  saveInquiries([savedInquiry, ...current.filter((i) => i.id !== savedInquiry.id)]);
+  setConnectionStatus('connected');
+
+  return savedInquiry;
 }
 
 /**

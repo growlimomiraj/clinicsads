@@ -1,6 +1,7 @@
 import React from 'react';
 import { HeartHandshake, Sparkles } from 'lucide-react';
 import { ADDITIONAL_SOLUTIONS_CONTENT, SolutionCardData, PageRoute } from '../data/siteContent';
+import { Link } from './Link';
 
 interface AdditionalSolutionsSectionProps {
   onSelectSolution: (solution: SolutionCardData) => void;
@@ -92,13 +93,13 @@ export const AdditionalSolutionsSection: React.FC<AdditionalSolutionsSectionProp
               </div>
 
               <div className="relative z-10 pt-7 w-full flex justify-center">
-                <button
-                  type="button"
+                <Link
+                  href="/services/clinic-landing-pages/"
                   onClick={() => handleOpenSolution(frontCard)}
-                  className="px-8 py-2.5 rounded-full bg-white text-[#183B2B] text-[13px] font-bold hover:bg-[#F3F8E9] transition-colors shadow-sm cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#183B2B]"
+                  className="px-8 py-2.5 rounded-full bg-white text-[#183B2B] text-[13px] font-bold hover:bg-[#F3F8E9] transition-colors shadow-sm cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#183B2B] inline-flex items-center justify-center"
                 >
                   {frontCard.buttonLabel}
-                </button>
+                </Link>
               </div>
             </div>
 
@@ -120,13 +121,13 @@ export const AdditionalSolutionsSection: React.FC<AdditionalSolutionsSectionProp
               </div>
 
               <div className="pt-6 w-full flex justify-center">
-                <button
-                  type="button"
+                <Link
+                  href="/services/"
                   onClick={() => handleOpenSolution(backCard)}
-                  className="px-7 py-2.5 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] transition-colors shadow-xs cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
+                  className="px-7 py-2.5 rounded-full bg-[#F97316] text-white text-[12.5px] font-bold hover:bg-[#EA580C] transition-colors shadow-xs cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316] inline-flex items-center justify-center"
                 >
                   {backCard.buttonLabel}
-                </button>
+                </Link>
               </div>
             </div>
           </div>

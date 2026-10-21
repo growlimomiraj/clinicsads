@@ -17,23 +17,21 @@ export interface ClinicInquiry {
   read?: boolean;
 }
 
-const GIST_ID = process.env.STORAGE_GIST_ID || '4b92efd5d9c9b91324e1d2382c6cddb7';
+const GIST_ID = process.env.STORAGE_GIST_ID || '';
 
 function getCloudToken(): string {
   if (process.env.STORAGE_TOKEN) return process.env.STORAGE_TOKEN;
   if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
-  try {
-    const codes = [103, 104, 111, 95, 114, 72, 98, 114, 79, 122, 70, 52, 53, 111, 85, 65, 80, 49, 110, 83, 52, 118, 98, 71, 52, 86, 77, 70, 56, 48, 76, 99, 117, 119, 50, 70, 52, 101, 110, 49];
-    return codes.map((c) => String.fromCharCode(c)).join('');
-  } catch {
-    return '';
-  }
+  return '';
 }
 
-const DEFAULT_ADMIN_KEY = 'Pakistan@2026clinicsads';
-
 function getAdminKey(): string {
-  return process.env.ADMIN_KEY || process.env.ADMIN_SECRET || DEFAULT_ADMIN_KEY;
+  if (process.env.ADMIN_KEY) return process.env.ADMIN_KEY;
+  if (process.env.ADMIN_SECRET) return process.env.ADMIN_SECRET;
+  if (process.env.NODE_ENV !== 'production') {
+    return 'clinicsads-dev-local-key';
+  }
+  return '';
 }
 
 // In-memory cache for fast sub-millisecond responses
@@ -42,116 +40,8 @@ let memoryDeletedIds: Set<string> = new Set();
 let lastFetchTime = 0;
 const CACHE_TTL_MS = 3000; // 3 seconds cache
 
-// Historical seed fallback
-const FALLBACK_INQUIRIES: ClinicInquiry[] = [
-  {
-    id: 'INQ-5917',
-    name: 'Umair Ali',
-    email: 'umair.alics@hotmail.com',
-    phone: '+923105615306',
-    clinicName: 'Apex Dental Care',
-    service: 'Google Ads',
-    preferredTime: 'Morning (9am - 12pm)',
-    message: 'Requested Strategy Call for Google Ads',
-    source: 'call-booking',
-    submittedAt: '2026-10-20T14:00:16.508Z',
-    status: 'New',
-    read: false,
-  },
-  {
-    id: 'INQ-7010',
-    name: 'shiddat',
-    email: 'shiddatplus@gmail.com',
-    phone: '+923039019035',
-    clinicName: 'ddcffd',
-    service: 'Google Ads',
-    preferredTime: 'Morning (9am - 12pm)',
-    message: 'Requested Strategy Call for Google Ads',
-    source: 'call-booking',
-    submittedAt: '2026-10-19T20:12:24.019Z',
-    status: 'New',
-    read: false,
-  },
-  {
-    id: 'INQ-8965',
-    name: 'usm',
-    email: 'usman@gmail.com',
-    clinicName: 'H Clinic',
-    service: 'Google Ads',
-    preferredTime: 'Morning (9am - 12pm)',
-    message: 'Requested Strategy Call for Google Ads',
-    source: 'call-booking',
-    submittedAt: '2026-10-19T19:31:46.623Z',
-    status: 'New',
-    read: false,
-  },
-  {
-    id: 'INQ-9656',
-    name: 'Umair Ali',
-    email: 'umair.alics@hotmail.com',
-    phone: '+923105615306',
-    clinicName: 'NovaCare Aesthetics',
-    service: 'Google Ads',
-    preferredTime: 'Morning (9am - 12pm)',
-    message: 'Requested Strategy Call for Google Ads',
-    source: 'call-booking',
-    submittedAt: '2026-10-19T19:27:43.460Z',
-    status: 'Proposal Sent',
-    read: true,
-  },
-  {
-    id: 'INQ-1042',
-    name: 'Dr. Sarah Jenkins',
-    email: 'sarah.jenkins@oakwooddental.com',
-    clinicName: 'Oakwood Dental & Aesthetics',
-    website: 'https://oakwooddental.com',
-    service: 'Google Ads',
-    message: 'We are opening a second location in November and need high-intent dental implant patient inquiries.',
-    submittedAt: '2026-10-19T17:34:00.000Z',
-    status: 'New',
-    source: 'modal',
-    read: false,
-  },
-  {
-    id: 'INQ-1041',
-    name: 'Dr. Emily Vance',
-    email: 'dr.vance@westsidephysio.co.uk',
-    clinicName: 'Westside Physiotherapy & Rehab',
-    website: 'https://westsidephysio.co.uk',
-    service: 'Landing Pages',
-    message: 'Current bounce rate on Google Ads traffic is 68%. Looking for sub-2-second conversion landing pages.',
-    submittedAt: '2026-10-19T15:19:00.000Z',
-    status: 'Contacted',
-    source: 'contact-page',
-    read: true,
-  },
-  {
-    id: 'INQ-1040',
-    name: 'Markus Al-Hassan',
-    email: 'markus@apexmedicaldxb.ae',
-    clinicName: 'Apex Medical Centre Dubai',
-    website: 'https://apexmedicaldxb.ae',
-    service: 'Meta Ads',
-    message: 'Need local radius patient awareness campaigns on Instagram for our cosmetic dermatology department.',
-    submittedAt: '2026-10-18T20:19:00.000Z',
-    status: 'Call Booked',
-    source: 'modal',
-    read: true,
-  },
-  {
-    id: 'INQ-1039',
-    name: 'Dr. Michael Chen',
-    email: 'mchen@horizonortho.ca',
-    clinicName: 'Horizon Orthodontics',
-    website: 'https://horizonortho.ca',
-    service: 'ChatGPT & AI Search',
-    message: 'Interested in optimizing clinical citations so local patients finding providers on ChatGPT get directed to us.',
-    submittedAt: '2026-10-17T20:19:00.000Z',
-    status: 'Proposal Sent',
-    source: 'modal',
-    read: true,
-  },
-];
+// Safe empty fallback - actual inquiries persist in data/inquiries.json or cloud storage
+const FALLBACK_INQUIRIES: ClinicInquiry[] = [];
 
 async function fetchFromCloudStore(): Promise<ClinicInquiry[]> {
   const now = Date.now();

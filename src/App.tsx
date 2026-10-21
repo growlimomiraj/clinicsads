@@ -9,6 +9,12 @@ import {
   ServiceCardData,
   SolutionCardData,
 } from './data/siteContent';
+import {
+  ROUTES,
+  getRouteByPath,
+  getLegacyHashRedirect,
+  normalizePath,
+} from './data/routes';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
 import { AnimatedSearchSection } from './components/AnimatedSearchSection';
@@ -23,63 +29,122 @@ import { DetailPanelModal } from './components/DetailPanelModal';
 import { SubpageViews } from './components/SubpageViews';
 import { AdminDashboard } from './components/AdminDashboard';
 
-const VALID_ROUTES: PageRoute[] = [
-  'home',
-  'services',
-  'why-clinicsads',
-  'solutions',
-  'contact',
-  'service-google-ads',
-  'service-meta-ads',
-  'service-landing-pages',
-  'service-tracking-followup',
-  'service-gpt',
-  'service-seo',
-  'solution-clinic-landing-pages',
-  'solution-chatgpt-ads-ai-search',
-  'admin',
-];
-
-function getRouteFromHash(): PageRoute {
-  if (typeof window === 'undefined') return 'home';
-  const raw = window.location.hash.replace(/^#\/?/, '').trim() as PageRoute;
-  if (VALID_ROUTES.includes(raw)) {
-    return raw;
+function resolveRouteFromLocation(initialPath?: string): PageRoute {
+  if (initialPath) {
+    const route = getRouteByPath(initialPath);
+    if (route) return route.id as PageRoute;
+    if (initialPath === '/404' || initialPath === '/404.html') return 'not-found';
+    if (initialPath === '/admin' || initialPath === '/admin/') return 'admin';
+    return 'home';
   }
+
+  if (typeof window === 'undefined') return 'home';
+
+  // 1. Safe legacy hash migration bridge (e.g. #service-google-ads -> /services/google-ads-for-clinics/)
+  if (window.location.hash) {
+    const redirectPath = getLegacyHashRedirect(window.location.hash);
+    if (redirectPath) {
+      const match = getRouteByPath(redirectPath);
+      if (match) {
+        window.history.replaceState(null, '', redirectPath);
+        return match.id as PageRoute;
+      }
+    }
+  }
+
+  // 2. Check path-based routing
+  const pathname = window.location.pathname;
+  if (pathname === '/admin' || pathname === '/admin/') {
+    return 'admin';
+  }
+
+  const match = getRouteByPath(pathname);
+  if (match) {
+    return match.id as PageRoute;
+  }
+
+  // If path is not recognized and not root, return not-found
+  if (pathname && pathname !== '/' && pathname !== '/index.html') {
+    return 'not-found';
+  }
+
   return 'home';
 }
 
-export default function App() {
-  const [currentPage, setCurrentPage] = useState<PageRoute>(getRouteFromHash);
+function routeIdToPath(routeId: PageRoute): string {
+  if (routeId === 'home') return '/';
+  if (routeId === 'admin') return '/admin';
+  if (routeId === 'not-found') return '/404';
+  const match = ROUTES.find((r) => r.id === routeId);
+  return match ? match.path : '/';
+}
+
+interface AppProps {
+  initialPath?: string;
+}
+
+export default function App({ initialPath }: AppProps = {}) {
+  const [currentPage, setCurrentPage] = useState<PageRoute>(() =>
+    resolveRouteFromLocation(initialPath)
+  );
   const [inquiryModalOpen, setInquiryModalOpen] = useState(false);
-  const [defaultInquiryService, setDefaultInquiryService] = useState<string>('Google Ads');
+  const [defaultInquiryService, setDefaultInquiryService] = useState<string>('Google Ads for Clinics');
 
   const [selectedService, setSelectedService] = useState<ServiceCardData | null>(null);
   const [selectedSolution, setSelectedSolution] = useState<SolutionCardData | null>(null);
 
   useEffect(() => {
-    const handleHashChange = () => {
-      setCurrentPage(getRouteFromHash());
+    const handlePopState = () => {
+      setCurrentPage(resolveRouteFromLocation());
     };
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
         setCurrentPage((prev) => (prev === 'admin' ? 'home' : 'admin'));
-        window.location.hash = currentPage === 'admin' ? '' : 'admin';
       }
     };
-    window.addEventListener('hashchange', handleHashChange);
+
+    // Check if initial hash needs migration on mount
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const redirectPath = getLegacyHashRedirect(window.location.hash);
+      if (redirectPath) {
+        window.history.replaceState(null, '', redirectPath);
+        const match = getRouteByPath(redirectPath);
+        if (match) setCurrentPage(match.id as PageRoute);
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState);
     window.addEventListener('keydown', handleKeyDown);
+
     return () => {
-      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [currentPage]);
+  }, []);
 
-  const handleNavigate = (route: PageRoute) => {
-    setCurrentPage(route);
+  const handleNavigate = (target: string) => {
+    // If target is a path (starts with /)
+    let routeId: PageRoute = 'home';
+    let targetPath = '/';
+
+    if (target.startsWith('/')) {
+      targetPath = normalizePath(target);
+      const match = getRouteByPath(targetPath);
+      routeId = (match ? match.id : 'not-found') as PageRoute;
+    } else {
+      routeId = target as PageRoute;
+      targetPath = routeIdToPath(routeId);
+    }
+
+    setCurrentPage(routeId);
+
     if (typeof window !== 'undefined') {
-      window.location.hash = route === 'home' ? '' : route;
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState(null, '', targetPath);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -91,7 +156,7 @@ export default function App() {
   };
 
   if (currentPage === 'admin') {
-    return <AdminDashboard onExit={() => handleNavigate('home')} />;
+    return <AdminDashboard onExit={() => handleNavigate('/')} />;
   }
 
   return (
@@ -107,7 +172,7 @@ export default function App() {
           <>
             <HeroSection
               onOpenInquiry={handleOpenInquiry}
-              onNavigate={handleNavigate}
+              onNavigate={handleNavigate as any}
               showBottomWave={false}
             />
             {/* Animated Search Section ("Someone Near You Just Searched:") */}
@@ -123,28 +188,26 @@ export default function App() {
             {/* Clinics We've Scaled */}
             <ClinicsScaledSection />
 
-            {/* 2. Our Services (Centered heading + 4-card 2-column grid + organic green right shape) */}
+            {/* 2. Our Services */}
             <ServicesSection
               onSelectService={(service) => {
-                setSelectedSolution(null);
-                setSelectedService(service);
+                handleNavigate(service.route);
               }}
-              onNavigate={handleNavigate}
+              onNavigate={handleNavigate as any}
             />
 
-            {/* 3. Why Choose ClinicsAds? (4 circular portrait crops collage on left + 2 feature rows on right) */}
+            {/* 3. Why Choose ClinicsAds? */}
             <WhyChooseSection />
 
-            {/* 4. Additional Solutions ("More Ways to Grow" organic shape on left + 2 overlapping tall cards on right) */}
+            {/* 4. Additional Solutions */}
             <AdditionalSolutionsSection
               onSelectSolution={(solution) => {
-                setSelectedService(null);
-                setSelectedSolution(solution);
+                handleNavigate(solution.route);
               }}
-              onNavigate={handleNavigate}
+              onNavigate={handleNavigate as any}
             />
 
-            {/* 5. Testimonials ("What Our Clients Say" horizontal card + overlapping circular controls + preview placeholder) */}
+            {/* 5. Testimonials (No unapproved testimonials in production) */}
             <TestimonialsSection />
           </>
         ) : (
@@ -153,29 +216,19 @@ export default function App() {
             onNavigate={handleNavigate}
             onOpenInquiry={handleOpenInquiry}
             onSelectServiceModal={(service) => {
-              setSelectedSolution(null);
-              setSelectedService(service);
+              handleNavigate(service.route);
             }}
             onSelectSolutionModal={(solution) => {
-              setSelectedService(null);
-              setSelectedSolution(solution);
+              handleNavigate(solution.route);
             }}
           />
         )}
       </main>
 
-      {/* 6. Footer (Deep green #183B2B + organic wave top boundary) */}
+      {/* 6. Footer (Deep green #183B2B with all 6 social media channels & crawlable links) */}
       <Footer
         onNavigate={handleNavigate}
         onOpenInquiry={handleOpenInquiry}
-        onSelectService={(service) => {
-          setSelectedSolution(null);
-          setSelectedService(service);
-        }}
-        onSelectSolution={(solution) => {
-          setSelectedService(null);
-          setSelectedSolution(solution);
-        }}
       />
 
       {/* Accessible Inquiry Modal for "Book a Call" and "Contact Us" */}

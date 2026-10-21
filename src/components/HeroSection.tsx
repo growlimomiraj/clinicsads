@@ -2,6 +2,7 @@ import React from 'react';
 import { Megaphone, LineChart, Target, Sparkles, CheckCircle2 } from 'lucide-react';
 import { HERO_CONTENT, PHOTO_ASSETS, PageRoute } from '../data/siteContent';
 import { ResilientPortrait } from './ResilientPortrait';
+import { Link } from './Link';
 
 interface HeroSectionProps {
   onOpenInquiry: (defaultService?: string) => void;
@@ -78,16 +79,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 {HERO_CONTENT.primaryCta}
               </button>
 
-              <button
-                type="button"
+              <Link
+                href="/services/"
                 onClick={() => {
                   onNavigate('services');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-8 py-3.5 rounded-full bg-[#DDE9C7] text-[#183B2B] text-[14px] font-semibold hover:bg-[#C7DCA5] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#183B2B]"
+                className="px-8 py-3.5 rounded-full bg-[#DDE9C7] text-[#183B2B] text-[14px] font-semibold hover:bg-[#C7DCA5] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#183B2B] inline-flex items-center justify-center"
               >
                 {HERO_CONTENT.secondaryCta}
-              </button>
+              </Link>
             </div>
           </div>
 

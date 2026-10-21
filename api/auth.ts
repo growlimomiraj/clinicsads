@@ -1,7 +1,10 @@
-const DEFAULT_ADMIN_KEY = 'Pakistan@2026clinicsads';
-
 function getAdminKey(): string {
-  return process.env.ADMIN_KEY || process.env.ADMIN_SECRET || DEFAULT_ADMIN_KEY;
+  if (process.env.ADMIN_KEY) return process.env.ADMIN_KEY;
+  if (process.env.ADMIN_SECRET) return process.env.ADMIN_SECRET;
+  if (process.env.NODE_ENV !== 'production') {
+    return 'clinicsads-dev-local-key';
+  }
+  return '';
 }
 
 function verifyAdminAuth(req: any): boolean {

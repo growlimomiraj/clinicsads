@@ -18,13 +18,17 @@ export const BrandWordmark: React.FC<BrandWordmarkProps> = ({
     if (onNavigate) {
       e.preventDefault();
       onNavigate('home');
+      if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+        window.history.pushState(null, '', '/');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   return (
     <a
-      href="#home"
+      href="/"
       onClick={handleClick}
       className={`inline-flex items-center gap-2.5 whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#99BC44] rounded-lg transition-opacity hover:opacity-90 ${className}`}
       aria-label="ClinicsAds Home"

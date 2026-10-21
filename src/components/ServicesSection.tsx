@@ -8,9 +8,10 @@ import {
   GoogleAnalyticsLogo,
   GoogleSearchConsoleLogo,
 } from './BrandLogos';
+import { Link } from './Link';
 
 interface ServicesSectionProps {
-  onSelectService: (service: ServiceCardData) => void;
+  onSelectService?: (service: ServiceCardData) => void;
   onNavigate?: (route: PageRoute) => void;
 }
 
@@ -51,21 +52,12 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
     }
   };
 
-  const handleCardAction = (card: ServiceCardData) => {
-    if (onNavigate) {
-      onNavigate(card.route);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      onSelectService(card);
-    }
-  };
-
   return (
     <section
       id="services"
       className="relative bg-white pt-10 pb-24 lg:pt-14 lg:pb-32 overflow-hidden"
     >
-      {/* Large organic soft green shape behind the right side of the grid matching screenshot */}
+      {/* Large organic soft green shape behind the right side of the grid */}
       <div
         className="pointer-events-none select-none absolute top-[18%] -right-24 sm:-right-16 w-[340px] sm:w-[500px] lg:w-[580px] h-[360px] sm:h-[440px] rounded-[70px] bg-gradient-to-bl from-[#C7DCA5]/75 via-[#DFECC8]/65 to-[#F3F8E9]/40 -rotate-[18deg] z-0"
         aria-hidden="true"
@@ -77,6 +69,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
           <h2 className="text-[28px] sm:text-[34px] font-extrabold text-[#183B2B] tracking-tight">
             {SERVICES_CONTENT.heading}
           </h2>
+          <p className="text-[15px] text-[#59665D] mt-2 max-w-[560px] mx-auto">
+            Specialized healthcare marketing solutions engineered to acquire qualified patient inquiries for dental and medical practices.
+          </p>
         </div>
 
         {/* 6-Card, Responsive Grid */}
@@ -85,25 +80,24 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
             const isFeatured = Boolean(card.featured);
 
             return (
-              <div
+              <Link
                 key={card.id}
-                onClick={() => handleCardAction(card)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleCardAction(card);
+                href={card.path}
+                onClick={() => {
+                  if (onNavigate) {
+                    onNavigate(card.route);
+                  } else if (onSelectService) {
+                    onSelectService(card);
                   }
                 }}
-                role="button"
-                tabIndex={0}
-                aria-label={`${card.title} — Open service page`}
-                className={`group relative rounded-[20px] p-7 sm:p-8 transition-all duration-200 cursor-pointer text-left overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#183B2B] ${
+                className={`group relative rounded-[20px] p-7 sm:p-8 transition-all duration-200 cursor-pointer text-left overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#183B2B] block ${
                   isFeatured
                     ? 'bg-gradient-to-br from-[#A6C653] to-[#8EB13B] text-[#183B2B] shadow-[0_16px_38px_rgba(153,188,68,0.28)] hover:shadow-[0_20px_44px_rgba(153,188,68,0.36)]'
                     : 'bg-white text-[#183B2B] shadow-[0_12px_35px_rgba(24,59,43,0.06)] hover:shadow-[0_16px_42px_rgba(24,59,43,0.1)] border border-[#F3F8E9]'
                 }`}
+                aria-label={`${card.title} — View service details`}
               >
-                {/* Subtle diagonal glossy highlight inside the first card (matching Cakap Private card) */}
+                {/* Subtle diagonal glossy highlight inside featured card */}
                 {isFeatured && (
                   <div
                     className="pointer-events-none absolute -top-12 right-8 w-36 h-64 bg-white/15 rotate-25 blur-[1px]"
@@ -135,7 +129,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                     </p>
                   </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

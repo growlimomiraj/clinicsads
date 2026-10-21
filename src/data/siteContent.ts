@@ -2,6 +2,7 @@ export type PageRoute =
   | 'home'
   | 'services'
   | 'why-clinicsads'
+  | 'about'
   | 'solutions'
   | 'contact'
   | 'service-google-ads'
@@ -12,6 +13,10 @@ export type PageRoute =
   | 'service-seo'
   | 'solution-clinic-landing-pages'
   | 'solution-chatgpt-ads-ai-search'
+  | 'resource-pre-launch-checklist'
+  | 'resource-google-vs-meta'
+  | 'resource-landing-page-guide'
+  | 'not-found'
   | 'admin';
 
 export interface NavItem {
@@ -23,6 +28,7 @@ export interface NavItem {
 export interface ServiceCardData {
   id: string;
   route: PageRoute;
+  path: string;
   title: string;
   description: string;
   featured?: boolean;
@@ -43,9 +49,11 @@ export interface ServiceCardData {
   details: {
     tagline: string;
     overview: string;
+    valueProposition?: string;
     deliverables: string[];
     methodology: string[];
     idealFor: string;
+    clientProvides?: string[];
     faq: { question: string; answer: string }[];
   };
 }
@@ -129,13 +137,12 @@ export const SITE_CONFIG = {
     handle: '@clinicsads',
   },
   submissionEndpoint: '', // Leave empty for transparent demo mode; populate with webhook/API URL in production
-  showUnapprovedTestimonialsInPreview: true,
+  showUnapprovedTestimonialsInPreview: false,
 };
 
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Services', route: 'services', sectionId: 'services' },
-  { label: 'Why ClinicsAds', route: 'why-clinicsads', sectionId: 'why-clinicsads' },
-  { label: 'Solutions', route: 'solutions', sectionId: 'solutions' },
+  { label: 'About', route: 'about', sectionId: 'about' },
   { label: 'Contact', route: 'contact', sectionId: 'footer' },
 ];
 
@@ -172,39 +179,54 @@ export const SERVICES_CONTENT: {
     {
       id: 'google-ads',
       route: 'service-google-ads',
-      title: 'Google Ads',
+      path: '/services/google-ads-for-clinics/',
+      title: 'Google Ads for Clinics',
       description:
-        'Reach people actively searching for the services your clinic offers.',
+        'Reach people actively searching for the treatments and consultations your clinic provides.',
       featured: true,
       iconName: 'google-ads',
       details: {
         tagline: 'High-Intent Local Search Campaigns for Healthcare & Dental Clinics',
         overview:
-          'Led by focused healthcare advertising methodology, we build conversion-centered search campaigns that capture prospective patients at the exact moment they search for treatments, consultations, or urgent care in your area.',
+          'We engineer conversion-centered Google Search campaigns that capture local patients at the precise moment they search for acute care, specialized treatments, or private clinic consultations in your community.',
+        valueProposition:
+          'Connect directly with high-intent patient searches, shield your budget with negative keyword filtering, and turn clicks into booked clinic consultations.',
         deliverables: [
-          'Local search radius and high-intent treatment keyword architecture',
-          'Healthcare advertising policy & patient-privacy compliant ad copy',
-          'Rigorous negative keyword filtering to eliminate wasted clicks',
-          'Flexible month-to-month campaign management with dedicated strategist oversight',
+          'Local search radius and high-intent treatment keyword architecture (Single Treatment Ad Groups)',
+          'Healthcare advertising policy & patient-privacy compliant ad copy and extensions',
+          'Rigorous 500+ term negative keyword filtering to eliminate wasted clicks (jobs, free clinics, home remedies)',
+          'Call asset scheduling and Google Maps location extensions tied to your clinic profile',
+          'Flexible month-to-month campaign management with dedicated healthcare strategist oversight',
         ],
         methodology: [
-          '1. Discovery: Audit local search demand, competitor clinics, and unit economics',
-          '2. Strategize: Structure treatment-specific ad groups and keyword intent tiers',
-          '3. Execute: Launch high-relevance search ads paired with dedicated landing pages',
-          '4. Optimize: Continuous bid, search-term, and cost-per-inquiry refinement',
+          '1. Discovery & Radius Audit: Analyze local search volume, competitor clinic bids, and unit economics',
+          '2. Treatment Architecture: Structure treatment-specific ad groups, keyword intent tiers, and negative shields',
+          '3. Execution: Launch high-relevance search ads tightly paired with dedicated clinic landing pages',
+          '4. Continuous Refinement: Weekly search term review, bid pacing, and cost-per-inquiry optimization',
         ],
         idealFor:
-          'Dental, medical, physiotherapy, chiropractors, dermatology, and urgent care clinics seeking direct patient search inquiries.',
+          'Dental practices (implants, clear aligners, emergency), physiotherapy clinics, chiropractic, dermatology, and specialty healthcare centers.',
+        clientProvides: [
+          'Priority clinical treatments and target patient capacity',
+          'Target geographic travel radius (e.g., 5-15 miles around practice)',
+          'Treatment fee ranges or accepted insurance plans for ad extensions',
+          'Front-desk intake email and phone for immediate inquiry routing',
+        ],
         faq: [
           {
             question: 'How do you prevent wasted ad spend on irrelevant searches?',
             answer:
-              'We maintain comprehensive healthcare negative keyword lists (filtering out job seekers, DIY home remedies, academic research, and out-of-area clicks) and review actual search term reports weekly.',
+              'We maintain comprehensive healthcare negative keyword lists (filtering out job seekers, DIY home remedies, academic research, out-of-area clicks, and irrelevant insurance programs) and review actual search term queries weekly.',
+          },
+          {
+            question: 'How do you judge whether an inquiry is actually qualified?',
+            answer:
+              'We track verified phone calls lasting over 60 seconds and completed appointment request forms—not raw button clicks. We review monthly inquiry logs with your clinic team to ensure ad spend produces real prospective patients.',
           },
           {
             question: 'Do we have to sign a long-term lock-in contract?',
             answer:
-              'No. Following ClinicsAds’ engagement standard, all management agreements are flexible and month-to-month.',
+              'No. Following ClinicsAds’ engagement standard, all campaign management agreements are flexible and month-to-month. We earn your partnership through verified inquiry results.',
           },
         ],
       },
@@ -212,39 +234,48 @@ export const SERVICES_CONTENT: {
     {
       id: 'meta-ads',
       route: 'service-meta-ads',
-      title: 'Meta Ads',
+      path: '/services/meta-ads-for-clinics/',
+      title: 'Meta Ads for Clinics',
       description:
-        'Introduce your clinic to prospective patients through Facebook and Instagram.',
+        'Introduce your clinic to prospective patients across Facebook and Instagram.',
       featured: false,
       iconName: 'meta',
       details: {
         tagline: 'Local Patient Awareness & Paid Social Campaigns on Facebook & Instagram',
         overview:
-          'Build local awareness and patient trust with strategy-led paid social campaigns across Facebook and Instagram—highlighting your clinic environment, treatments, and educational care.',
+          'Build local community awareness and patient trust with strategy-led paid social campaigns across Facebook and Instagram—highlighting your clinicians, modern treatment environments, and patient care.',
+        valueProposition:
+          'Generate qualified elective and specialty consultations by educating prospective patients in your immediate neighborhood.',
         deliverables: [
-          'Local radius audience structuring tailored to your clinic neighborhood',
-          'Visual and video ad creative highlighting patient care and clinic comfort',
-          'Platform-compliant ad copy adhering to Meta healthcare advertising standards',
-          'Multi-touch retargeting sequences for prospective patients who visited your site',
+          'Localized radius audience structuring centered on your clinic neighborhood (adhering to privacy standards)',
+          'High-resolution visual and short-form video ad creative highlighting doctor credentials and clinic comfort',
+          'Platform-compliant ad copy adhering strictly to Meta healthcare advertising restrictions',
+          'High-converting mobile inquiry flows with instant front-desk lead alerts',
+          'Retargeting sequences for prospective patients who visited your site but have not yet scheduled',
         ],
         methodology: [
-          '1. Discovery: Identify high-value elective or recurring clinic procedures',
-          '2. Strategize: Craft educational and trust-building creative angles',
-          '3. Execute: Deploy localized Facebook & Instagram campaigns with clear CTAs',
-          '4. Optimize: Refresh creative assets and optimize toward booked consultations',
+          '1. Specialty Audit: Identify elective or recurring clinic procedures suited to discovery (aligners, aesthetic treatments, checkups)',
+          '2. Creative Strategy: Develop trust-building video angles, doctor introductions, and treatment explanations',
+          '3. Campaign Launch: Deploy localized Facebook & Instagram campaigns with clear consultation CTAs',
+          '4. Creative Refresh & Scaling: Rotate creative assets regularly and optimize toward booked inquiries',
         ],
         idealFor:
-          'Cosmetic dentistry, orthodontics, medspas, physiotherapy, and new clinic locations building local patient demand.',
+          'Cosmetic dentistry, orthodontics, medical spas, physiotherapy practices, wellness centers, and newly opened clinic locations.',
+        clientProvides: [
+          'High-resolution clinic photography and short video clips of clinicians/facilities',
+          'Clinician bios, certifications, and registration numbers',
+          'Access to clinic Facebook Page and Instagram business account',
+        ],
         faq: [
           {
             question: 'How do you handle Meta’s healthcare advertising restrictions?',
             answer:
-              'We write educational, welcoming copy that focuses on your clinic’s care environment and treatment benefits without violating Meta’s personal attributes policy.',
+              'Meta prohibits targeting based on sensitive personal health conditions or implying personal attributes. We craft educational, welcoming creative that highlights your practice environment, doctor qualifications, and service accessibility without violating policy.',
           },
           {
-            question: 'Should our clinic use instant lead forms or a landing page?',
+            question: 'Should our clinic use Meta instant forms or a dedicated landing page?',
             answer:
-              'We test both based on your front-desk capacity—using dedicated clinic landing pages for higher-intent inquiries and structured instant forms when rapid callback workflows are in place.',
+              'We evaluate your front-desk capacity: dedicated clinic landing pages generally produce higher-intent inquiries who have read treatment details, while structured instant forms work well when your team can call leads back within 15 minutes.',
           },
         ],
       },
@@ -252,39 +283,48 @@ export const SERVICES_CONTENT: {
     {
       id: 'landing-pages',
       route: 'service-landing-pages',
-      title: 'Landing Pages',
+      path: '/services/clinic-landing-pages/',
+      title: 'Clinic Landing Pages',
       description:
-        'Give visitors a clear path from interest to inquiry.',
+        'Sub-2-second mobile treatment pages engineered to convert ad traffic into inquiries.',
       featured: false,
       iconName: 'landing-pages',
       details: {
-        tagline: 'Sub-2-Second Mobile-First Service Pages Built to Convert Ad Traffic',
+        tagline: 'Sub-2-Second Mobile-First Service Pages Built to Convert Paid Ad Traffic',
         overview:
-          'Engineered with conversion-focused healthcare web design standards—delivering sub-2-second mobile load times, clear treatment explanations, and frictionless appointment request flows.',
+          'Engineered with healthcare conversion design standards—delivering sub-2-second mobile load times, clear message hierarchy, clinician credentials, and frictionless appointment request flows.',
+        valueProposition:
+          'Stop losing 60%+ of paid ad clicks to slow, cluttered general homepages. Give prospective patients a direct, reassuring path to inquire.',
         deliverables: [
-          'Sub-2-second mobile-first page speed architecture for paid ad traffic',
-          'Treatment-specific layouts with clinician credentials, FAQs, and location maps',
-          'Direct click-to-call and streamlined appointment request forms',
-          'HIPAA-aware form handling and CRM/scheduling workflow integration',
+          'Sub-2-second mobile-first speed architecture optimized for paid search and social traffic',
+          '1-to-1 message match with your ad campaigns, eliminating visitor confusion',
+          'Doctor credentials, practice photography, treatment overview, and location maps',
+          'Prominent sticky click-to-call buttons and streamlined, accessible consultation forms',
+          'HIPAA-aware form handling and automated routing to your clinic reception',
         ],
         methodology: [
-          '1. Discovery: Pinpoint where current website visitors drop off before inquiring',
-          '2. Strategize: Map a 1-to-1 message match between your ad copy and landing page',
-          '3. Execute: Build a fast, accessible, mobile-responsive clinic landing page',
-          '4. Optimize: Conversion rate optimization (CRO) to lift visitor-to-patient inquiries',
+          '1. Drop-off Analysis: Identify where existing clinic website visitors bounce before booking',
+          '2. Message Architecture: Structure headlines, credentials, FAQs, and contact forms for maximum clarity',
+          '3. Build & Optimization: Develop lightweight, accessible pages scoring 90+ on mobile performance',
+          '4. CRO Testing: Refine call-to-action placement and form fields to maximize conversion rates',
         ],
         idealFor:
-          'Clinics sending paid Google, Meta, or ChatGPT ad traffic to a general homepage that struggles to convert visitors into appointments.',
+          'Any clinic investing in Google Ads, Meta Ads, or local campaigns whose website currently converts below 5% of visitors into inquiries.',
+        clientProvides: [
+          'Clinician headshots, bio, and professional registration details',
+          'Clinic address, parking notes, and treatment pricing ranges/insurance policies',
+          'Brand assets (logo, brand colors, clinic exterior/interior photography)',
+        ],
         faq: [
           {
             question: 'Can the landing page stay on our existing clinic domain?',
             answer:
-              'Yes. We can deploy dedicated campaign pages on a subdomain or subfolder of your existing clinic website while matching your exact visual branding.',
+              'Yes. We can deploy dedicated campaign landing pages on a subdomain or subfolder of your existing clinic domain while matching your exact visual branding.',
           },
           {
-            question: 'Why not send ad traffic directly to our main homepage?',
+            question: 'Why not send ad traffic directly to our main clinic homepage?',
             answer:
-              'Homepages have dozens of navigation links that distract visitors. A dedicated treatment landing page answers the exact question the patient searched for and guides them straight to booking.',
+              'Homepages have dozens of navigation links, social feeds, and general information that distract paid visitors. A dedicated treatment landing page answers the exact search query and guides the visitor straight into booking.',
           },
         ],
       },
@@ -292,79 +332,48 @@ export const SERVICES_CONTENT: {
     {
       id: 'tracking-followup',
       route: 'service-tracking-followup',
-      title: 'Tracking & Follow-Up',
+      path: '/services/clinic-conversion-tracking/',
+      title: 'Clinic Conversion Tracking',
       description:
-        'Understand your inquiries and improve the steps toward a booked appointment.',
+        'GA4, Google Tag Manager & server-side attribution for clinic inquiries without privacy leaks.',
       featured: false,
       iconName: 'analytics',
       details: {
         tagline: 'GA4, Google Tag Manager & Server-Side Attribution Without Blind Spots',
         overview:
-          'Eliminate attribution blind spots with clean Google Tag Manager (GTM), GA4, and server-side conversion pipelines—connecting ad spend directly to phone calls, form inquiries, and front-desk follow-up.',
+          'Eliminate attribution blind spots with clean Google Tag Manager (GTM), GA4, and server-side conversion pipelines—connecting ad spend directly to verified phone calls, form inquiries, and reception follow-up.',
+        valueProposition:
+          'Gain total transparency into which keywords and campaigns produce booked appointments, without transmitting sensitive patient health information.',
         deliverables: [
-          'Google Tag Manager (GTM), GA4, and server-side conversion pipeline setup',
-          'Accurate tracking for phone calls, appointment forms, and online bookings',
-          'Instant front-desk lead notifications and structured follow-up workflows',
-          'HIPAA-aware review generation workflows to grow local Google ratings',
+          'Google Tag Manager (GTM) and GA4 custom event configuration with deduplication',
+          'Privacy-safe call tracking measuring genuine conversations (>60 seconds) rather than misdials',
+          'Verified form submission events marked as Primary conversions in Google Ads',
+          'Instant front-desk email and SMS notifications for incoming consultation requests',
+          'Monthly inquiry quality reviews matching ad spend to clinic appointment show rates',
         ],
         methodology: [
-          '1. Discovery: Audit existing analytics tags, call routing, and reception response times',
-          '2. Strategize: Define clear conversion events that reflect real patient inquiries',
-          '3. Execute: Configure GTM, GA4, call tracking, and CRM lead alerts',
-          '4. Optimize: Review inquiry quality and reception follow-up speed monthly',
+          '1. Audit: Inspect existing analytics tags, tracking gaps, and front-desk response times',
+          '2. Pipeline Setup: Configure server-side and client-side GTM triggers for phone and form interactions',
+          '3. Validation: Test inquiry flows end-to-end with synthetic submissions to confirm data accuracy',
+          '4. Feedback Loop: Regularly review lead quality and clinic follow-up speed to refine bidding',
         ],
         idealFor:
-          'Practices wanting transparent ROI visibility into which campaigns generate real patient conversations and bookings.',
+          'Clinics spending $1,000+/month on advertising who want transparent visibility into their cost per qualified inquiry.',
+        clientProvides: [
+          'Access to Google Tag Manager, Google Analytics 4, and Google Ads accounts',
+          'Front-desk intake email addresses or SMS numbers for alerts',
+          'Clinic phone provider details for dynamic number insertion if needed',
+        ],
         faq: [
           {
             question: 'How is patient privacy protected during conversion tracking?',
             answer:
-              'We configure server-side and GTM pipelines using privacy-safe event parameters so ad platforms optimize for conversions without receiving sensitive patient health details.',
+              'We configure server-side and GTM pipelines using privacy-safe event parameters (such as generate_lead with unique synthetic IDs). We never send patient names, emails, phone numbers, or health condition details to ad networks.',
           },
           {
-            question: 'How do you help our reception team convert more inquiries?',
+            question: 'Why should we track phone call durations?',
             answer:
-              'We set up instant SMS/email alerts for new form inquiries and provide simple follow-up templates so prospective patients receive a response within minutes.',
-          },
-        ],
-      },
-    },
-    {
-      id: 'gpt',
-      route: 'service-gpt',
-      title: 'ChatGPT & AI Search',
-      description:
-        'Help patients find and choose your clinic through conversational AI and answer engines.',
-      featured: false,
-      iconName: 'gpt',
-      details: {
-        tagline: 'AI-Powered Patient Discovery & Conversational Search Optimization',
-        overview:
-          'Position your clinic as the trusted, recommended choice across emerging conversational search engines like ChatGPT, Perplexity, and Google AI Overviews.',
-        deliverables: [
-          'Conversational search query analysis & treatment intent mapping',
-          'Structured knowledge graph and verified clinical schema markup',
-          'Practitioner credential & clinical specialty AI syndication',
-          'Attribution tracking for AI-assisted patient consultations',
-        ],
-        methodology: [
-          '1. Audit: Analyze current AI engine perception and citations of your clinic',
-          '2. Optimize: Structure doctor profiles, credentials, and treatments for LLM retrieval',
-          '3. Authority: Build authoritative medical references and structured FAQ schema',
-          '4. Monitor: Track citation frequency, AI referral volume, and booked patients',
-        ],
-        idealFor:
-          'Practices and specialty clinics looking to capture early patient demand on conversational AI platforms before competitors.',
-        faq: [
-          {
-            question: 'How do patients use ChatGPT to find clinics?',
-            answer:
-              'Patients increasingly use conversational AI to research symptoms, compare treatments, and ask for recommended local specialists. We ensure your clinic is properly structured and cited as a top recommendation.',
-          },
-          {
-            question: 'Does this work alongside Google Ads?',
-            answer:
-              'Yes, AI search optimization complements Google and Meta ad campaigns, capturing high-intent patients who research treatments using AI answer engines.',
+              'A 5-second call is often a wrong number or quick hangup. Counting it as a lead trains Google Ads algorithms on low-quality clicks. We only count calls exceeding 60 seconds as meaningful patient inquiries.',
           },
         ],
       },
@@ -372,39 +381,84 @@ export const SERVICES_CONTENT: {
     {
       id: 'seo',
       route: 'service-seo',
+      path: '/services/clinic-seo/',
       title: 'Clinic SEO & Local Search',
       description:
-        'Rank higher in Google local search and Google Maps for high-intent patient queries.',
+        'Dominate Google Maps 3-Pack and high-intent organic healthcare searches in your area.',
       featured: false,
       iconName: 'seo',
       details: {
         tagline: 'Google Maps 3-Pack & Organic Search Visibility for Healthcare Clinics',
         overview:
-          'Drive steady, compounding patient inquiries by dominating local Google Maps results, Google Business Profile rankings, and high-intent local medical search queries.',
+          'Drive steady, compounding patient inquiries by optimizing local Google Maps results, Google Business Profile categories, and treatment-specific crawlable content that answers prospective patients’ medical questions.',
+        valueProposition:
+          'Build sustainable, long-term organic authority that delivers patients month after month alongside your paid advertising.',
         deliverables: [
-          'Google Business Profile (Maps 3-Pack) optimization and local category alignment',
-          'Treatment-specific on-page SEO targeting high-intent local searches',
-          'Local citation synchronization and healthcare directory management',
-          'Patient review generation strategy and local authority link building',
+          'Google Business Profile (Maps 3-Pack) optimization, primary category alignment, and service cataloging',
+          'Crawlable treatment service pages with MedicalBusiness and Physician schema structured data',
+          'Local citation synchronization across healthcare directories and healthcare registries',
+          'Google Search Console indexing and technical health monitoring',
+          'Ethical patient review generation workflows to build authentic 5-star clinic reputation',
         ],
         methodology: [
-          '1. Audit: Analyze local keyword rankings, competitor visibility, and technical SEO hygiene',
-          '2. On-Page: Optimize title tags, medical service pages, and doctor bios with schema',
-          '3. Local Authority: Optimize Google Business Profile, review signals, and citations',
-          '4. Compounding Growth: Track keyword movements, organic phone calls, and appointment requests',
+          '1. Technical & Local Audit: Analyze local keyword rankings, competitor visibility, and technical SEO hygiene',
+          '2. On-Page & Schema: Structure treatment pages with clear headings, doctor bios, and schema markup',
+          '3. Local Authority: Optimize Google Business Profile, review acquisition, and citation consistency',
+          '4. Search Console Monitoring: Track organic impressions, click queries, and organic consultation calls',
         ],
         idealFor:
-          'Clinics seeking sustainable, long-term organic patient volume alongside their paid advertising.',
+          'Established practices and multi-provider clinics seeking sustainable, compounding organic patient volume.',
+        clientProvides: [
+          'Google Business Profile manager access',
+          'Google Search Console access or domain DNS access',
+          'Verified practice address, licensing, and doctor credential details',
+        ],
         faq: [
           {
-            question: 'How soon can we see results from Clinic SEO?',
+            question: 'How soon can our clinic expect results from SEO?',
             answer:
-              'Google Maps and local optimizations typically show initial momentum within 60–90 days, with organic treatment page rankings compounding over 3–6 months.',
+              'Google Business Profile optimizations and citation fixes often show initial local momentum within 60–90 days, with organic treatment page rankings compounding over 6 to 12 months. We never promise overnight rankings.',
           },
           {
-            question: 'Why is Google Maps optimization so important for clinics?',
+            question: 'Do you guarantee a #1 ranking on Google Maps?',
             answer:
-              'Over 70% of prospective patients searching for healthcare services look directly at Google Maps 3-Pack results to read reviews, check location, and call the clinic.',
+              'No ethical agency guarantees specific #1 rankings, as Google’s search algorithms factor in real-time user location, competition, and searcher intent. We guarantee rigorous adherence to Google’s guidelines, crawlable architecture, and transparent monthly progress reporting.',
+          },
+        ],
+      },
+    },
+    {
+      id: 'gpt',
+      route: 'service-gpt',
+      path: '/services/',
+      title: 'ChatGPT & AI Search Optimization',
+      description:
+        'Position your clinic as the recommended choice across AI answer engines.',
+      featured: false,
+      iconName: 'gpt',
+      details: {
+        tagline: 'AI-Powered Patient Discovery & Conversational Search Optimization',
+        overview:
+          'Structure your clinic’s doctors, credentials, and treatments so that conversational search engines (ChatGPT, Perplexity, and Google AI Overviews) accurately recommend your practice for local medical inquiries.',
+        deliverables: [
+          'Conversational search query analysis & treatment intent mapping',
+          'Structured knowledge graph and verified clinical schema markup',
+          'Practitioner credential & clinical specialty AI syndication',
+          'Monitoring citation frequency and AI-referred patient consultations',
+        ],
+        methodology: [
+          '1. Audit: Analyze current AI engine citations of your clinic and regional competitors',
+          '2. Structure: Implement medical schema markup for doctor bios, treatments, and clinical FAQs',
+          '3. Authority: Build authoritative citations across healthcare registries and directories',
+          '4. Monitor: Track citation frequency and patient consultation inquiries',
+        ],
+        idealFor:
+          'Specialty clinics looking to lead their market in conversational search visibility.',
+        faq: [
+          {
+            question: 'How do patients use AI search to find clinics?',
+            answer:
+              'Patients increasingly use conversational AI to research treatment options and ask for recommended specialists in their city. Proper structured data and clinical citations ensure your clinic is surfaced.',
           },
         ],
       },

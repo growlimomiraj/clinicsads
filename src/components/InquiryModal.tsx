@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, CheckCircle2, Phone, Mail, Calendar, Clock, Sparkles } from 'lucide-react';
 import { SITE_CONFIG } from '../data/siteContent';
 import { submitInquiry } from '../data/inquiriesStore';
+import { trackLeadGeneration, trackConsultationOpen } from '../utils/analytics';
 
 interface InquiryModalProps {
   isOpen: boolean;
@@ -22,6 +23,8 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
   const [service, setService] = useState(defaultService);
   const [preferredTime, setPreferredTime] = useState('Morning (9am - 12pm)');
   const [notes, setNotes] = useState('');
+  const [hpCompany, setHpCompany] = useState('');
+  const [hpWebsite, setHpWebsite] = useState('');
   const [submittedDemo, setSubmittedDemo] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -31,6 +34,12 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
       setService(defaultService);
     }
   }, [defaultService]);
+
+  useEffect(() => {
+    if (isOpen) {
+      trackConsultationOpen(service || 'General');
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -46,11 +55,16 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (hpCompany || hpWebsite) {
+      setSubmittedDemo(true);
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage(null);
 
     try {
-      await submitInquiry({
+      const created = await submitInquiry({
         name,
         email,
         phone: phone || undefined,
@@ -60,7 +74,12 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
         preferredTime,
         message: notes || `Requested Strategy Call for ${service}`,
         source: 'call-booking',
+        _hp_company: hpCompany,
+        _hp_website: hpWebsite,
       });
+      if (created && created.id) {
+        trackLeadGeneration(created.id, service, 'call-booking');
+      }
       setSubmittedDemo(true);
     } catch (err: any) {
       let msg = 'Failed to submit inquiry. Please try again or call us directly.';
@@ -138,6 +157,26 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3.5">
+              {/* Honeypot Fields (Hidden from human users) */}
+              <div style={{ display: 'none' }} aria-hidden="true">
+                <input
+                  type="text"
+                  name="_hp_company"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={hpCompany}
+                  onChange={(e) => setHpCompany(e.target.value)}
+                />
+                <input
+                  type="text"
+                  name="_hp_website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={hpWebsite}
+                  onChange={(e) => setHpWebsite(e.target.value)}
+                />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                   <label

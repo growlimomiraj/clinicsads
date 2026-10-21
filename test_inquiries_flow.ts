@@ -3,6 +3,8 @@ import inquiriesHandler from './api/inquiries.ts';
 import authHandler from './api/auth.ts';
 import clinicsHandler from './api/clinics.ts';
 
+process.env.ADMIN_KEY = 'test-admin-secret-key-2026';
+
 async function runTests() {
   console.log('--- STARTING VERIFICATION TEST SUITE ---');
 
@@ -53,7 +55,7 @@ async function runTests() {
     const goodAuthRes = await fetch(`${baseUrl}/api/auth`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ passcode: 'Pakistan@2026clinicsads' }),
+      body: JSON.stringify({ passcode: 'test-admin-secret-key-2026' }),
     });
     const goodAuthData = await goodAuthRes.json();
     if (!goodAuthData.authenticated || !goodAuthData.token) {
