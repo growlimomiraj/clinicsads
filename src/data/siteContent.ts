@@ -119,6 +119,15 @@ export const SITE_CONFIG = {
     address: '7917 Mountain Rd NE, Albuquerque, NM 87110',
     serviceHours: 'Mon – Fri, 9:00 AM – 6:00 PM MST (Month-to-Month Agreements)',
   },
+  socialLinks: {
+    instagram: 'https://www.instagram.com/clinicsads',
+    facebook: 'https://www.facebook.com/clinicsads',
+    x: 'https://x.com/clinicsads',
+    youtube: 'https://www.youtube.com/@clinicsads',
+    linkedin: 'https://www.linkedin.com/company/clinicsads',
+    tiktok: 'https://www.tiktok.com/@clinicsads',
+    handle: '@clinicsads',
+  },
   submissionEndpoint: '', // Leave empty for transparent demo mode; populate with webhook/API URL in production
   showUnapprovedTestimonialsInPreview: true,
 };
