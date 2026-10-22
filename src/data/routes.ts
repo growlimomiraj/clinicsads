@@ -180,9 +180,9 @@ export const ROUTES: RouteMetadata[] = [
   {
     path: '/about/',
     id: 'about',
-    title: 'About ClinicsAds | Healthcare Marketing',
+    title: 'About ClinicsAds | Healthcare Marketing Agency & Clinic PPC Partner',
     description:
-      'Learn about ClinicsAds: our clinical marketing methodology, transparent month-to-month partnership model, and dedicated focus on patient acquisition for healthcare practices.',
+      'Learn about ClinicsAds: our specialized healthcare marketing methodology, transparent month-to-month clinic PPC partnership, and dedicated patient acquisition focus.',
     canonical: `${SITE_URL}/about/`,
     h1: 'About ClinicsAds: Dedicated Healthcare Marketing & Patient Acquisition',
     intent: 'Company credibility and approach',
@@ -201,7 +201,7 @@ export const ROUTES: RouteMetadata[] = [
   {
     path: '/contact/',
     id: 'contact',
-    title: 'Contact ClinicsAds | Discuss Your Clinic Marketing',
+    title: 'Contact ClinicsAds | Clinic Marketing & Healthcare PPC Consultation',
     description:
       'Speak with our healthcare marketing strategists. Schedule a consultation to review your clinic\'s search demand, competitor landscape, and patient inquiry growth strategy.',
     canonical: `${SITE_URL}/contact/`,
@@ -241,7 +241,7 @@ export const ROUTES: RouteMetadata[] = [
     ],
     isArticle: true,
     publishedDate: '2026-10-21',
-    modifiedDate: '2026-10-21',
+    modifiedDate: '2026-10-22',
     author: 'ClinicsAds Healthcare Strategy Team',
   },
   {
@@ -266,7 +266,7 @@ export const ROUTES: RouteMetadata[] = [
     ],
     isArticle: true,
     publishedDate: '2026-10-21',
-    modifiedDate: '2026-10-21',
+    modifiedDate: '2026-10-22',
     author: 'ClinicsAds Healthcare Strategy Team',
   },
   {
@@ -291,7 +291,7 @@ export const ROUTES: RouteMetadata[] = [
     ],
     isArticle: true,
     publishedDate: '2026-10-21',
-    modifiedDate: '2026-10-21',
+    modifiedDate: '2026-10-22',
     author: 'ClinicsAds Healthcare Strategy Team',
   },
 ];
@@ -373,6 +373,17 @@ export function generateSchemaGraph(route: RouteMetadata): object {
       'ClinicsAds is a specialized healthcare marketing agency, clinic marketing agency, and healthcare advertising agency delivering Google Ads for clinics, Meta Ads, clinic landing page design, clinic SEO services, and healthcare PPC management.',
     telephone: '+1-667-347-4729',
     email: 'info@clinicsads.com',
+    priceRange: '$$',
+    currenciesAccepted: 'USD',
+    paymentAccepted: 'Credit Card, ACH, Wire Transfer',
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '08:00',
+        closes: '18:00',
+      },
+    ],
     address: {
       '@type': 'PostalAddress',
       streetAddress: '7917 Mountain Rd NE',
@@ -427,7 +438,10 @@ export function generateSchemaGraph(route: RouteMetadata): object {
     '@id': `${SITE_URL}/#website`,
     url: `${SITE_URL}/`,
     name: 'ClinicsAds',
-    alternateName: ['Clinics Ads', 'ClinicsAds Healthcare Marketing'],
+    alternateName: ['Clinics Ads', 'ClinicsAds Healthcare Marketing', 'ClinicsAds Healthcare Advertising'],
+    description:
+      'Specialized healthcare marketing agency and clinic marketing agency delivering Google Ads for clinics, Meta Ads, clinic landing page design, and local clinic SEO.',
+    inLanguage: 'en-US',
     publisher: {
       '@id': `${SITE_URL}/#organization`,
     },
@@ -474,6 +488,7 @@ export function generateSchemaGraph(route: RouteMetadata): object {
       '@id': `${route.canonical}#service`,
       name: route.h1,
       serviceType: 'Healthcare Advertising & Patient Acquisition',
+      category: 'Healthcare Marketing & PPC',
       description: route.description,
       provider: {
         '@id': `${SITE_URL}/#organization`,
@@ -481,6 +496,12 @@ export function generateSchemaGraph(route: RouteMetadata): object {
       areaServed: {
         '@type': 'Country',
         name: 'United States',
+      },
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'USD',
+        availability: 'https://schema.org/InStock',
+        url: route.canonical,
       },
       termsOfService: `${SITE_URL}/about/`,
     });
