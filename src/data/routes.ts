@@ -361,9 +361,10 @@ export function getLegacyHashRedirect(hash: string): string | undefined {
 
 export function generateSchemaGraph(route: RouteMetadata): object {
   const organizationSchema = {
-    '@type': 'Organization',
+    '@type': ['Organization', 'ProfessionalService'],
     '@id': `${SITE_URL}/#organization`,
     name: 'ClinicsAds',
+    alternateName: ['Clinics Ads', 'ClinicsAds Healthcare Marketing'],
     url: `${SITE_URL}/`,
     logo: {
       '@type': 'ImageObject',
@@ -379,7 +380,7 @@ export function generateSchemaGraph(route: RouteMetadata): object {
       '@id': `${SITE_URL}/#logo`,
     },
     description:
-      'Healthcare advertising agency helping clinics acquire more qualified patient inquiries through Google Ads, Meta Ads, and high-converting landing pages.',
+      'ClinicsAds is a specialized healthcare marketing agency, clinic marketing agency, and healthcare advertising agency delivering Google Ads for clinics, Meta Ads, clinic landing page design, clinic SEO services, and physical therapy marketing.',
     telephone: '+1-667-347-4729',
     email: 'info@clinicsads.com',
     address: {
@@ -389,6 +390,41 @@ export function generateSchemaGraph(route: RouteMetadata): object {
       addressRegion: 'NM',
       postalCode: '87110',
       addressCountry: 'US',
+    },
+    knowsAbout: [
+      'Google Ads for clinics',
+      'healthcare PPC agency',
+      'clinic marketing agency',
+      'healthcare marketing agency',
+      'digital marketing for clinics',
+      'healthcare advertising agency',
+      'PPC for medical practices',
+      'healthcare Google Ads management',
+      'Facebook Ads for clinics',
+      'Meta Ads for clinics',
+      'Instagram advertising for clinics',
+      'clinic landing page design',
+      'healthcare landing page design',
+      'clinic SEO services',
+      'local SEO for clinics',
+      'healthcare SEO agency',
+      'physical therapy marketing agency',
+      'physiotherapy marketing agency',
+      'Google Ads for physical therapists',
+      'physiotherapy lead generation',
+      'conversion tracking for clinics',
+    ],
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Healthcare Marketing Services',
+      itemListElement: [
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Google Ads for Clinics & Healthcare PPC', url: `${SITE_URL}/services/google-ads-for-clinics/` } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Meta Ads for Clinics (Facebook & Instagram)', url: `${SITE_URL}/services/meta-ads-for-clinics/` } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Clinic Landing Page Design', url: `${SITE_URL}/services/clinic-landing-pages/` } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Conversion Tracking for Clinics', url: `${SITE_URL}/services/clinic-conversion-tracking/` } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Clinic SEO Services & Local SEO', url: `${SITE_URL}/services/clinic-seo/` } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Physical Therapy Marketing & Physiotherapy PPC', url: `${SITE_URL}/services/physical-therapy-marketing/` } },
+      ],
     },
     sameAs: [
       'https://www.instagram.com/clinicsads',
@@ -467,5 +503,28 @@ export function generateSchemaGraph(route: RouteMetadata): object {
   return {
     '@context': 'https://schema.org',
     '@graph': graph,
+  };
+}
+
+/**
+ * Generate FAQPage structured data for service pages with FAQ content.
+ * This earns rich snippets in Google SERPs, dramatically increasing CTR.
+ */
+export function generateFaqSchema(
+  faqs: { question: string; answer: string }[]
+): object | null {
+  if (!faqs || faqs.length === 0) return null;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
   };
 }

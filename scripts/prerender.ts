@@ -9,8 +9,10 @@ import {
   NOT_FOUND_ROUTE,
   SITE_URL,
   generateSchemaGraph,
+  generateFaqSchema,
   RouteMetadata,
 } from '../src/data/routes';
+import { SERVICES_CONTENT } from '../src/data/siteContent';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -57,7 +59,15 @@ function injectMetadataAndContent(
     `<meta property="og:url" content="${route.canonical}" />`
   );
 
-  // 5. Replace Schema.org JSON-LD
+  // 5. Inject hreflang for English targeting
+  if (!html.includes('hreflang')) {
+    html = html.replace(
+      '</head>',
+      `    <link rel="alternate" hreflang="en" href="${route.canonical}" />\n    <link rel="alternate" hreflang="x-default" href="${route.canonical}" />\n  </head>`
+    );
+  }
+
+  // 6. Replace Schema.org JSON-LD
   const schemaJson = JSON.stringify(generateSchemaGraph(route), null, 2);
   const schemaTag = `<script type="application/ld+json">\n${schemaJson}\n    </script>`;
   html = html.replace(
@@ -65,7 +75,24 @@ function injectMetadataAndContent(
     schemaTag
   );
 
-  // 6. Inject prerendered App HTML into <div id="root">
+  // 7. Inject FAQPage schema for service pages with FAQ content
+  if (route.path.startsWith('/services/') && route.path !== '/services/') {
+    const serviceCard = SERVICES_CONTENT.cards.find(
+      (card) => card.path === route.path
+    );
+    if (serviceCard && serviceCard.details.faq && serviceCard.details.faq.length > 0) {
+      const faqSchema = generateFaqSchema(serviceCard.details.faq);
+      if (faqSchema) {
+        const faqSchemaJson = JSON.stringify(faqSchema, null, 2);
+        html = html.replace(
+          '</head>',
+          `    <script type="application/ld+json">\n${faqSchemaJson}\n    </script>\n  </head>`
+        );
+      }
+    }
+  }
+
+  // 8. Inject prerendered App HTML into <div id="root">
   html = html.replace(
     /<div id=["']root["']>[\s\S]*?<\/div>/i,
     `<div id="root">${appHtml}</div>`
@@ -75,7 +102,7 @@ function injectMetadataAndContent(
 }
 
 function generateSitemapXml(routes: RouteMetadata[]): string {
-  const currentDate = '2026-10-21';
+  const currentDate = new Date().toISOString().slice(0, 10);
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
   xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
