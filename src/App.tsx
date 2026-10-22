@@ -179,13 +179,15 @@ export default function App({ initialPath }: AppProps = {}) {
         />
         {currentPage === 'home' && (
           <>
+            {/* 1. Animated Search Section ("Someone Near You Just Searched:") */}
+            <AnimatedSearchSection onOpenInquiry={handleOpenInquiry} />
+
+            {/* 2. Hero Section ("Help More Patients Find Your Clinic") */}
             <HeroSection
               onOpenInquiry={handleOpenInquiry}
               onNavigate={handleNavigate as any}
               showBottomWave={false}
             />
-            {/* Animated Search Section ("Someone Near You Just Searched:") */}
-            <AnimatedSearchSection onOpenInquiry={handleOpenInquiry} />
           </>
         )}
       </div>

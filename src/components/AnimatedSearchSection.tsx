@@ -100,7 +100,7 @@ export const AnimatedSearchSection: React.FC<AnimatedSearchSectionProps> = ({ on
     <section
       id="local-patient-search"
       aria-labelledby="animated-search-heading"
-      className="relative w-full overflow-hidden bg-[#F3F8E9] pt-[50px] sm:pt-[65px] lg:pt-[76px] pb-[115px] sm:pb-[145px] lg:pb-[170px] text-[#183B2B] selection:bg-[#99BC44]/30 selection:text-[#183B2B]"
+      className="relative w-full overflow-hidden bg-[#F3F8E9] pt-6 sm:pt-8 lg:pt-10 pb-8 sm:pb-10 lg:pb-12 text-[#183B2B] selection:bg-[#99BC44]/30 selection:text-[#183B2B]"
     >
       {/* ========================================================================= */}
       {/* FAINT DECORATIVE BACKGROUND SHAPES & OUTLINE ICONS MATCHING HERO/SERVICES */}

@@ -16,7 +16,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   showBottomWave = false,
 }) => {
   return (
-    <section className={`relative pt-6 overflow-hidden ${showBottomWave ? 'pb-24 lg:pb-32' : 'pb-8 sm:pb-10 lg:pb-12'}`}>
+    <section className={`relative pt-4 sm:pt-6 lg:pt-8 overflow-hidden ${showBottomWave ? 'pb-24 lg:pb-32' : 'pb-14 sm:pb-18 lg:pb-24'}`}>
       {/* Subtle organic background shapes in top-left and behind hero composition */}
       <div
         className="pointer-events-none select-none absolute -top-28 -left-24 w-[420px] h-[420px] rounded-full border-[45px] border-[#E4F0D0]/60 opacity-70"
