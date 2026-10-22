@@ -24,9 +24,13 @@ const PAUSE_BEFORE_NEXT_MS = 300;
 
 export interface AnimatedSearchSectionProps {
   onOpenInquiry?: (serviceTitle?: string) => void;
+  showBottomWave?: boolean;
 }
 
-export const AnimatedSearchSection: React.FC<AnimatedSearchSectionProps> = ({ onOpenInquiry }) => {
+export const AnimatedSearchSection: React.FC<AnimatedSearchSectionProps> = ({
+  onOpenInquiry,
+  showBottomWave = false,
+}) => {
   const [displayText, setDisplayText] = useState('');
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
@@ -251,22 +255,24 @@ export const AnimatedSearchSection: React.FC<AnimatedSearchSectionProps> = ({ on
       </div>
 
       {/* ========================================================================= */}
-      {/* SMOOTH CURVED WAVE TRANSITION AT BOTTOM MATCHING ABOVE SECTION BORDER     */}
+      {/* SMOOTH CURVED WAVE TRANSITION AT BOTTOM (RENDERED ONLY IF AT BOTTOM)      */}
       {/* ========================================================================= */}
-      <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none pointer-events-none">
-        <svg
-          viewBox="0 0 1440 110"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-[55px] sm:h-[85px] lg:h-[105px] preserve-3d"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M0 25C280 115 640 110 980 50C1190 13 1340 20 1440 45V110H0V25Z"
-            fill="#FFFFFF"
-          />
-        </svg>
-      </div>
+      {showBottomWave && (
+        <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none pointer-events-none">
+          <svg
+            viewBox="0 0 1440 110"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-[55px] sm:h-[85px] lg:h-[105px] preserve-3d"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0 25C280 115 640 110 980 50C1190 13 1340 20 1440 45V110H0V25Z"
+              fill="#FFFFFF"
+            />
+          </svg>
+        </div>
+      )}
     </section>
   );
 };

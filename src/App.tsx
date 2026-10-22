@@ -186,7 +186,7 @@ export default function App({ initialPath }: AppProps = {}) {
             <HeroSection
               onOpenInquiry={handleOpenInquiry}
               onNavigate={handleNavigate as any}
-              showBottomWave={false}
+              showBottomWave={true}
             />
           </>
         )}
