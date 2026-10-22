@@ -169,9 +169,9 @@ export default function App({ initialPath }: AppProps = {}) {
   }
 
   return (
-    <div id="top" className="min-h-screen flex flex-col bg-white text-[#59665D]">
+    <div id="top" className="min-h-screen flex flex-col bg-white text-[#59665D] overflow-x-hidden w-full">
       {/* Header, Hero, and Search wrapped in continuous pale green #F3F8E9 canvas */}
-      <div className="bg-[#F3F8E9]">
+      <div className="bg-[#F3F8E9] overflow-x-hidden w-full">
         <Header
           currentPage={currentPage}
           onNavigate={handleNavigate}

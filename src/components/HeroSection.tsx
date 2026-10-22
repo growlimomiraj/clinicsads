@@ -46,35 +46,35 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       <div className="max-w-[1180px] mx-auto px-5 sm:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-6 items-center">
           {/* Left Column: Text Content */}
-          <div className="lg:col-span-5 text-left max-w-[480px] mx-auto lg:mx-0">
+          <div className="lg:col-span-5 text-left w-full max-w-[480px] mx-auto lg:mx-0 min-w-0">
             {/* Small white pill above headline matching reference */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white shadow-[0_4px_14px_rgba(24,59,43,0.05)] mb-6">
-              <span className="w-4 h-4 rounded-full bg-[#99BC44]/20 flex items-center justify-center text-[#7A9A2E]">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-white shadow-[0_4px_14px_rgba(24,59,43,0.05)] mb-6 max-w-full">
+              <span className="w-4 h-4 rounded-full bg-[#99BC44]/20 flex items-center justify-center text-[#7A9A2E] shrink-0">
                 <Sparkles className="w-2.5 h-2.5" />
               </span>
-              <span className="text-[12.5px] font-semibold text-[#7A9A2E] tracking-wide whitespace-nowrap">
+              <span className="text-[11.5px] sm:text-[12.5px] font-semibold text-[#7A9A2E] tracking-wide leading-snug">
                 {HERO_CONTENT.pill}
               </span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-[36px] sm:text-[44px] lg:text-[46px] font-extrabold text-[#183B2B] leading-[1.16] tracking-tight mb-5 text-balance">
+            <h1 className="text-[30px] xs:text-[34px] sm:text-[44px] lg:text-[46px] font-extrabold text-[#183B2B] leading-[1.16] tracking-tight mb-5 text-balance break-words">
               {HERO_CONTENT.headlineLines[0]}
               <br />
               {HERO_CONTENT.headlineLines[1]}
             </h1>
 
             {/* Description */}
-            <p className="text-[15.5px] sm:text-[16px] text-[#59665D] leading-[1.7] mb-8">
+            <p className="text-[14.5px] sm:text-[16px] text-[#59665D] leading-[1.7] mb-8 break-words">
               {HERO_CONTENT.description}
             </p>
 
             {/* Primary & Secondary Buttons */}
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <button
                 type="button"
                 onClick={() => onOpenInquiry()}
-                className="px-8 py-3.5 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-all shadow-[0_8px_20px_rgba(249,115,22,0.32)] cursor-pointer whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
+                className="px-7 sm:px-8 py-3.5 rounded-full bg-[#F97316] text-white text-[14px] font-bold hover:bg-[#EA580C] transition-all shadow-[0_8px_20px_rgba(249,115,22,0.32)] cursor-pointer whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
               >
                 {HERO_CONTENT.primaryCta}
               </button>
@@ -85,7 +85,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   onNavigate('services');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-8 py-3.5 rounded-full bg-[#DDE9C7] text-[#183B2B] text-[14px] font-semibold hover:bg-[#C7DCA5] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#183B2B] inline-flex items-center justify-center"
+                className="px-7 sm:px-8 py-3.5 rounded-full bg-[#DDE9C7] text-[#183B2B] text-[14px] font-semibold hover:bg-[#C7DCA5] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#183B2B] inline-flex items-center justify-center"
               >
                 {HERO_CONTENT.secondaryCta}
               </Link>
@@ -93,8 +93,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
 
           {/* Right Column: Concentric Rings, Circular Portrait, Floating Cards & Orbit Avatars */}
-          <div className="lg:col-span-7 flex items-center justify-center lg:justify-end">
-            <div className="relative w-[330px] h-[330px] sm:w-[460px] sm:h-[460px] lg:w-[520px] lg:h-[520px] flex items-center justify-center">
+          <div className="lg:col-span-7 flex items-center justify-center lg:justify-end w-full overflow-hidden sm:overflow-visible">
+            <div className="relative w-[280px] h-[280px] xs:w-[320px] xs:h-[320px] sm:w-[460px] sm:h-[460px] lg:w-[520px] lg:h-[520px] flex items-center justify-center shrink-0">
               {/* Outer Thin Orbit Ring */}
               <div
                 className="absolute inset-0 rounded-full border-[1.5px] border-white/90 shadow-[0_0_40px_rgba(24,59,43,0.03)] pointer-events-none"
