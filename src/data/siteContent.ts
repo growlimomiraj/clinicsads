@@ -11,6 +11,7 @@ export type PageRoute =
   | 'service-tracking-followup'
   | 'service-gpt'
   | 'service-seo'
+  | 'service-physical-therapy'
   | 'solution-clinic-landing-pages'
   | 'solution-chatgpt-ads-ai-search'
   | 'resource-pre-launch-checklist'
@@ -147,10 +148,10 @@ export const NAV_ITEMS: NavItem[] = [
 ];
 
 export const HERO_CONTENT = {
-  pill: 'Marketing built for clinics',
+  pill: 'Healthcare Marketing Agency & Digital Marketing for Clinics',
   headlineLines: ['Help More Patients', 'Find Your Clinic'],
   description:
-    'Connect your clinic with people looking for your services through focused advertising, clear landing pages, and a simpler inquiry journey.',
+    'ClinicsAds is a specialized healthcare marketing agency, clinic marketing agency, and healthcare advertising agency. We connect medical practices with prospective patients through expert Google Ads, Meta Ads, high-converting clinic landing pages, and local healthcare SEO.',
   primaryCta: 'Book a Call',
   secondaryCta: 'Our Services',
   floatingCards: {
@@ -180,17 +181,17 @@ export const SERVICES_CONTENT: {
       id: 'google-ads',
       route: 'service-google-ads',
       path: '/services/google-ads-for-clinics/',
-      title: 'Google Ads for Clinics',
+      title: 'Google Ads for Clinics & Healthcare PPC Agency',
       description:
-        'Reach people actively searching for the treatments and consultations your clinic provides.',
+        'High-intent Google Ads management for medical and dental clinics by a dedicated healthcare PPC agency. Capture active patient searches and drive booked consultations.',
       featured: true,
       iconName: 'google-ads',
       details: {
-        tagline: 'High-Intent Local Search Campaigns for Healthcare & Dental Clinics',
+        tagline: 'Google Ads Agency for Clinics & Healthcare PPC Management',
         overview:
-          'We engineer conversion-centered Google Search campaigns that capture local patients at the precise moment they search for acute care, specialized treatments, or private clinic consultations in your community.',
+          'We engineer conversion-centered Google Search campaigns as a specialized healthcare PPC agency. Providing end-to-end healthcare Google Ads management and PPC for medical practices, our Google Ads agency for clinics captures local patients at the precise moment they search for acute care, specialized treatments, or private consultations.',
         valueProposition:
-          'Connect directly with high-intent patient searches, shield your budget with negative keyword filtering, and turn clicks into booked clinic consultations.',
+          'Connect directly with high-intent patient searches through expert healthcare Google Ads management. Our healthcare PPC agency eliminates wasted spend with 500+ negative keyword shields and turns clicks into verified appointments.',
         deliverables: [
           'Local search radius and high-intent treatment keyword architecture (Single Treatment Ad Groups)',
           'Healthcare advertising policy & patient-privacy compliant ad copy and extensions',
@@ -205,7 +206,7 @@ export const SERVICES_CONTENT: {
           '4. Continuous Refinement: Weekly search term review, bid pacing, and cost-per-inquiry optimization',
         ],
         idealFor:
-          'Dental practices (implants, clear aligners, emergency), physiotherapy clinics, chiropractic, dermatology, and specialty healthcare centers.',
+          'Dental practices (implants, clear aligners, emergency), physical therapy practices, medical clinics, dermatology, and specialty healthcare centers.',
         clientProvides: [
           'Priority clinical treatments and target patient capacity',
           'Target geographic travel radius (e.g., 5-15 miles around practice)',
@@ -214,19 +215,19 @@ export const SERVICES_CONTENT: {
         ],
         faq: [
           {
-            question: 'How do you prevent wasted ad spend on irrelevant searches?',
+            question: 'What makes your Google Ads agency for clinics different from general PPC agencies?',
             answer:
-              'We maintain comprehensive healthcare negative keyword lists (filtering out job seekers, DIY home remedies, academic research, out-of-area clicks, and irrelevant insurance programs) and review actual search term queries weekly.',
+              'Unlike generalist PPC agencies that bid on broad, wasteful terms, our healthcare PPC agency specializes exclusively in clinic marketing and medical practices. We navigate strict healthcare advertising policies, deploy healthcare negative keyword shields, and optimize toward verified appointment inquiries rather than superficial clicks.',
           },
           {
-            question: 'How do you judge whether an inquiry is actually qualified?',
+            question: 'How does your healthcare Google Ads management handle PPC for medical practices?',
             answer:
-              'We track verified phone calls lasting over 60 seconds and completed appointment request forms—not raw button clicks. We review monthly inquiry logs with your clinic team to ensure ad spend produces real prospective patients.',
+              'We structure campaigns using Single Treatment Ad Groups (STAGs) aligned with high-margin clinical procedures. Each ad group matches patient intent directly with mobile click-to-call assets and clinic landing pages, lowering cost-per-acquisition while maximizing qualified patient volume.',
           },
           {
             question: 'Do we have to sign a long-term lock-in contract?',
             answer:
-              'No. Following ClinicsAds’ engagement standard, all campaign management agreements are flexible and month-to-month. We earn your partnership through verified inquiry results.',
+              'No. Following ClinicsAds’ engagement standard, all healthcare PPC management agreements are flexible and month-to-month. We earn your partnership through verified inquiry results.',
           },
         ],
       },
@@ -235,17 +236,17 @@ export const SERVICES_CONTENT: {
       id: 'meta-ads',
       route: 'service-meta-ads',
       path: '/services/meta-ads-for-clinics/',
-      title: 'Meta Ads for Clinics',
+      title: 'Meta Ads for Clinics (Facebook & Instagram)',
       description:
-        'Introduce your clinic to prospective patients across Facebook and Instagram.',
+        'Targeted Facebook Ads for clinics and Instagram advertising for medical practices engineered for patient discovery and local elective procedures.',
       featured: false,
       iconName: 'meta',
       details: {
-        tagline: 'Local Patient Awareness & Paid Social Campaigns on Facebook & Instagram',
+        tagline: 'Facebook Ads for Clinics & Instagram Advertising for Healthcare Practices',
         overview:
-          'Build local community awareness and patient trust with strategy-led paid social campaigns across Facebook and Instagram—highlighting your clinicians, modern treatment environments, and patient care.',
+          'Build local community awareness and patient trust with strategy-led paid social campaigns across Facebook and Instagram. Our Meta Ads for clinics combine compliant Facebook Ads for clinics and engaging Instagram advertising for medical practices—highlighting your clinicians, modern treatment environments, and patient care.',
         valueProposition:
-          'Generate qualified elective and specialty consultations by educating prospective patients in your immediate neighborhood.',
+          'Generate qualified elective and specialty consultations by educating prospective patients in your immediate neighborhood through Meta Ads for clinics.',
         deliverables: [
           'Localized radius audience structuring centered on your clinic neighborhood (adhering to privacy standards)',
           'High-resolution visual and short-form video ad creative highlighting doctor credentials and clinic comfort',
@@ -260,7 +261,7 @@ export const SERVICES_CONTENT: {
           '4. Creative Refresh & Scaling: Rotate creative assets regularly and optimize toward booked inquiries',
         ],
         idealFor:
-          'Cosmetic dentistry, orthodontics, medical spas, physiotherapy practices, wellness centers, and newly opened clinic locations.',
+          'Cosmetic dentistry, orthodontics, medical spas, physical therapy practices, wellness centers, and newly opened clinic locations.',
         clientProvides: [
           'High-resolution clinic photography and short video clips of clinicians/facilities',
           'Clinician bios, certifications, and registration numbers',
@@ -268,7 +269,7 @@ export const SERVICES_CONTENT: {
         ],
         faq: [
           {
-            question: 'How do you handle Meta’s healthcare advertising restrictions?',
+            question: 'How do you run Facebook Ads for clinics and Instagram advertising compliantly?',
             answer:
               'Meta prohibits targeting based on sensitive personal health conditions or implying personal attributes. We craft educational, welcoming creative that highlights your practice environment, doctor qualifications, and service accessibility without violating policy.',
           },
@@ -284,17 +285,17 @@ export const SERVICES_CONTENT: {
       id: 'landing-pages',
       route: 'service-landing-pages',
       path: '/services/clinic-landing-pages/',
-      title: 'Clinic Landing Pages',
+      title: 'Clinic Landing Page Design',
       description:
-        'Sub-2-second mobile treatment pages engineered to convert ad traffic into inquiries.',
+        'High-converting clinic landing page design and healthcare landing page design with sub-2-second mobile load speeds engineered to convert ad traffic into inquiries.',
       featured: false,
       iconName: 'landing-pages',
       details: {
-        tagline: 'Sub-2-Second Mobile-First Service Pages Built to Convert Paid Ad Traffic',
+        tagline: 'High-Converting Clinic Landing Page Design & Healthcare CRO',
         overview:
-          'Engineered with healthcare conversion design standards—delivering sub-2-second mobile load times, clear message hierarchy, clinician credentials, and frictionless appointment request flows.',
+          'Engineered with healthcare conversion design standards—our clinic landing page design and healthcare landing page design deliver sub-2-second mobile load times, clear message hierarchy, clinician credentials, and frictionless appointment request flows.',
         valueProposition:
-          'Stop losing 60%+ of paid ad clicks to slow, cluttered general homepages. Give prospective patients a direct, reassuring path to inquire.',
+          'Stop losing 60%+ of paid ad clicks to slow, cluttered general homepages. Our specialized clinic landing page design gives prospective patients a direct, reassuring path to inquire.',
         deliverables: [
           'Sub-2-second mobile-first speed architecture optimized for paid search and social traffic',
           '1-to-1 message match with your ad campaigns, eliminating visitor confusion',
@@ -309,7 +310,7 @@ export const SERVICES_CONTENT: {
           '4. CRO Testing: Refine call-to-action placement and form fields to maximize conversion rates',
         ],
         idealFor:
-          'Any clinic investing in Google Ads, Meta Ads, or local campaigns whose website currently converts below 5% of visitors into inquiries.',
+          'Any medical or dental clinic investing in Google Ads, Meta Ads, or local campaigns whose website currently converts below 5% of visitors into inquiries.',
         clientProvides: [
           'Clinician headshots, bio, and professional registration details',
           'Clinic address, parking notes, and treatment pricing ranges/insurance policies',
@@ -317,14 +318,14 @@ export const SERVICES_CONTENT: {
         ],
         faq: [
           {
+            question: 'Why is specialized healthcare landing page design necessary?',
+            answer:
+              'Patients arriving from Google Ads or Meta Ads are seeking a specific treatment and need immediate reassurance on doctor credentials, clinic location, and consultation availability. General clinic homepages distract visitors with irrelevant navigation, causing high bounce rates.',
+          },
+          {
             question: 'Can the landing page stay on our existing clinic domain?',
             answer:
               'Yes. We can deploy dedicated campaign landing pages on a subdomain or subfolder of your existing clinic domain while matching your exact visual branding.',
-          },
-          {
-            question: 'Why not send ad traffic directly to our main clinic homepage?',
-            answer:
-              'Homepages have dozens of navigation links, social feeds, and general information that distract paid visitors. A dedicated treatment landing page answers the exact search query and guides the visitor straight into booking.',
           },
         ],
       },
@@ -333,15 +334,15 @@ export const SERVICES_CONTENT: {
       id: 'tracking-followup',
       route: 'service-tracking-followup',
       path: '/services/clinic-conversion-tracking/',
-      title: 'Clinic Conversion Tracking',
+      title: 'Conversion Tracking for Clinics',
       description:
-        'GA4, Google Tag Manager & server-side attribution for clinic inquiries without privacy leaks.',
+        'GA4, Google Tag Manager & server-side conversion tracking for clinics to attribute phone calls and form inquiries without privacy leaks.',
       featured: false,
       iconName: 'analytics',
       details: {
-        tagline: 'GA4, Google Tag Manager & Server-Side Attribution Without Blind Spots',
+        tagline: 'Conversion Tracking for Clinics: GA4, GTM & Patient Attribution',
         overview:
-          'Eliminate attribution blind spots with clean Google Tag Manager (GTM), GA4, and server-side conversion pipelines—connecting ad spend directly to verified phone calls, form inquiries, and reception follow-up.',
+          'Eliminate attribution blind spots with comprehensive conversion tracking for clinics. We configure Google Tag Manager (GTM), GA4, and privacy-safe server-side conversion pipelines—connecting ad spend directly to verified phone calls, form inquiries, and reception follow-up.',
         valueProposition:
           'Gain total transparency into which keywords and campaigns produce booked appointments, without transmitting sensitive patient health information.',
         deliverables: [
@@ -366,7 +367,7 @@ export const SERVICES_CONTENT: {
         ],
         faq: [
           {
-            question: 'How is patient privacy protected during conversion tracking?',
+            question: 'How is patient privacy protected during clinic conversion tracking?',
             answer:
               'We configure server-side and GTM pipelines using privacy-safe event parameters (such as generate_lead with unique synthetic IDs). We never send patient names, emails, phone numbers, or health condition details to ad networks.',
           },
@@ -382,15 +383,15 @@ export const SERVICES_CONTENT: {
       id: 'seo',
       route: 'service-seo',
       path: '/services/clinic-seo/',
-      title: 'Clinic SEO & Local Search',
+      title: 'Clinic SEO Services & Local SEO for Clinics',
       description:
-        'Dominate Google Maps 3-Pack and high-intent organic healthcare searches in your area.',
+        'Premier healthcare SEO agency delivering clinic SEO services and local SEO for clinics to dominate Google Maps 3-Pack and high-intent organic patient searches.',
       featured: false,
       iconName: 'seo',
       details: {
-        tagline: 'Google Maps 3-Pack & Organic Search Visibility for Healthcare Clinics',
+        tagline: 'Clinic SEO Services, Local SEO for Clinics & Healthcare SEO Agency',
         overview:
-          'Drive steady, compounding patient inquiries by optimizing local Google Maps results, Google Business Profile categories, and treatment-specific crawlable content that answers prospective patients’ medical questions.',
+          'As a dedicated healthcare SEO agency, we provide advanced clinic SEO services and local SEO for clinics. Drive steady, compounding patient inquiries by optimizing local Google Maps results, Google Business Profile categories, and treatment-specific crawlable content that answers prospective patients’ medical questions.',
         valueProposition:
           'Build sustainable, long-term organic authority that delivers patients month after month alongside your paid advertising.',
         deliverables: [
@@ -415,14 +416,73 @@ export const SERVICES_CONTENT: {
         ],
         faq: [
           {
-            question: 'How soon can our clinic expect results from SEO?',
+            question: 'How do clinic SEO services and local SEO for clinics work together?',
             answer:
-              'Google Business Profile optimizations and citation fixes often show initial local momentum within 60–90 days, with organic treatment page rankings compounding over 6 to 12 months. We never promise overnight rankings.',
+              'Local SEO for clinics optimizes your Google Maps 3-Pack profile, NAP citations, and localized patient reviews. On-page clinic SEO services ensure your individual treatment pages rank organically for specialized condition searches, creating two powerful entry points for new patients.',
           },
           {
-            question: 'Do you guarantee a #1 ranking on Google Maps?',
+            question: 'Why choose a specialized healthcare SEO agency over a general SEO company?',
             answer:
-              'No ethical agency guarantees specific #1 rankings, as Google’s search algorithms factor in real-time user location, competition, and searcher intent. We guarantee rigorous adherence to Google’s guidelines, crawlable architecture, and transparent monthly progress reporting.',
+              'Healthcare search queries are categorized under Google’s strict "Your Money or Your Life" (YMYL) guidelines, requiring validated E-E-A-T credentials, medical structured data, and compliance. Our healthcare SEO agency specializes exclusively in healthcare practices, ensuring full alignment with medical search quality standards.',
+          },
+        ],
+      },
+    },
+    {
+      id: 'physical-therapy-marketing',
+      route: 'service-physical-therapy',
+      path: '/services/physical-therapy-marketing/',
+      title: 'Physical Therapy Marketing Agency & Physiotherapy PPC',
+      description:
+        'Leading physical therapy marketing agency and physiotherapy PPC agency. Specialized Google Ads for physical therapists, physiotherapy lead generation, and clinic growth.',
+      featured: true,
+      iconName: 'activity',
+      details: {
+        tagline: 'Physical Therapy Marketing Agency & Physiotherapy Lead Generation',
+        overview:
+          'As a specialized physical therapy marketing agency and physiotherapy marketing agency, we engineer high-converting patient acquisition campaigns for private practices. From high-intent Google Ads for physical therapists and Google Ads for physiotherapy clinics to targeted physiotherapy lead generation, our physical therapy PPC agency connects clinicians with patients actively searching for acute relief from back pain, sciatica, rotator cuff tears, sports injuries, and post-operative rehab.',
+        valueProposition:
+          'Fill your clinic schedule with qualified private patients. Our physical therapy PPC agency generates 25–60+ new consultation inquiries each month with high-intent Google Ads for physical therapists and proven physiotherapy lead generation.',
+        deliverables: [
+          'Dedicated Google Ads for physical therapists targeting acute symptom queries (sciatica, back pain, joint rehab, sports physio)',
+          'High-intent Google Ads for physiotherapy clinics with Single Treatment Ad Groups and 500+ negative keyword shields',
+          'Mobile click-to-call and quick consultation booking landing pages converting 12%+ of local injury searches',
+          'Physiotherapy lead generation pipelines with automated front-desk SMS & email alerts',
+          'Local SEO for clinics and Google Maps 3-Pack optimization for physical therapy practices',
+        ],
+        methodology: [
+          '1. Condition & Geo-Radius Architecture: Map local search demand for acute conditions (sciatica, shoulder pain, knee rehab) within a 5-10 mile clinic radius',
+          '2. Search Intent Pairing: Deploy Single Treatment Ad Groups (STAGs) pairing precise patient queries with matched physical therapy landing pages',
+          '3. Patient Lead Generation & Qualification: Implement verified phone tracking (>60s) and multi-step inquiry forms with automated front-desk alerts',
+          '4. Cost-Per-Acquisition Optimization: Continuously tune bids, negative keywords, and local geo-modifiers to scale patient volume profitably',
+        ],
+        idealFor:
+          'Private physical therapy clinics, physiotherapy groups, sports rehabilitation clinics, orthopedic physical therapists, and multi-location physio practices.',
+        clientProvides: [
+          'Primary clinical specialties (sports rehab, dry needling, pelvic floor, spine/sciatica)',
+          'Private consultation fee ranges and accepted insurance or self-pay options',
+          'Reception intake email & direct phone line for instant patient follow-up',
+        ],
+        faq: [
+          {
+            question: 'Why should physical therapy clinics hire a specialized physiotherapy marketing agency?',
+            answer:
+              'Generic agencies bid on broad terms like "back exercise" or "stretching at home," wasting thousands on people who will never book a clinical appointment. As a specialized physical therapy PPC agency, we structure campaigns exclusively around acute pain, physician referrals, and high-intent private consultation queries.',
+          },
+          {
+            question: 'How does Google Ads for physical therapists differ from general healthcare PPC?',
+            answer:
+              'Physical therapy patients have immediate pain or post-operative rehabilitation timelines. We focus Google Ads on urgent symptom searches ("physiotherapy for sciatica near me", "sports physical therapist open today"), utilizing call assets and mobile landing pages so patients can book directly from their phones.',
+          },
+          {
+            question: 'What is the typical cost per lead for physiotherapy lead generation?',
+            answer:
+              'Depending on your metropolitan market and local competition, qualified inquiry calls and appointment requests typically range between $35 and $75. Given that a private physical therapy patient typically completes 6 to 12 sessions (worth $800–$2,000+ in lifetime clinic revenue), the return on ad spend is exceptionally high.',
+          },
+          {
+            question: 'Do you have experience marketing real physiotherapy clinics?',
+            answer:
+              'Yes. We have managed and scaled campaigns for practices including Bodyworks Physio, Cambridge Physio, Encore Physiotherapy, and Westside Physiotherapy, generating consistent weekly private patient inquiries.',
           },
         ],
       },

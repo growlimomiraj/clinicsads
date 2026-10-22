@@ -48,6 +48,12 @@ export const Header: React.FC<HeaderProps> = ({
       route: 'service-seo',
       desc: 'Google Maps 3-Pack and organic healthcare visibility',
     },
+    {
+      title: 'Physical Therapy Marketing',
+      href: '/services/physical-therapy-marketing/',
+      route: 'service-physical-therapy',
+      desc: 'Google Ads & lead generation for physiotherapy clinics',
+    },
   ];
 
   const isServicesActive =
