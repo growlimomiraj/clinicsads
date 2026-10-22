@@ -7,7 +7,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Calendar,
-  Sparkles,
 } from 'lucide-react';
 import { PageRoute } from '../data/siteContent';
 import { Link } from './Link';
@@ -119,26 +118,31 @@ const RESULT_SLIDES: ResultSlide[] = [
   },
 ];
 
+const AUTOPLAY_INTERVAL_MS = 3800;
+
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onOpenInquiry,
   onNavigate,
   showBottomWave = true,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const [zoomImage, setZoomImage] = useState<string | null>(null);
+
+  const touchStartXRef = useRef<number | null>(null);
 
   const totalSlides = RESULT_SLIDES.length;
   const currentSlide = RESULT_SLIDES[currentIndex];
 
-  // Auto advance every 6 seconds unless paused
+  // Continuous auto-scrolling
   useEffect(() => {
-    if (isPaused || zoomImage) return;
+    if (zoomImage) return;
+
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % totalSlides);
-    }, 6000);
+    }, AUTOPLAY_INTERVAL_MS);
+
     return () => clearInterval(timer);
-  }, [isPaused, zoomImage, totalSlides]);
+  }, [zoomImage, totalSlides, currentIndex]);
 
   // Keyboard navigation & Escape
   useEffect(() => {
@@ -165,6 +169,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % totalSlides);
+  };
+
+  // Mobile Touch Swipe Handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+    if (deltaX > 45) {
+      handlePrev();
+    } else if (deltaX < -45) {
+      handleNext();
+    }
+    touchStartXRef.current = null;
   };
 
   return (
@@ -207,12 +227,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. THE RESULTS SLIDER                                                     */}
+        {/* 2. THE RESULTS SLIDER (AUTOSCROLLING)                                     */}
         {/* ========================================================================= */}
         <div
           className="relative max-w-[1040px] mx-auto"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           {/* Main Slide Card */}
           <div className="rounded-2xl sm:rounded-3xl bg-white border border-[#DFECC8] shadow-[0_20px_50px_rgba(24,59,43,0.09)] overflow-hidden">
@@ -327,46 +347,28 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* ========================================================================= */}
-        {/* 3. THUMBNAILS NAVIGATION BAR                                              */}
+        {/* 3. CLEAN PAGINATION DOTS (MINIMAL, ZERO CLUTTER)                           */}
         {/* ========================================================================= */}
-        <div className="mt-5 max-w-[1040px] mx-auto">
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
-            {RESULT_SLIDES.map((slide, idx) => {
-              const isActive = idx === currentIndex;
-              return (
-                <button
-                  key={slide.id}
-                  type="button"
-                  onClick={() => setCurrentIndex(idx)}
-                  className={`p-1.5 sm:p-2 rounded-xl text-left transition-all cursor-pointer border ${
-                    isActive
-                      ? 'bg-white border-[#183B2B] shadow-md ring-2 ring-[#183B2B]/20 scale-[1.02]'
-                      : 'bg-white/70 hover:bg-white border-[#DFECC8] opacity-65 hover:opacity-100'
-                  }`}
-                >
-                  <div className="aspect-[16/10] overflow-hidden rounded-lg bg-[#F8FAF4] mb-1.5 border border-[#E6EFE0]">
-                    <img
-                      src={slide.imageSrc}
-                      alt={slide.title}
-                      className="w-full h-full object-cover object-top"
-                    />
-                  </div>
-                  <p className="text-[11px] font-bold text-[#183B2B] truncate leading-tight">
-                    {slide.title.split('—')[0].trim()}
-                  </p>
-                  <p className="text-[9.5px] font-semibold text-[#7A9A2E] truncate">
-                    {slide.metrics[0].value} {slide.metrics[0].label}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
+        <div className="flex items-center justify-center gap-1.5 mt-4 sm:mt-5">
+          {RESULT_SLIDES.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setCurrentIndex(idx)}
+              aria-label={`Go to result slide ${idx + 1}`}
+              className={`h-2 transition-all duration-300 rounded-full cursor-pointer ${
+                idx === currentIndex
+                  ? 'w-7 bg-[#183B2B]'
+                  : 'w-2 bg-[#D5E5C0] hover:bg-[#99BC44]'
+              }`}
+            />
+          ))}
         </div>
 
         {/* ========================================================================= */}
         {/* 4. CLEAN CALL-TO-ACTION                                                   */}
         {/* ========================================================================= */}
-        <div className="mt-8 text-center">
+        <div className="mt-7 sm:mt-8 text-center">
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-3">
             <button
               type="button"
