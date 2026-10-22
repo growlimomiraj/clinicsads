@@ -178,30 +178,6 @@ export const ROUTES: RouteMetadata[] = [
     legacyHashes: ['#service-seo'],
   },
   {
-    path: '/services/physical-therapy-marketing/',
-    id: 'service-physical-therapy',
-    title: 'Physical Therapy Marketing Agency | Physiotherapy PPC & Lead Gen | ClinicsAds',
-    description:
-      'Premier physical therapy marketing agency and physiotherapy PPC agency. Specialized Google Ads for physical therapists, physiotherapy lead generation, and clinic growth.',
-    canonical: `${SITE_URL}/services/physical-therapy-marketing/`,
-    h1: 'Physical Therapy Marketing Agency & Physiotherapy Lead Generation',
-    intent: 'Physical therapy marketing agency; physiotherapy PPC and patient lead generation',
-    keywords: [
-      'physical therapy marketing agency',
-      'physiotherapy marketing agency',
-      'Google Ads for physical therapists',
-      'Google Ads for physiotherapy clinics',
-      'physical therapy PPC agency',
-      'physiotherapy lead generation',
-    ],
-    breadcrumbs: [
-      { name: 'Home', item: `${SITE_URL}/` },
-      { name: 'Services', item: `${SITE_URL}/services/` },
-      { name: 'Physical Therapy Marketing', item: `${SITE_URL}/services/physical-therapy-marketing/` },
-    ],
-    legacyHashes: ['#service-physical-therapy', '#physiotherapy-marketing'],
-  },
-  {
     path: '/about/',
     id: 'about',
     title: 'About ClinicsAds | Healthcare Marketing',
@@ -343,14 +319,28 @@ export function normalizePath(path: string): string {
   return clean;
 }
 
+export const REDIRECTS: Record<string, string> = {
+  '/services/physical-therapy-marketing/': '/services/google-ads-for-clinics/',
+  '/services/physical-therapy-marketing': '/services/google-ads-for-clinics/',
+  '/physical-therapy-marketing/': '/services/google-ads-for-clinics/',
+  '/physical-therapy-marketing': '/services/google-ads-for-clinics/',
+};
+
 export function getRouteByPath(pathname: string): RouteMetadata | undefined {
   const normalized = normalizePath(pathname);
+  if (REDIRECTS[normalized] || REDIRECTS[pathname]) {
+    const dest = REDIRECTS[normalized] || REDIRECTS[pathname];
+    return ROUTES.find((r) => r.path === dest);
+  }
   return ROUTES.find((r) => r.path === normalized);
 }
 
 export function getLegacyHashRedirect(hash: string): string | undefined {
   if (!hash) return undefined;
   const cleanHash = '#' + hash.replace(/^#\/?/, '').trim();
+  if (cleanHash === '#service-physical-therapy' || cleanHash === '#physiotherapy-marketing') {
+    return '/services/google-ads-for-clinics/';
+  }
   for (const route of ROUTES) {
     if (route.legacyHashes && route.legacyHashes.includes(cleanHash)) {
       return route.path;
@@ -380,7 +370,7 @@ export function generateSchemaGraph(route: RouteMetadata): object {
       '@id': `${SITE_URL}/#logo`,
     },
     description:
-      'ClinicsAds is a specialized healthcare marketing agency, clinic marketing agency, and healthcare advertising agency delivering Google Ads for clinics, Meta Ads, clinic landing page design, clinic SEO services, and physical therapy marketing.',
+      'ClinicsAds is a specialized healthcare marketing agency, clinic marketing agency, and healthcare advertising agency delivering Google Ads for clinics, Meta Ads, clinic landing page design, clinic SEO services, and healthcare PPC management.',
     telephone: '+1-667-347-4729',
     email: 'info@clinicsads.com',
     address: {
@@ -398,6 +388,7 @@ export function generateSchemaGraph(route: RouteMetadata): object {
       'healthcare marketing agency',
       'digital marketing for clinics',
       'healthcare advertising agency',
+      'Google Ads agency for clinics',
       'PPC for medical practices',
       'healthcare Google Ads management',
       'Facebook Ads for clinics',
@@ -408,10 +399,6 @@ export function generateSchemaGraph(route: RouteMetadata): object {
       'clinic SEO services',
       'local SEO for clinics',
       'healthcare SEO agency',
-      'physical therapy marketing agency',
-      'physiotherapy marketing agency',
-      'Google Ads for physical therapists',
-      'physiotherapy lead generation',
       'conversion tracking for clinics',
     ],
     hasOfferCatalog: {
@@ -423,7 +410,6 @@ export function generateSchemaGraph(route: RouteMetadata): object {
         { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Clinic Landing Page Design', url: `${SITE_URL}/services/clinic-landing-pages/` } },
         { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Conversion Tracking for Clinics', url: `${SITE_URL}/services/clinic-conversion-tracking/` } },
         { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Clinic SEO Services & Local SEO', url: `${SITE_URL}/services/clinic-seo/` } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Physical Therapy Marketing & Physiotherapy PPC', url: `${SITE_URL}/services/physical-therapy-marketing/` } },
       ],
     },
     sameAs: [

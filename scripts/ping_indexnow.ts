@@ -7,7 +7,6 @@ const payload = JSON.stringify({
   urlList: [
     'https://clinicsads.com/',
     'https://clinicsads.com/services/',
-    'https://clinicsads.com/services/physical-therapy-marketing/',
     'https://clinicsads.com/services/google-ads-for-clinics/',
     'https://clinicsads.com/services/meta-ads-for-clinics/',
     'https://clinicsads.com/services/clinic-landing-pages/',

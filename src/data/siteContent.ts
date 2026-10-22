@@ -11,7 +11,6 @@ export type PageRoute =
   | 'service-tracking-followup'
   | 'service-gpt'
   | 'service-seo'
-  | 'service-physical-therapy'
   | 'solution-clinic-landing-pages'
   | 'solution-chatgpt-ads-ai-search'
   | 'resource-pre-launch-checklist'
@@ -424,65 +423,6 @@ export const SERVICES_CONTENT: {
             question: 'Why choose a specialized healthcare SEO agency over a general SEO company?',
             answer:
               'Healthcare search queries are categorized under Google’s strict "Your Money or Your Life" (YMYL) guidelines, requiring validated E-E-A-T credentials, medical structured data, and compliance. Our healthcare SEO agency specializes exclusively in healthcare practices, ensuring full alignment with medical search quality standards.',
-          },
-        ],
-      },
-    },
-    {
-      id: 'physical-therapy-marketing',
-      route: 'service-physical-therapy',
-      path: '/services/physical-therapy-marketing/',
-      title: 'Physical Therapy Marketing Agency & Physiotherapy PPC',
-      description:
-        'Leading physical therapy marketing agency and physiotherapy PPC agency. Specialized Google Ads for physical therapists, physiotherapy lead generation, and clinic growth.',
-      featured: true,
-      iconName: 'activity',
-      details: {
-        tagline: 'Physical Therapy Marketing Agency & Physiotherapy Lead Generation',
-        overview:
-          'As a specialized physical therapy marketing agency and physiotherapy marketing agency, we engineer high-converting patient acquisition campaigns for private practices. From high-intent Google Ads for physical therapists and Google Ads for physiotherapy clinics to targeted physiotherapy lead generation, our physical therapy PPC agency connects clinicians with patients actively searching for acute relief from back pain, sciatica, rotator cuff tears, sports injuries, and post-operative rehab.',
-        valueProposition:
-          'Fill your clinic schedule with qualified private patients. Our physical therapy PPC agency generates 25–60+ new consultation inquiries each month with high-intent Google Ads for physical therapists and proven physiotherapy lead generation.',
-        deliverables: [
-          'Dedicated Google Ads for physical therapists targeting acute symptom queries (sciatica, back pain, joint rehab, sports physio)',
-          'High-intent Google Ads for physiotherapy clinics with Single Treatment Ad Groups and 500+ negative keyword shields',
-          'Mobile click-to-call and quick consultation booking landing pages converting 12%+ of local injury searches',
-          'Physiotherapy lead generation pipelines with automated front-desk SMS & email alerts',
-          'Local SEO for clinics and Google Maps 3-Pack optimization for physical therapy practices',
-        ],
-        methodology: [
-          '1. Condition & Geo-Radius Architecture: Map local search demand for acute conditions (sciatica, shoulder pain, knee rehab) within a 5-10 mile clinic radius',
-          '2. Search Intent Pairing: Deploy Single Treatment Ad Groups (STAGs) pairing precise patient queries with matched physical therapy landing pages',
-          '3. Patient Lead Generation & Qualification: Implement verified phone tracking (>60s) and multi-step inquiry forms with automated front-desk alerts',
-          '4. Cost-Per-Acquisition Optimization: Continuously tune bids, negative keywords, and local geo-modifiers to scale patient volume profitably',
-        ],
-        idealFor:
-          'Private physical therapy clinics, physiotherapy groups, sports rehabilitation clinics, orthopedic physical therapists, and multi-location physio practices.',
-        clientProvides: [
-          'Primary clinical specialties (sports rehab, dry needling, pelvic floor, spine/sciatica)',
-          'Private consultation fee ranges and accepted insurance or self-pay options',
-          'Reception intake email & direct phone line for instant patient follow-up',
-        ],
-        faq: [
-          {
-            question: 'Why should physical therapy clinics hire a specialized physiotherapy marketing agency?',
-            answer:
-              'Generic agencies bid on broad terms like "back exercise" or "stretching at home," wasting thousands on people who will never book a clinical appointment. As a specialized physical therapy PPC agency, we structure campaigns exclusively around acute pain, physician referrals, and high-intent private consultation queries.',
-          },
-          {
-            question: 'How does Google Ads for physical therapists differ from general healthcare PPC?',
-            answer:
-              'Physical therapy patients have immediate pain or post-operative rehabilitation timelines. We focus Google Ads on urgent symptom searches ("physiotherapy for sciatica near me", "sports physical therapist open today"), utilizing call assets and mobile landing pages so patients can book directly from their phones.',
-          },
-          {
-            question: 'What is the typical cost per lead for physiotherapy lead generation?',
-            answer:
-              'Depending on your metropolitan market and local competition, qualified inquiry calls and appointment requests typically range between $35 and $75. Given that a private physical therapy patient typically completes 6 to 12 sessions (worth $800–$2,000+ in lifetime clinic revenue), the return on ad spend is exceptionally high.',
-          },
-          {
-            question: 'Do you have experience marketing real physiotherapy clinics?',
-            answer:
-              'Yes. We have managed and scaled campaigns for practices including Bodyworks Physio, Cambridge Physio, Encore Physiotherapy, and Westside Physiotherapy, generating consistent weekly private patient inquiries.',
           },
         ],
       },

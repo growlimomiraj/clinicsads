@@ -6,6 +6,26 @@
   "cleanUrls": true,
   "redirects": [
     {
+      "source": "/services/physical-therapy-marketing/:path*",
+      "destination": "https://clinicsads.com/services/google-ads-for-clinics/",
+      "permanent": true
+    },
+    {
+      "source": "/services/physical-therapy-marketing",
+      "destination": "https://clinicsads.com/services/google-ads-for-clinics/",
+      "permanent": true
+    },
+    {
+      "source": "/physical-therapy-marketing/:path*",
+      "destination": "https://clinicsads.com/services/google-ads-for-clinics/",
+      "permanent": true
+    },
+    {
+      "source": "/physical-therapy-marketing",
+      "destination": "https://clinicsads.com/services/google-ads-for-clinics/",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "has": [
         {

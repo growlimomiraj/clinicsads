@@ -110,11 +110,6 @@ export const Footer: React.FC<FooterProps> = ({
       href: '/services/clinic-seo/',
       route: 'service-seo',
     },
-    {
-      title: 'Physical Therapy Marketing',
-      href: '/services/physical-therapy-marketing/',
-      route: 'service-physical-therapy',
-    },
   ];
 
   const resourceLinks = [

@@ -11,6 +11,7 @@ import {
 } from './data/siteContent';
 import {
   ROUTES,
+  REDIRECTS,
   getRouteByPath,
   getLegacyHashRedirect,
   normalizePath,
@@ -56,6 +57,14 @@ function resolveRouteFromLocation(initialPath?: string): PageRoute {
   const pathname = window.location.pathname;
   if (pathname === '/admin' || pathname === '/admin/') {
     return 'admin';
+  }
+
+  const normalized = normalizePath(pathname);
+  if (REDIRECTS[normalized] || REDIRECTS[pathname]) {
+    const dest = REDIRECTS[normalized] || REDIRECTS[pathname];
+    window.history.replaceState(null, '', dest);
+    const match = getRouteByPath(dest);
+    if (match) return match.id as PageRoute;
   }
 
   const match = getRouteByPath(pathname);
