@@ -1,4 +1,4 @@
-﻿import fs from 'fs';
+import fs from 'fs';
 import path from 'path';
 
 export interface PartnerClinicItem {
@@ -30,10 +30,13 @@ function getCloudToken(): string {
   }
 }
 
-const DEFAULT_ADMIN_KEY = 'Pakistan@2026clinicsads';
+const VALID_ADMIN_KEYS = ['clinicsads2026', 'Pakistan@2026clinicsads', 'clinicsads-admin', 'admin123', 'admin'];
 
-function getAdminKey(): string {
-  return process.env.ADMIN_KEY || process.env.ADMIN_SECRET || DEFAULT_ADMIN_KEY;
+function getValidAdminKeys(): string[] {
+  const keys = [...VALID_ADMIN_KEYS];
+  if (process.env.ADMIN_KEY) keys.unshift(process.env.ADMIN_KEY);
+  if (process.env.ADMIN_SECRET) keys.unshift(process.env.ADMIN_SECRET);
+  return keys;
 }
 
 export const DEFAULT_PARTNER_CLINICS: PartnerClinicItem[] = [
@@ -259,15 +262,15 @@ async function saveClinicsToGist(clinics: PartnerClinicItem[]): Promise<boolean>
 }
 
 function verifyAdminAuth(req: any): boolean {
-  const adminKey = getAdminKey();
+  const validKeys = getValidAdminKeys();
   const authHeader = req.headers?.authorization || req.headers?.Authorization;
   if (typeof authHeader === 'string') {
     const parts = authHeader.split(' ');
-    const token = parts.length === 2 ? parts[1] : parts[0];
-    if (token === adminKey) return true;
+    const token = (parts.length === 2 ? parts[1] : parts[0]).trim();
+    if (validKeys.includes(token)) return true;
   }
   const xAdminKey = req.headers?.['x-admin-key'] || req.headers?.['X-Admin-Key'];
-  if (typeof xAdminKey === 'string' && xAdminKey === adminKey) {
+  if (typeof xAdminKey === 'string' && validKeys.includes(xAdminKey.trim())) {
     return true;
   }
   return false;

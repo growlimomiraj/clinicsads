@@ -231,8 +231,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       if (ok) {
         setIsAuthenticated(true);
         showToast('✓ Access granted: Operations Hub live synchronized.');
-        const latest = await syncInquiriesWithCloud();
-        setInquiries(latest);
+        const [latestInquiries, latestClinics] = await Promise.all([
+          syncInquiriesWithCloud(),
+          getPartnerClinicsFromCloud(),
+        ]);
+        if (latestInquiries && Array.isArray(latestInquiries)) {
+          setInquiries(latestInquiries);
+        }
+        if (latestClinics && Array.isArray(latestClinics) && latestClinics.length > 0) {
+          setPartnerClinics(latestClinics);
+        }
       } else {
         setPasscodeError('Incorrect passcode. Please check your passcode and try again.');
       }
@@ -298,14 +306,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
 
-  // Sync Partner Clinics from Global Cloud on Mount
+  // Sync Partner Clinics & Inquiries from Global Cloud on Mount or when Authenticated
   useEffect(() => {
-    getPartnerClinicsFromCloud().then((cloudClinics) => {
-      if (cloudClinics && Array.isArray(cloudClinics) && cloudClinics.length > 0) {
-        setPartnerClinics(cloudClinics);
-      }
-    });
-  }, []);
+    if (isAuthenticated) {
+      syncInquiriesWithCloud().then((latest) => {
+        if (latest && Array.isArray(latest)) {
+          setInquiries(latest);
+        }
+      });
+      getPartnerClinicsFromCloud().then((cloudClinics) => {
+        if (cloudClinics && Array.isArray(cloudClinics) && cloudClinics.length > 0) {
+          setPartnerClinics(cloudClinics);
+        }
+      });
+    }
+  }, [isAuthenticated]);
 
   // Sync to LocalStorage
   useEffect(() => {

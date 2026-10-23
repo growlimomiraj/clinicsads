@@ -24,7 +24,22 @@ export interface ClinicInquiry {
 const STORAGE_KEY = 'clinicsads_inquiries_cache_v2';
 const DELETED_IDS_KEY = 'clinicsads_deleted_inquiry_ids';
 const ADMIN_TOKEN_KEY = 'clinicsads_admin_session_token';
-const INITIAL_INQUIRIES: ClinicInquiry[] = [];
+const INITIAL_INQUIRIES: ClinicInquiry[] = [
+  {
+    id: 'INQ-6923',
+    name: 'shiddat',
+    email: 'shiddatplus@gmail.com',
+    phone: '+923039019035',
+    clinicName: 'ddcffd',
+    service: 'Google Ads',
+    message: 'Requested Strategy Call for Google Ads',
+    preferredTime: 'Morning (9am - 12pm)',
+    submittedAt: '2026-10-21T16:22:35.479Z',
+    status: 'Proposal Sent',
+    source: 'call-booking',
+    read: true,
+  },
+];
 
 let memoryDeletedIds = new Set<string>();
 
