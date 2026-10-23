@@ -449,7 +449,7 @@ export function generateSchemaGraph(route: RouteMetadata): object {
 
   const breadcrumbListSchema = {
     '@type': 'BreadcrumbList',
-    itemListElement: route.breadcrumbs.map((crumb, idx) => ({
+    itemListElement: (route.breadcrumbs || []).map((crumb, idx) => ({
       '@type': 'ListItem',
       position: idx + 1,
       name: crumb.name,

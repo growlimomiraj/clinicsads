@@ -32,16 +32,32 @@ import { AdminDashboard } from './components/AdminDashboard';
 
 function resolveRouteFromLocation(initialPath?: string): PageRoute {
   if (initialPath) {
+    if (initialPath === '/admin' || initialPath === '/admin/' || initialPath.startsWith('/admin')) return 'admin';
     const route = getRouteByPath(initialPath);
     if (route) return route.id as PageRoute;
     if (initialPath === '/404' || initialPath === '/404.html') return 'not-found';
-    if (initialPath === '/admin' || initialPath === '/admin/') return 'admin';
     return 'home';
   }
 
   if (typeof window === 'undefined') return 'home';
 
-  // 1. Safe legacy hash migration bridge (e.g. #service-google-ads -> /services/google-ads-for-clinics/)
+  // 0. Search query param check (e.g. ?admin=true or ?admin)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('admin')) {
+      return 'admin';
+    }
+  } catch {
+    // ignore
+  }
+
+  // 1. Direct hash check for admin portal (#admin, #/admin)
+  const hash = (window.location.hash || '').toLowerCase();
+  if (hash === '#admin' || hash === '#/admin' || hash === '#!/admin') {
+    return 'admin';
+  }
+
+  // 1b. Safe legacy hash migration bridge (e.g. #service-google-ads -> /services/google-ads-for-clinics/)
   if (window.location.hash) {
     const redirectPath = getLegacyHashRedirect(window.location.hash);
     if (redirectPath) {
@@ -55,7 +71,7 @@ function resolveRouteFromLocation(initialPath?: string): PageRoute {
 
   // 2. Check path-based routing
   const pathname = window.location.pathname;
-  if (pathname === '/admin' || pathname === '/admin/') {
+  if (pathname === '/admin' || pathname === '/admin/' || pathname.startsWith('/admin')) {
     return 'admin';
   }
 
@@ -82,7 +98,7 @@ function resolveRouteFromLocation(initialPath?: string): PageRoute {
 
 function routeIdToPath(routeId: PageRoute): string {
   if (routeId === 'home') return '/';
-  if (routeId === 'admin') return '/admin';
+  if (routeId === 'admin') return '/admin/';
   if (routeId === 'not-found') return '/404';
   const match = ROUTES.find((r) => r.id === routeId);
   return match ? match.path : '/';
@@ -103,7 +119,7 @@ export default function App({ initialPath }: AppProps = {}) {
   const [selectedSolution, setSelectedSolution] = useState<SolutionCardData | null>(null);
 
   useEffect(() => {
-    const handlePopState = () => {
+    const handleLocationChange = () => {
       setCurrentPage(resolveRouteFromLocation());
     };
 
@@ -114,31 +130,40 @@ export default function App({ initialPath }: AppProps = {}) {
       }
     };
 
-    // Check if initial hash needs migration on mount
+    // Check if initial hash needs migration or admin routing on mount
     if (typeof window !== 'undefined' && window.location.hash) {
-      const redirectPath = getLegacyHashRedirect(window.location.hash);
-      if (redirectPath) {
-        window.history.replaceState(null, '', redirectPath);
-        const match = getRouteByPath(redirectPath);
-        if (match) setCurrentPage(match.id as PageRoute);
+      const currentHash = window.location.hash.toLowerCase();
+      if (currentHash === '#admin' || currentHash === '#/admin') {
+        setCurrentPage('admin');
+      } else {
+        const redirectPath = getLegacyHashRedirect(window.location.hash);
+        if (redirectPath) {
+          window.history.replaceState(null, '', redirectPath);
+          const match = getRouteByPath(redirectPath);
+          if (match) setCurrentPage(match.id as PageRoute);
+        }
       }
     }
 
-    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
   const handleNavigate = (target: string) => {
-    // If target is a path (starts with /)
     let routeId: PageRoute = 'home';
     let targetPath = '/';
 
-    if (target.startsWith('/')) {
+    if (target === 'admin' || target === '/admin' || target === '/admin/') {
+      routeId = 'admin';
+      targetPath = '/admin/';
+    } else if (target.startsWith('/')) {
       targetPath = normalizePath(target);
       const match = getRouteByPath(targetPath);
       routeId = (match ? match.id : 'not-found') as PageRoute;

@@ -4,6 +4,16 @@
   "buildCommand": "npm run build",
   "trailingSlash": true,
   "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/admin/:path*",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    }
+  ],
   "redirects": [
     {
       "source": "/services/physical-therapy-marketing/:path*",

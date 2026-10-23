@@ -668,6 +668,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 </>
               )}
             </button>
+
+            <div className="pt-1 text-center">
+              <span className="inline-block text-[11px] text-gray-400 bg-gray-50 border border-gray-200/80 rounded-full px-3 py-1">
+                Default Passcode: <span className="font-mono font-bold text-gray-600">clinicsads2026</span>
+              </span>
+            </div>
           </form>
 
           <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-xs">

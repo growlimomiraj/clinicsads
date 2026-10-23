@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
+import { Calendar, Mail, Phone, MapPin, ExternalLink, Lock } from 'lucide-react';
 import { SITE_CONFIG } from '../data/siteContent';
 import { BrandWordmark } from './BrandWordmark';
 import { Link } from './Link';
@@ -409,6 +409,16 @@ export const Footer: React.FC<FooterProps> = ({
               className="hover:text-white transition-colors"
             >
               Contact
+            </Link>
+            <span>•</span>
+            <Link
+              href="/admin/"
+              onClick={() => onNavigate('admin')}
+              className="hover:text-white/80 transition-colors inline-flex items-center gap-1 text-[11px] text-white/40"
+              title="Secure Admin Portal"
+            >
+              <Lock className="w-3 h-3 text-[#99BC44]" />
+              <span>Admin Portal</span>
             </Link>
           </div>
         </div>

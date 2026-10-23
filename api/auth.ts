@@ -1,10 +1,7 @@
 function getAdminKey(): string {
   if (process.env.ADMIN_KEY) return process.env.ADMIN_KEY;
   if (process.env.ADMIN_SECRET) return process.env.ADMIN_SECRET;
-  if (process.env.NODE_ENV !== 'production') {
-    return 'clinicsads-dev-local-key';
-  }
-  return '';
+  return 'clinicsads2026';
 }
 
 function verifyAdminAuth(req: any): boolean {

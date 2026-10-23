@@ -90,14 +90,28 @@ if (fs.existsSync(sitemapPath)) {
   }
 }
 
-// 4. Verify robots.txt
-console.log('\n4. Verifying Robots.txt:');
+// 4. Verify robots.txt & Admin Security
+console.log('\n4. Verifying Robots.txt & Admin Security:');
 const robotsPath = path.join(distDir, 'robots.txt');
 assert(fs.existsSync(robotsPath), `robots.txt exists in dist/`);
 if (fs.existsSync(robotsPath)) {
   const robots = fs.readFileSync(robotsPath, 'utf8');
   assert(robots.includes('User-agent: *'), `robots.txt allows all user agents`);
+  assert(robots.includes('Disallow: /admin'), `robots.txt disallows admin crawling`);
   assert(robots.includes(`Sitemap: ${SITE_URL}/sitemap.xml`), `robots.txt references sitemap`);
+}
+
+// 4b. Verify Admin Page prerendering & noindex
+const adminHtmlPath = path.join(distDir, 'admin', 'index.html');
+assert(fs.existsSync(adminHtmlPath), `Admin HTML exists at dist/admin/index.html`);
+if (fs.existsSync(adminHtmlPath)) {
+  const adminHtml = fs.readFileSync(adminHtmlPath, 'utf8');
+  assert(adminHtml.includes('noindex, nofollow'), `Admin HTML includes noindex, nofollow`);
+  assert(adminHtml.includes('ClinicsAds'), `Admin HTML contains ClinicsAds branding`);
+}
+if (fs.existsSync(sitemapPath)) {
+  const sitemap = fs.readFileSync(sitemapPath, 'utf8');
+  assert(!sitemap.includes('/admin'), `sitemap.xml correctly excludes private /admin route`);
 }
 
 // 5. Verify vercel.json configuration

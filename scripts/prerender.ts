@@ -139,6 +139,8 @@ function generateSitemapXml(routes: RouteMetadata[]): string {
 
 function generateRobotsTxt(): string {
   return `User-agent: *
+Disallow: /admin
+Disallow: /admin/
 Allow: /
 Allow: /favicon*
 Allow: /logo*
@@ -202,6 +204,40 @@ async function runPrerender() {
   const notFoundPath = path.join(distDir, '404.html');
   fs.writeFileSync(notFoundPath, notFoundHtml, 'utf8');
   console.log(`✓ Generated 404 HTML: ${notFoundPath} (${notFoundHtml.length} bytes)`);
+
+  // 2b. Prerender Secure Admin Portal (with noindex, nofollow)
+  console.log('Prerendering Admin Portal...');
+  const adminRoute: RouteMetadata = {
+    id: 'admin',
+    path: '/admin/',
+    canonical: `${SITE_URL}/admin/`,
+    title: 'ClinicsAds Administrator Portal | Secure Login',
+    description: 'Private administrative management portal for ClinicsAds leads and clinic operations.',
+    h1: 'Operations Hub',
+    intent: 'Operations & Management',
+    keywords: [],
+    breadcrumbs: [
+      { name: 'Home', item: `${SITE_URL}/` },
+      { name: 'Admin', item: `${SITE_URL}/admin/` },
+    ],
+  };
+  const adminAppHtml = renderToString(
+    React.createElement(App as React.ComponentType<{ initialPath?: string }>, {
+      initialPath: '/admin',
+    })
+  );
+  let adminHtml = injectMetadataAndContent(baseHtml, adminRoute, adminAppHtml);
+  adminHtml = adminHtml.replace(
+    '</head>',
+    '    <meta name="robots" content="noindex, nofollow" />\n  </head>'
+  );
+  const adminDir = path.join(distDir, 'admin');
+  if (!fs.existsSync(adminDir)) {
+    fs.mkdirSync(adminDir, { recursive: true });
+  }
+  const adminPath = path.join(adminDir, 'index.html');
+  fs.writeFileSync(adminPath, adminHtml, 'utf8');
+  console.log(`✓ Generated Admin HTML: ${adminPath} (${adminHtml.length} bytes)`);
 
   // 3. Generate Valid XML Sitemap
   console.log('Generating sitemap.xml...');
