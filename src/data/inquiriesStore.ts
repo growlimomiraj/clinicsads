@@ -353,7 +353,7 @@ export async function submitInquiry(
   } catch (netErr: any) {
     setConnectionStatus('error');
     throw new Error(
-      'Network connection issue: Unable to reach our server. Please try again or reach out directly to info@clinicsads.com or +1 (667) 347-4729.'
+      'Network connection issue: Unable to reach our server. Please try again or reach out directly to info@clinicsads.com or +971 50 482 6917.'
     );
   }
 
@@ -362,7 +362,7 @@ export async function submitInquiry(
     const errJson = await res.json().catch(() => ({}));
     const message =
       errJson.error ||
-      `Server could not accept your inquiry (Status ${res.status}). Please try again or call us at +1 (667) 347-4729.`;
+      `Server could not accept your inquiry (Status ${res.status}). Please try again or call us at +971 50 482 6917.`;
     throw new Error(message);
   }
 

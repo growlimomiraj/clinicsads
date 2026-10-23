@@ -120,8 +120,8 @@ export const SITE_CONFIG = {
     founderRole: 'Clinical Marketing Specialists',
   },
   contact: {
-    phoneDisplay: '+1 (667) 347-4729',
-    phoneHref: 'tel:+16673474729',
+    phoneDisplay: '+971 50 482 6917',
+    phoneHref: 'tel:+971504826917',
     email: 'info@clinicsads.com',
     emailHref: 'mailto:info@clinicsads.com',
     address: '7917 Mountain Rd NE, Albuquerque, NM 87110',

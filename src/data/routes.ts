@@ -371,7 +371,7 @@ export function generateSchemaGraph(route: RouteMetadata): object {
     },
     description:
       'ClinicsAds is a specialized healthcare marketing agency, clinic marketing agency, and healthcare advertising agency delivering Google Ads for clinics, Meta Ads, clinic landing page design, clinic SEO services, and healthcare PPC management.',
-    telephone: '+1-667-347-4729',
+    telephone: '+971 50 482 6917',
     email: 'info@clinicsads.com',
     priceRange: '$$',
     currenciesAccepted: 'USD',
